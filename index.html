@@ -1,0 +1,1720 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#8B6343">
+<meta name="description" content="Rotina — Agenda & Estudos">
+<title>Rotina</title>
+<link rel="manifest" href="data:application/json,%7B%22name%22%3A%22Rotina%22%2C%22short_name%22%3A%22Rotina%22%2C%22start_url%22%3A%22.%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%23F5EFE6%22%2C%22theme_color%22%3A%22%238B6343%22%7D">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --cream:    #F5EFE6;
+  --cream2:   #EDE4D8;
+  --beige:    #E0D0BC;
+  --tan:      #C4A882;
+  --brown-l:  #A07850;
+  --brown:    #8B6343;
+  --brown-d:  #5C3D20;
+  --text:     #3A2A1A;
+  --text-m:   #6B4F35;
+  --text-l:   #9C7C5C;
+  --cat-saude:    #B8D4C4;
+  --cat-estudo:   #C0C8E0;
+  --cat-social:   #DCC0C8;
+  --cat-trabalho: #D4CCA8;
+  --cat-pessoal:  #C8C0D8;
+  --cat-marco:    #D4B896;
+  /* status semáforo */
+  --s0-bg: #E8E8E8; --s0-fg: #888;
+  --s1-bg: #FFF3C4; --s1-fg: #A07800;
+  --s2-bg: #C8EDD8; --s2-fg: #1E7A48;
+  --s3-bg: #C8D4F4; --s3-fg: #2040A0;
+  --shadow: 0 2px 12px rgba(90,50,20,.08);
+  --shadow-hover: 0 4px 20px rgba(90,50,20,.14);
+  --radius: 14px; --radius-sm: 8px;
+}
+
+body { background:var(--cream); color:var(--text); font-family:'Inter',sans-serif; min-height:100vh; overflow-x:hidden; }
+.app { display:flex; flex-direction:column; min-height:100vh; max-width:430px; margin:0 auto; }
+
+/* ── HEADER ── */
+.header { background:var(--brown); color:var(--cream); padding:20px 20px 16px; display:flex; align-items:center; justify-content:space-between; position:sticky; top:0; z-index:100; }
+.header-left { display:flex; align-items:center; gap:10px; }
+.header-back { background:rgba(255,255,255,.15); border:none; color:var(--cream); width:32px; height:32px; border-radius:50%; cursor:pointer; font-size:1rem; display:flex; align-items:center; justify-content:center; }
+.header-title { font-family:'Playfair Display',serif; font-size:1.5rem; font-weight:700; letter-spacing:-.01em; }
+.header-subtitle { font-size:.7rem; font-weight:400; opacity:.7; margin-top:1px; }
+.header-date { font-size:.75rem; font-weight:300; opacity:.8; margin-top:2px; }
+.header-btn { background:rgba(255,255,255,.15); border:none; color:var(--cream); width:36px; height:36px; border-radius:50%; cursor:pointer; font-size:1.1rem; display:flex; align-items:center; justify-content:center; transition:background .2s; }
+.header-btn:hover { background:rgba(255,255,255,.25); }
+
+/* ── TOP NAV ── */
+.nav { background:var(--cream2); border-bottom:1px solid var(--beige); display:flex; overflow-x:auto; scrollbar-width:none; position:sticky; top:73px; z-index:99; }
+.nav::-webkit-scrollbar { display:none; }
+.nav-btn { flex:none; padding:12px 18px; background:none; border:none; font-family:'Inter',sans-serif; font-size:.82rem; font-weight:500; color:var(--text-m); cursor:pointer; position:relative; white-space:nowrap; transition:color .2s; }
+.nav-btn.active { color:var(--brown); }
+.nav-btn.active::after { content:''; position:absolute; bottom:0; left:18px; right:18px; height:2px; background:var(--brown); border-radius:2px; }
+
+/* ── MAIN ── */
+.main { flex:1; padding:16px; padding-bottom:90px; }
+.view { display:none; }
+.view.active { display:block; }
+
+/* ── SECTION HEADER ── */
+.sec-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:12px; }
+.sec-title { font-family:'Playfair Display',serif; font-size:1rem; font-weight:600; color:var(--brown); }
+.sec-link { font-size:.75rem; color:var(--text-l); cursor:pointer; }
+
+/* ── TODAY HERO ── */
+.today-card { background:linear-gradient(135deg,var(--brown) 0%,var(--brown-l) 100%); border-radius:var(--radius); padding:20px; color:var(--cream); margin-bottom:20px; box-shadow:var(--shadow); }
+.today-label { font-size:.7rem; font-weight:500; text-transform:uppercase; letter-spacing:.08em; opacity:.75; }
+.today-dayname { font-family:'Playfair Display',serif; font-size:1.6rem; font-weight:700; margin-top:4px; }
+.today-fulldate { font-size:.8rem; opacity:.8; margin-top:2px; }
+.today-stats { display:flex; gap:16px; margin-top:16px; }
+.today-stat { display:flex; flex-direction:column; gap:2px; }
+.today-stat-num { font-size:1.3rem; font-weight:700; }
+.today-stat-lbl { font-size:.68rem; opacity:.7; font-weight:300; }
+
+/* ── TASK CARDS ── */
+.tasks-list { display:flex; flex-direction:column; gap:8px; }
+.task-card { background:white; border-radius:var(--radius-sm); padding:13px 14px 13px 0; display:flex; align-items:stretch; box-shadow:var(--shadow); cursor:pointer; transition:box-shadow .2s,transform .15s; overflow:hidden; }
+.task-card:hover { box-shadow:var(--shadow-hover); transform:translateY(-1px); }
+.task-card.done { opacity:.5; }
+.task-card.done .task-title { text-decoration:line-through; }
+.task-stripe { width:4px; flex-shrink:0; margin-right:14px; }
+.task-check { width:18px; height:18px; border-radius:50%; border:2px solid var(--beige); flex-shrink:0; margin-right:10px; cursor:pointer; display:flex; align-items:center; justify-content:center; transition:background .2s,border-color .2s; align-self:center; }
+.task-check.checked { background:var(--brown); border-color:var(--brown); }
+.task-check.checked::after { content:'✓'; color:white; font-size:.6rem; }
+.task-body { flex:1; min-width:0; }
+.task-title { font-size:.88rem; font-weight:500; color:var(--text); line-height:1.3; }
+.task-meta { font-size:.72rem; color:var(--text-l); margin-top:4px; display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
+.task-tag { font-size:.65rem; padding:2px 7px; border-radius:20px; font-weight:500; text-transform:uppercase; letter-spacing:.04em; }
+.task-time { display:flex; align-items:center; gap:3px; }
+
+.cat-saude    { background:var(--cat-saude);    color:#2D6B50; }
+.cat-estudo   { background:var(--cat-estudo);   color:#2D3D7B; }
+.cat-social   { background:var(--cat-social);   color:#7B2D40; }
+.cat-trabalho { background:var(--cat-trabalho); color:#5C4F10; }
+.cat-pessoal  { background:var(--cat-pessoal);  color:#3D2D6B; }
+.cat-marco    { background:var(--cat-marco);    color:#6B3A10; }
+.stripe-saude    { background:#6EB898; }
+.stripe-estudo   { background:#8090C8; }
+.stripe-social   { background:#C88090; }
+.stripe-trabalho { background:#B8A84A; }
+.stripe-pessoal  { background:#9080C8; }
+.stripe-marco    { background:var(--brown-l); }
+
+/* ── TIME BLOCKS ── */
+.timeblock { margin-bottom:18px; }
+.timeblock-label { font-size:.7rem; font-weight:600; text-transform:uppercase; letter-spacing:.1em; color:var(--text-l); margin-bottom:8px; display:flex; align-items:center; gap:8px; }
+.timeblock-label::after { content:''; flex:1; height:1px; background:var(--beige); }
+
+/* ── MINI CAL ── */
+.mini-cal { background:white; border-radius:var(--radius); padding:16px; box-shadow:var(--shadow); margin-bottom:20px; }
+.mini-cal-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:12px; }
+.mini-cal-month { font-family:'Playfair Display',serif; font-size:.95rem; font-weight:600; color:var(--brown); }
+.mini-cal-nav { display:flex; gap:4px; }
+.mini-cal-navbtn { background:var(--cream); border:none; color:var(--text-m); width:28px; height:28px; border-radius:50%; cursor:pointer; font-size:.9rem; display:flex; align-items:center; justify-content:center; }
+.cal-grid { display:grid; grid-template-columns:repeat(7,1fr); gap:2px; }
+.cal-dow { font-size:.65rem; font-weight:600; color:var(--text-l); text-align:center; padding:4px 0; text-transform:uppercase; letter-spacing:.05em; }
+.cal-day { aspect-ratio:1; display:flex; flex-direction:column; align-items:center; justify-content:center; font-size:.78rem; cursor:pointer; border-radius:50%; position:relative; transition:background .15s; color:var(--text); }
+.cal-day:hover { background:var(--cream); }
+.cal-day.today { background:var(--brown); color:white; font-weight:700; }
+.cal-day.other-month { color:var(--beige); cursor:default; }
+.cal-day.has-event::after { content:''; position:absolute; bottom:3px; width:4px; height:4px; border-radius:50%; background:var(--brown-l); }
+.cal-day.today.has-event::after { background:var(--cream); }
+.cal-day.prova-week { background:rgba(192,200,224,.35); border-radius:0; }
+.cal-day.prova-week.today { background:var(--brown); }
+
+/* ── MARCOS ── */
+.marcos-list { display:flex; flex-direction:column; gap:10px; }
+.marco-card { background:white; border-radius:var(--radius-sm); padding:14px 16px; display:flex; align-items:center; gap:14px; box-shadow:var(--shadow); cursor:pointer; transition:box-shadow .2s; }
+.marco-card:hover { box-shadow:var(--shadow-hover); }
+.marco-date-badge { background:var(--cream2); border-radius:10px; padding:8px 10px; text-align:center; flex-shrink:0; min-width:48px; }
+.marco-date-day { font-family:'Playfair Display',serif; font-size:1.3rem; font-weight:700; color:var(--brown); line-height:1; }
+.marco-date-mon { font-size:.62rem; font-weight:600; text-transform:uppercase; letter-spacing:.06em; color:var(--text-l); margin-top:2px; }
+.marco-info { flex:1; min-width:0; }
+.marco-title { font-size:.88rem; font-weight:600; color:var(--text); }
+.marco-sub { font-size:.73rem; color:var(--text-l); margin-top:3px; }
+.marco-countdown { font-size:.7rem; font-weight:600; color:var(--brown); background:var(--cat-marco); padding:3px 8px; border-radius:20px; flex-shrink:0; }
+.marco-countdown.past { color:var(--text-l); background:var(--cream2); }
+.marco-countdown.today-badge { color:white; background:var(--brown); }
+
+/* ── WEEK STRIP ── */
+.week-strip { display:flex; gap:6px; margin-bottom:20px; overflow-x:auto; padding-bottom:4px; }
+.week-strip::-webkit-scrollbar { display:none; }
+.week-day-btn { flex-shrink:0; width:46px; background:white; border:none; border-radius:12px; padding:10px 0; cursor:pointer; transition:background .15s; display:flex; flex-direction:column; align-items:center; gap:4px; box-shadow:var(--shadow); }
+.week-day-btn.selected { background:var(--brown); }
+.week-day-name { font-size:.62rem; font-weight:600; text-transform:uppercase; letter-spacing:.05em; color:var(--text-l); }
+.week-day-btn.selected .week-day-name { color:rgba(255,255,255,.7); }
+.week-day-num { font-size:.95rem; font-weight:700; color:var(--text); }
+.week-day-btn.selected .week-day-num { color:white; }
+.week-day-dot { width:4px; height:4px; border-radius:50%; background:var(--tan); }
+.week-day-btn.selected .week-day-dot { background:rgba(255,255,255,.6); }
+.week-day-dot.hidden { visibility:hidden; }
+
+/* ── FAB ── */
+.fab { position:fixed; bottom:80px; right:20px; width:54px; height:54px; border-radius:50%; background:var(--brown); color:white; border:none; font-size:1.4rem; box-shadow:0 4px 16px rgba(90,50,20,.3); cursor:pointer; display:flex; align-items:center; justify-content:center; z-index:200; transition:background .2s,transform .15s; }
+.fab:hover { background:var(--brown-d); transform:scale(1.06); }
+.fab.hidden { display:none; }
+
+/* ── BOTTOM NAV ── */
+.bottom-nav { position:fixed; bottom:0; left:50%; transform:translateX(-50%); width:100%; max-width:430px; background:white; border-top:1px solid var(--beige); display:flex; z-index:200; box-shadow:0 -2px 16px rgba(90,50,20,.08); }
+.bn-btn { flex:1; padding:10px 0 12px; background:none; border:none; cursor:pointer; display:flex; flex-direction:column; align-items:center; gap:3px; color:var(--text-l); font-size:.62rem; font-weight:500; transition:color .2s; }
+.bn-btn.active { color:var(--brown); }
+.bn-icon { font-size:1.3rem; }
+
+/* ── MODAL ── */
+.modal-overlay { position:fixed; inset:0; background:rgba(30,15,5,.5); z-index:300; display:flex; align-items:flex-end; justify-content:center; opacity:0; pointer-events:none; transition:opacity .25s; }
+.modal-overlay.open { opacity:1; pointer-events:all; }
+.modal { background:var(--cream); border-radius:var(--radius) var(--radius) 0 0; width:100%; max-width:430px; padding:20px; transform:translateY(100%); transition:transform .3s cubic-bezier(.4,0,.2,1); max-height:92vh; overflow-y:auto; }
+.modal-overlay.open .modal { transform:translateY(0); }
+.modal-handle { width:40px; height:4px; background:var(--beige); border-radius:2px; margin:0 auto 20px; }
+.modal-title { font-family:'Playfair Display',serif; font-size:1.2rem; font-weight:700; color:var(--brown); margin-bottom:20px; }
+
+/* ── FORMS ── */
+.form-group { margin-bottom:14px; }
+.form-label { font-size:.75rem; font-weight:600; color:var(--text-m); margin-bottom:6px; display:block; text-transform:uppercase; letter-spacing:.05em; }
+.form-input,.form-select,.form-textarea { width:100%; background:white; border:1.5px solid var(--beige); border-radius:var(--radius-sm); padding:10px 12px; font-family:'Inter',sans-serif; font-size:.88rem; color:var(--text); outline:none; transition:border-color .2s; }
+.form-input:focus,.form-select:focus,.form-textarea:focus { border-color:var(--tan); }
+.form-textarea { resize:vertical; min-height:70px; }
+.modal-row { display:flex; gap:10px; }
+.modal-row .form-group { flex:1; }
+.cat-picker { display:flex; gap:8px; flex-wrap:wrap; }
+.cat-option { padding:6px 12px; border-radius:20px; border:2px solid transparent; font-size:.75rem; font-weight:600; cursor:pointer; transition:.15s; text-transform:uppercase; letter-spacing:.04em; }
+.cat-option.selected { border-color:var(--brown); }
+.btn-primary { width:100%; background:var(--brown); color:white; border:none; border-radius:var(--radius-sm); padding:13px; font-family:'Inter',sans-serif; font-size:.9rem; font-weight:600; cursor:pointer; margin-top:6px; transition:background .2s; }
+.btn-primary:hover { background:var(--brown-d); }
+.btn-secondary { width:100%; background:var(--cream2); color:var(--text-m); border:none; border-radius:var(--radius-sm); padding:11px; font-family:'Inter',sans-serif; font-size:.85rem; font-weight:500; cursor:pointer; margin-top:8px; }
+.btn-danger { background:none; border:none; color:#C87070; font-size:.78rem; cursor:pointer; margin-top:6px; width:100%; padding:8px; }
+
+/* ── MISC ── */
+.detail-card { background:white; border-radius:var(--radius); padding:20px; box-shadow:var(--shadow); margin-bottom:14px; }
+.detail-title { font-family:'Playfair Display',serif; font-size:1.15rem; font-weight:700; color:var(--text); margin-bottom:12px; }
+.detail-row { display:flex; align-items:flex-start; gap:10px; padding:8px 0; border-bottom:1px solid var(--cream); }
+.detail-row:last-child { border-bottom:none; }
+.detail-icon { width:20px; text-align:center; color:var(--text-l); font-size:.9rem; flex-shrink:0; margin-top:1px; }
+.detail-val { font-size:.85rem; color:var(--text); flex:1; }
+.chips { display:flex; gap:7px; overflow-x:auto; margin-bottom:16px; padding-bottom:2px; }
+.chips::-webkit-scrollbar { display:none; }
+.chip { flex-shrink:0; padding:5px 13px; border-radius:20px; border:1.5px solid var(--beige); background:white; font-size:.73rem; font-weight:500; color:var(--text-m); cursor:pointer; transition:.15s; }
+.chip.active { background:var(--brown); color:white; border-color:var(--brown); }
+.badge { display:inline-flex; align-items:center; justify-content:center; min-width:18px; height:18px; padding:0 5px; background:#C88090; color:white; border-radius:20px; font-size:.6rem; font-weight:700; margin-left:6px; }
+.empty { text-align:center; padding:40px 20px; color:var(--text-l); }
+.empty-icon { font-size:2.5rem; margin-bottom:12px; opacity:.5; }
+.empty-title { font-family:'Playfair Display',serif; font-size:1rem; color:var(--text-m); margin-bottom:6px; }
+.empty-sub { font-size:.8rem; }
+
+/* ════════════════════════════════
+   ÁREA DE ESTUDOS
+════════════════════════════════ */
+
+/* ── Tela de seleção de áreas ── */
+.areas-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:8px; }
+.area-card {
+  background:white; border-radius:var(--radius); padding:22px 16px;
+  display:flex; flex-direction:column; align-items:center; gap:10px;
+  box-shadow:var(--shadow); cursor:pointer; transition:box-shadow .2s,transform .15s;
+  border:2px solid transparent; text-align:center;
+}
+.area-card:hover { box-shadow:var(--shadow-hover); transform:translateY(-2px); }
+.area-card.active-area { border-color:var(--tan); }
+.area-icon { font-size:2rem; }
+.area-name { font-family:'Playfair Display',serif; font-size:.95rem; font-weight:700; color:var(--text); }
+.area-sub { font-size:.7rem; color:var(--text-l); }
+.area-card.coming { opacity:.45; cursor:not-allowed; }
+
+/* ── Estudos: semestre banner ── */
+.sem-banner {
+  background:linear-gradient(135deg,#3B4E7A 0%,#5568A0 100%);
+  border-radius:var(--radius); padding:16px 18px; color:white; margin-bottom:18px;
+  display:flex; align-items:center; justify-content:space-between;
+  box-shadow:var(--shadow);
+}
+.sem-banner-left {}
+.sem-banner-name { font-family:'Playfair Display',serif; font-size:1rem; font-weight:700; }
+.sem-banner-dates { font-size:.72rem; opacity:.8; margin-top:3px; }
+.sem-banner-progress { flex-shrink:0; display:flex; flex-direction:column; align-items:flex-end; gap:4px; }
+.sem-progress-bar { width:90px; height:6px; background:rgba(255,255,255,.3); border-radius:3px; overflow:hidden; }
+.sem-progress-fill { height:100%; background:white; border-radius:3px; }
+.sem-progress-lbl { font-size:.65rem; opacity:.8; }
+.sem-banner-cfg { background:rgba(255,255,255,.2); border:none; color:white; padding:5px 10px; border-radius:20px; font-size:.72rem; cursor:pointer; margin-top:6px; }
+
+/* ── Ramos ── */
+.ramos-list { display:flex; flex-direction:column; gap:0; }
+.ramo-section { margin-bottom:8px; }
+.ramo-header {
+  display:flex; align-items:center; gap:10px; padding:12px 14px;
+  background:white; border-radius:var(--radius-sm); box-shadow:var(--shadow);
+  cursor:pointer; transition:background .15s; user-select:none;
+}
+.ramo-header:hover { background:var(--cream2); }
+.ramo-drag { color:var(--text-l); font-size:.9rem; cursor:grab; padding:0 2px; }
+.ramo-color { width:10px; height:10px; border-radius:50%; flex-shrink:0; }
+.ramo-name { flex:1; font-size:.9rem; font-weight:600; color:var(--text); }
+.ramo-count { font-size:.72rem; color:var(--text-l); }
+.ramo-arrow { font-size:.75rem; color:var(--text-l); transition:transform .2s; }
+.ramo-arrow.open { transform:rotate(90deg); }
+.ramo-actions { display:flex; gap:4px; }
+.ramo-action-btn { background:none; border:none; font-size:.85rem; cursor:pointer; padding:2px 4px; color:var(--text-l); }
+
+/* ── Matérias dentro do ramo ── */
+.materias-list { padding:4px 0 4px 14px; display:flex; flex-direction:column; gap:6px; margin-top:6px; }
+.materia-card {
+  background:white; border-radius:var(--radius-sm); padding:12px 14px 12px 0;
+  display:flex; align-items:stretch; box-shadow:0 1px 6px rgba(90,50,20,.06);
+  cursor:pointer; transition:box-shadow .2s,transform .1s;
+}
+.materia-card:hover { box-shadow:var(--shadow-hover); transform:translateY(-1px); }
+.materia-stripe { width:4px; flex-shrink:0; border-radius:0 2px 2px 0; margin-right:12px; }
+.materia-body { flex:1; min-width:0; }
+.materia-name { font-size:.88rem; font-weight:600; color:var(--text); }
+.materia-meta { font-size:.72rem; color:var(--text-l); margin-top:4px; display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
+.materia-progress-mini { display:flex; gap:3px; margin-top:6px; }
+.materia-progress-pip { width:8px; height:8px; border-radius:2px; background:var(--beige); }
+.materia-right { display:flex; flex-direction:column; align-items:flex-end; justify-content:center; padding-right:2px; gap:6px; }
+
+/* ── Status badge ── */
+.status-badge { font-size:.6rem; padding:2px 7px; border-radius:20px; font-weight:700; text-transform:uppercase; letter-spacing:.05em; white-space:nowrap; }
+.status-0 { background:var(--s0-bg); color:var(--s0-fg); }
+.status-1 { background:var(--s1-bg); color:var(--s1-fg); }
+.status-2 { background:var(--s2-bg); color:var(--s2-fg); }
+.status-3 { background:var(--s3-bg); color:var(--s3-fg); }
+.status-dot { width:10px; height:10px; border-radius:50%; flex-shrink:0; }
+.status-dot-0 { background:var(--s0-fg); }
+.status-dot-1 { background:#F0B800; }
+.status-dot-2 { background:#1E7A48; }
+.status-dot-3 { background:#2040A0; }
+
+/* ── Conteúdos ── */
+.conteudo-item {
+  background:white; border-radius:var(--radius-sm); padding:13px 14px;
+  display:flex; align-items:center; gap:12px; box-shadow:0 1px 6px rgba(90,50,20,.06);
+  cursor:pointer; transition:box-shadow .15s;
+}
+.conteudo-item:hover { box-shadow:var(--shadow-hover); }
+.conteudo-status-btn {
+  width:28px; height:28px; border-radius:50%; border:none; cursor:pointer;
+  display:flex; align-items:center; justify-content:center; flex-shrink:0; font-size:.75rem;
+  transition:transform .1s;
+}
+.conteudo-status-btn:active { transform:scale(.9); }
+.conteudo-body { flex:1; min-width:0; }
+.conteudo-title { font-size:.86rem; font-weight:500; color:var(--text); line-height:1.3; }
+.conteudo-meta { font-size:.7rem; color:var(--text-l); margin-top:3px; }
+.conteudo-ref { font-size:.68rem; color:var(--brown); margin-top:2px; }
+
+/* ── Prova week highlight ── */
+.prova-alert {
+  background:linear-gradient(135deg,#8090C8,#6070B0);
+  border-radius:var(--radius-sm); padding:11px 14px; color:white;
+  display:flex; align-items:center; gap:10px; margin-bottom:10px; font-size:.8rem;
+}
+.prova-alert-icon { font-size:1.1rem; }
+
+/* ── Drag handle (ordem dos ramos) ── */
+.drag-ghost { opacity:.4; background:var(--cream2) !important; }
+
+/* ── Semestre config list item ── */
+.sem-materia-row {
+  background:white; border-radius:var(--radius-sm); padding:11px 14px;
+  display:flex; align-items:center; gap:10px; box-shadow:0 1px 6px rgba(90,50,20,.06);
+  margin-bottom:6px;
+}
+.sem-materia-row .task-check { flex-shrink:0; }
+
+/* ── Progress overall bar ── */
+.progress-bar-wrap { background:var(--beige); border-radius:20px; height:8px; overflow:hidden; margin-top:6px; }
+.progress-bar-fill { height:100%; border-radius:20px; transition:width .4s; }
+
+/* ── Ordem drag indicator ── */
+.order-num { width:22px; height:22px; background:var(--cream2); border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:.68rem; font-weight:700; color:var(--text-l); flex-shrink:0; }
+
+@media (prefers-reduced-motion:reduce) { *,*::before,*::after { transition-duration:.01ms !important; } }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- HEADER (dinâmico) -->
+  <header class="header" id="appHeader">
+    <div class="header-left">
+      <div>
+        <div class="header-title" id="headerTitle">Rotina</div>
+        <div class="header-date" id="headerDate"></div>
+      </div>
+    </div>
+    <div style="display:flex;gap:8px" id="headerActions">
+      <button class="header-btn" onclick="openSearch()" title="Buscar">🔍</button>
+      <button class="header-btn" onclick="openModal('new')" title="Adicionar">＋</button>
+    </div>
+  </header>
+
+  <!-- TOP NAV (condicional) -->
+  <nav class="nav" id="topNav">
+    <button class="nav-btn active" onclick="switchView('hoje',this)">Hoje</button>
+    <button class="nav-btn" onclick="switchView('semana',this)">Semana</button>
+    <button class="nav-btn" onclick="switchView('marcos',this)">Marcos<span class="badge" id="marcoBadge">0</span></button>
+    <button class="nav-btn" onclick="switchView('rotina',this)">Rotina</button>
+  </nav>
+
+  <main class="main">
+
+    <!-- ─── VIEW: HOJE ─── -->
+    <div class="view active" id="view-hoje">
+      <div class="today-card" id="todayCard"></div>
+      <div class="sec-header">
+        <span class="sec-title">Tarefas de hoje</span>
+        <span class="sec-link" onclick="switchToAll()">Ver tudo</span>
+      </div>
+      <div class="chips" id="filterChips">
+        <button class="chip active" data-cat="all" onclick="filterTasks('all',this)">Todas</button>
+        <button class="chip" data-cat="saude" onclick="filterTasks('saude',this)">Saúde</button>
+        <button class="chip" data-cat="estudo" onclick="filterTasks('estudo',this)">Estudos</button>
+        <button class="chip" data-cat="social" onclick="filterTasks('social',this)">Social</button>
+        <button class="chip" data-cat="trabalho" onclick="filterTasks('trabalho',this)">Trabalho</button>
+        <button class="chip" data-cat="pessoal" onclick="filterTasks('pessoal',this)">Pessoal</button>
+      </div>
+      <div class="tasks-list" id="todayTasks"></div>
+    </div>
+
+    <!-- ─── VIEW: SEMANA ─── -->
+    <div class="view" id="view-semana">
+      <div class="week-strip" id="weekStrip"></div>
+      <div class="tasks-list" id="weekTasks"></div>
+    </div>
+
+    <!-- ─── VIEW: MARCOS ─── -->
+    <div class="view" id="view-marcos">
+      <div class="mini-cal" id="miniCal"></div>
+      <div class="sec-header">
+        <span class="sec-title">Datas importantes</span>
+        <span class="sec-link" onclick="openModal('marco')">+ Adicionar</span>
+      </div>
+      <div class="marcos-list" id="marcosList"></div>
+    </div>
+
+    <!-- ─── VIEW: ROTINA ─── -->
+    <div class="view" id="view-rotina">
+      <div class="sec-header">
+        <span class="sec-title">Minha rotina</span>
+        <span class="sec-link" onclick="openModal('rotina')">+ Bloco</span>
+      </div>
+      <p style="font-size:.78rem;color:var(--text-l);margin-bottom:16px;line-height:1.5">
+        Blocos fixos que se repetem. Não aparecem no calendário.
+      </p>
+      <div id="rotinaBlocks"></div>
+    </div>
+
+    <!-- ─── VIEW: ÁREAS ─── -->
+    <div class="view" id="view-areas">
+      <div class="sec-header" style="margin-bottom:6px">
+        <span class="sec-title">Minhas Áreas</span>
+      </div>
+      <p style="font-size:.78rem;color:var(--text-l);margin-bottom:18px;line-height:1.5">Organize cada dimensão da sua vida separadamente.</p>
+      <div class="areas-grid">
+        <div class="area-card" onclick="enterArea('estudos')">
+          <div class="area-icon">📚</div>
+          <div class="area-name">Estudos</div>
+          <div class="area-sub" id="areaStudosSub">—</div>
+        </div>
+        <div class="area-card" onclick="enterArea('trabalho')">
+          <div class="area-icon">💼</div>
+          <div class="area-name">Trabalho</div>
+          <div class="area-sub" id="areaTrabalhoSub">—</div>
+        </div>
+        <div class="area-card" onclick="enterArea('pessoal')">
+          <div class="area-icon">🌿</div>
+          <div class="area-name">Pessoal</div>
+          <div class="area-sub" id="areaPessoalSub">—</div>
+        </div>
+        <div class="area-card coming" style="opacity:.3">
+          <div class="area-icon">＋</div>
+          <div class="area-name">Adicionar</div>
+          <div class="area-sub">Em breve</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ─── VIEW: ÁREA ESTUDOS ─── -->
+    <div class="view" id="view-estudos">
+      <!-- semestre banner -->
+      <div id="estudosSemBanner"></div>
+      <!-- filtros rápidos de status -->
+      <div class="chips" id="estudosChips">
+        <button class="chip active" data-sf="all" onclick="filterEstudos('all',this)">Todas</button>
+        <button class="chip" data-sf="0" onclick="filterEstudos('0',this)">⚫ Não estudado</button>
+        <button class="chip" data-sf="1" onclick="filterEstudos('1',this)">🟡 Iniciado</button>
+        <button class="chip" data-sf="2" onclick="filterEstudos('2',this)">🟢 Finalizado</button>
+        <button class="chip" data-sf="3" onclick="filterEstudos('3',this)">🔵 Resumido</button>
+      </div>
+      <div id="ramosContainer"></div>
+    </div>
+
+    <!-- ─── VIEW: MATÉRIA DETAIL ─── -->
+    <div class="view" id="view-materia">
+      <div id="materiaDetailContent"></div>
+    </div>
+
+    <!-- ─── VIEW: ÁREA TRABALHO ─── -->
+    <div class="view" id="view-trabalho">
+      <div id="trabalhoContent"></div>
+    </div>
+
+    <!-- ─── VIEW: ÁREA PESSOAL ─── -->
+    <div class="view" id="view-pessoal">
+      <div id="pessoalContent"></div>
+    </div>
+
+  </main>
+
+  <!-- FAB dinâmico -->
+  <button class="fab" id="fabBtn" onclick="fabAction()">＋</button>
+
+  <!-- BOTTOM NAV -->
+  <nav class="bottom-nav">
+    <button class="bn-btn active" id="bn-hoje" onclick="switchView('hoje',null,true)">
+      <span class="bn-icon">☀️</span>Hoje
+    </button>
+    <button class="bn-btn" id="bn-semana" onclick="switchView('semana',null,true)">
+      <span class="bn-icon">📅</span>Semana
+    </button>
+    <button class="bn-btn" id="bn-marcos" onclick="switchView('marcos',null,true)">
+      <span class="bn-icon">📍</span>Marcos
+    </button>
+    <button class="bn-btn" id="bn-rotina" onclick="switchView('rotina',null,true)">
+      <span class="bn-icon">🔁</span>Rotina
+    </button>
+    <button class="bn-btn" id="bn-areas" onclick="switchView('areas',null,true)">
+      <span class="bn-icon">🗂️</span>Áreas
+    </button>
+  </nav>
+</div>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modalOverlay" onclick="closeModalOutside(event)">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div id="modalContent"></div>
+  </div>
+</div>
+
+<script>
+// ════════════════════════════════════════════════
+//  STORAGE
+// ════════════════════════════════════════════════
+const SK = {
+  tasks:'rotina_tasks', marcos:'rotina_marcos', rotina:'rotina_blocks',
+  ramos:'est_ramos', materias:'est_materias', conteudos:'est_conteudos',
+  semestre:'est_semestre',
+  semestres:'est_semestres',          // lista completa de semestres
+  trabalho:'area_trabalho',           // projetos da área Trabalho
+  pessoal:'area_pessoal',             // itens da área Pessoal
+};
+const load = k => { try { return JSON.parse(localStorage.getItem(k)) || []; } catch { return []; } };
+const loadObj = k => { try { return JSON.parse(localStorage.getItem(k)) || {}; } catch { return {}; } };
+const save = (k,v) => localStorage.setItem(k, JSON.stringify(v));
+
+let tasks     = load(SK.tasks);
+let marcos    = load(SK.marcos);
+let rotina    = load(SK.rotina);
+let ramos     = load(SK.ramos);
+let materias  = load(SK.materias);
+let conteudos = load(SK.conteudos);
+let semestres = load(SK.semestres);   // lista de todos os semestres
+let semestre  = loadObj(SK.semestre); // semestre ativo (objeto)
+let trabalhoItens = load(SK.trabalho);
+let pessoalItens  = load(SK.pessoal);
+
+// ════════════════════════════════════════════════
+//  UTILS
+// ════════════════════════════════════════════════
+const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2,6);
+const fmtDate = d => d.toISOString().slice(0,10);
+const addDays = (d,n) => { const r = new Date(d); r.setDate(r.getDate()+n); return fmtDate(r); };
+const parseDate = s => { const [y,m,d]=s.split('-'); return new Date(+y,+m-1,+d); };
+const today = () => fmtDate(new Date());
+const diffDays = ds => { const n=new Date(); n.setHours(0,0,0,0); const t=parseDate(ds); t.setHours(0,0,0,0); return Math.round((t-n)/86400000); };
+const esc = s => (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;');
+
+const MONTHS_PT    = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+const MONTHS_SHORT = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+const DAYS_PT      = ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
+const DAYS_FULL    = ['Domingo','Segunda-feira','Terça-feira','Quarta-feira','Quinta-feira','Sexta-feira','Sábado'];
+const CAT_LABEL    = {saude:'Saúde',estudo:'Estudos',social:'Social',trabalho:'Trabalho',pessoal:'Pessoal',marco:'Marco'};
+const CAT_ICON     = {saude:'💚',estudo:'📘',social:'🌸',trabalho:'💼',pessoal:'⭐',marco:'📍'};
+const STATUS_LABEL = ['Não estudado','Iniciado','Finalizado','Resumido'];
+const STATUS_ICON  = ['⚫','🟡','🟢','🔵'];
+const RAMO_COLORS  = ['#8090C8','#6EB898','#C88090','#B8A84A','#9080C8','#C8905A','#70AAC0','#C0C870'];
+
+// ════════════════════════════════════════════════
+//  SEED DATA
+// ════════════════════════════════════════════════
+if (!tasks.length) {
+  const td = today();
+  tasks = [
+    {id:uid(),title:'Academia — treino de pernas',cat:'saude',time:'07:00',date:td,done:false,notes:''},
+    {id:uid(),title:'Revisar Direito Civil — Contratos',cat:'estudo',time:'09:00',date:td,done:false,notes:'Cap. 4'},
+    {id:uid(),title:'Reunião de projeto',cat:'trabalho',time:'14:00',date:td,done:false,notes:''},
+    {id:uid(),title:'Leitura 30 min',cat:'pessoal',time:'21:00',date:td,done:false,notes:''},
+  ];
+  save(SK.tasks,tasks);
+}
+if (!marcos.length) {
+  const d=new Date();
+  marcos = [
+    {id:uid(),title:'Semana de Provas — 1º sem',date:addDays(d,8),cat:'estudo',notes:'Início da semana de avaliações',icon:'📝'},
+    {id:uid(),title:'Consulta médica anual',date:addDays(d,15),cat:'saude',notes:'Hospital das Clínicas — 10h',icon:'🩺'},
+    {id:uid(),title:'Entrega do trabalho final',date:addDays(d,22),cat:'trabalho',notes:'Via e-mail até 23h59',icon:'💼'},
+    {id:uid(),title:'Aniversário da mamãe',date:addDays(d,30),cat:'social',notes:'',icon:'🎂'},
+  ];
+  save(SK.marcos,marcos);
+}
+if (!rotina.length) {
+  rotina = [
+    {id:uid(),title:'Acordar & alongamento',time:'06:30',days:[1,2,3,4,5],cat:'saude',notes:'15 min'},
+    {id:uid(),title:'Bloco de estudos',time:'08:00',days:[1,2,3,4,5],cat:'estudo',notes:'2h sem interrupções'},
+    {id:uid(),title:'Almoço',time:'12:00',days:[0,1,2,3,4,5,6],cat:'pessoal',notes:''},
+    {id:uid(),title:'Treino na academia',time:'17:00',days:[1,3,5],cat:'saude',notes:'1h'},
+    {id:uid(),title:'Revisão do dia',time:'22:00',days:[0,1,2,3,4,5,6],cat:'pessoal',notes:'10 min'},
+  ];
+  save(SK.rotina,rotina);
+}
+if (!ramos.length) {
+  ramos = [
+    {id:'r1',nome:'Direito Civil',cor:RAMO_COLORS[0],ordem:0},
+    {id:'r2',nome:'Direito Penal',cor:RAMO_COLORS[1],ordem:1},
+    {id:'r3',nome:'Direito Constitucional',cor:RAMO_COLORS[2],ordem:2},
+    {id:'r4',nome:'Direito Administrativo',cor:RAMO_COLORS[3],ordem:3},
+  ];
+  save(SK.ramos,ramos);
+}
+if (!materias.length) {
+  materias = [
+    {id:'m1',ramoId:'r1',nome:'Teoria Geral dos Contratos',diaProva:3,ordem:0,semestre:semestre.id||'s1'},
+    {id:'m2',ramoId:'r1',nome:'Responsabilidade Civil',diaProva:5,ordem:1,semestre:semestre.id||'s1'},
+    {id:'m3',ramoId:'r2',nome:'Parte Geral do CP',diaProva:2,ordem:0,semestre:semestre.id||'s1'},
+    {id:'m4',ramoId:'r3',nome:'Direitos Fundamentais',diaProva:4,ordem:0,semestre:semestre.id||'s1'},
+  ];
+  save(SK.materias,materias);
+}
+if (!conteudos.length) {
+  conteudos = [
+    {id:'c1',materiaId:'m1',titulo:'Conceito e formação do contrato',referencia:'Flávio Tartuce, cap. 1',capitulos:'1-2',status:2,ordem:0},
+    {id:'c2',materiaId:'m1',titulo:'Vícios do consentimento',referencia:'Flávio Tartuce, cap. 3',capitulos:'3',status:1,ordem:1},
+    {id:'c3',materiaId:'m1',titulo:'Extinção do contrato',referencia:'Flávio Tartuce, cap. 5',capitulos:'5-6',status:0,ordem:2},
+    {id:'c4',materiaId:'m2',titulo:'Ato ilícito e culpa',referencia:'Cavalieri Filho, cap. 2',capitulos:'2',status:3,ordem:0},
+    {id:'c5',materiaId:'m2',titulo:'Nexo de causalidade',referencia:'Cavalieri Filho, cap. 4',capitulos:'4-5',status:1,ordem:1},
+    {id:'c6',materiaId:'m3',titulo:'Tipicidade penal',referencia:'Rogério Greco, cap. 8',capitulos:'8',status:2,ordem:0},
+    {id:'c7',materiaId:'m4',titulo:'Gerações dos direitos fundamentais',referencia:'Novelino, cap. 3',capitulos:'3',status:0,ordem:0},
+  ];
+  save(SK.conteudos,conteudos);
+}
+if (!semestre.id) {
+  const d = new Date();
+  semestre = {
+    id:'s1', nome:'1º Semestre 2025', tipo:'faculdade',
+    inicio: fmtDate(new Date(d.getFullYear(),1,1)),
+    fim:    fmtDate(new Date(d.getFullYear(),6,31)),
+    semProvaInicio: addDays(d,8),
+    semProvaFim:    addDays(d,14),
+    semProvaExclusoes: [],
+  };
+  save(SK.semestre,semestre);
+}
+// migrar: se a lista de semestres estiver vazia, popular com o semestre ativo
+if (!semestres.length && semestre.id) {
+  semestres = [semestre];
+  save(SK.semestres, semestres);
+}
+// verificar avanço automático: se a data atual passou o fim, ativar o próximo semestre
+(function autoAdvanceSemestre() {
+  const td = today();
+  if (semestre.fim && td > semestre.fim) {
+    const prox = semestres.find(s => s.id !== semestre.id && s.inicio > semestre.fim && s.inicio <= td);
+    if (prox) { semestre = prox; save(SK.semestre, semestre); }
+  }
+})();
+
+// ════════════════════════════════════════════════
+//  STATE
+// ════════════════════════════════════════════════
+let activeView    = 'hoje';
+let activeFilter  = 'all';
+let estudosFilter = 'all';
+let selectedWeekDay = today();
+let calYear = new Date().getFullYear(), calMonth = new Date().getMonth();
+let currentRamoOpen = {};  // ramoId -> bool
+let currentMateriaId = null;
+let modalMode = null, editingId = null;
+
+// ════════════════════════════════════════════════
+//  NAVIGATION
+// ════════════════════════════════════════════════
+const VIEW_TABS   = {hoje:0,semana:1,marcos:2,rotina:3};
+const VIEW_BN     = ['hoje','semana','marcos','rotina','areas'];
+const isSubview   = v => ['estudos','materia','trabalho','pessoal'].includes(v);
+
+function switchView(v, tabBtn, fromBottom=false) {
+  activeView = v;
+  document.querySelectorAll('.view').forEach(el => el.classList.toggle('active', el.id==='view-'+v));
+
+  // top nav visibility
+  const showTopNav = !isSubview(v) && v!=='areas';
+  document.getElementById('topNav').style.display = showTopNav ? '' : 'none';
+
+  // top nav active
+  if (showTopNav) {
+    document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+    const idx = VIEW_TABS[v];
+    if (idx!==undefined) document.querySelectorAll('.nav-btn')[idx]?.classList.add('active');
+  }
+
+  // bottom nav
+  document.querySelectorAll('.bn-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('bn-'+v)?.classList.add('active');
+  if (['estudos','materia','trabalho','pessoal'].includes(v)) document.getElementById('bn-areas')?.classList.add('active');
+
+  // header
+  updateHeader(v);
+  // fab
+  updateFab(v);
+
+  // render
+  if (v==='hoje')     renderToday();
+  if (v==='semana')   renderWeek();
+  if (v==='marcos')   renderMarcos();
+  if (v==='rotina')   renderRotina();
+  if (v==='areas')    renderAreas();
+  if (v==='estudos')  renderEstudos();
+  if (v==='trabalho') renderTrabalho();
+  if (v==='pessoal')  renderPessoal();
+}
+
+function updateHeader(v) {
+  const title = document.getElementById('headerTitle');
+  const sub   = document.getElementById('headerDate');
+  const acts  = document.getElementById('headerActions');
+  const left  = document.getElementById('appHeader').querySelector('.header-left');
+
+  // clear back btn
+  const oldBack = document.getElementById('headerBackBtn');
+  if (oldBack) oldBack.remove();
+
+  if (v==='hoje'||v==='semana'||v==='marcos'||v==='rotina') {
+    title.textContent = 'Rotina';
+    sub.textContent = headerDateStr();
+    acts.innerHTML = `<button class="header-btn" onclick="openSearch()">🔍</button><button class="header-btn" onclick="openModal('new')">＋</button>`;
+  } else if (v==='areas') {
+    title.textContent = 'Áreas';
+    sub.textContent = '';
+    acts.innerHTML = '';
+  } else if (v==='estudos') {
+    title.textContent = 'Estudos';
+    sub.textContent = semestre.nome || '';
+    acts.innerHTML = `<button class="header-btn" onclick="openModal('semestre')">⚙️</button><button class="header-btn" onclick="openModal('novo-ramo')">＋</button>`;
+    const back = document.createElement('button');
+    back.className='header-back'; back.id='headerBackBtn'; back.textContent='‹';
+    back.onclick=()=>switchView('areas');
+    left.insertBefore(back, left.firstChild);
+  } else if (v==='trabalho') {
+    title.textContent = 'Trabalho';
+    sub.textContent = '';
+    acts.innerHTML = `<button class="header-btn" onclick="openModal('novo-trab')">＋</button>`;
+    const back = document.createElement('button');
+    back.className='header-back'; back.id='headerBackBtn'; back.textContent='‹';
+    back.onclick=()=>switchView('areas');
+    left.insertBefore(back, left.firstChild);
+  } else if (v==='pessoal') {
+    title.textContent = 'Pessoal';
+    sub.textContent = '';
+    acts.innerHTML = `<button class="header-btn" onclick="openModal('novo-pes')">＋</button>`;
+    const back = document.createElement('button');
+    back.className='header-back'; back.id='headerBackBtn'; back.textContent='‹';
+    back.onclick=()=>switchView('areas');
+    left.insertBefore(back, left.firstChild);
+  } else if (v==='materia') {
+    const m = materias.find(x=>x.id===currentMateriaId);
+    title.textContent = m ? m.nome : 'Matéria';
+    sub.textContent = m ? (ramos.find(r=>r.id===m.ramoId)?.nome||'') : '';
+    acts.innerHTML = `<button class="header-btn" onclick="openModal('edit-materia','${currentMateriaId}')">✏️</button><button class="header-btn" onclick="openModal('novo-conteudo')">＋</button>`;
+    const back = document.createElement('button');
+    back.className='header-back'; back.id='headerBackBtn'; back.textContent='‹';
+    back.onclick=()=>switchView('estudos');
+    left.insertBefore(back, left.firstChild);
+  }
+}
+
+function updateFab(v) {
+  const fab = document.getElementById('fabBtn');
+  const hidden = ['areas','estudos','materia','trabalho','pessoal'].includes(v);
+  fab.classList.toggle('hidden', hidden);
+}
+
+function headerDateStr() {
+  const d=new Date();
+  return `${DAYS_PT[d.getDay()]}, ${d.getDate()} de ${MONTHS_PT[d.getMonth()]}`;
+}
+function renderHeaderDate() {
+  document.getElementById('headerDate').textContent = headerDateStr();
+}
+
+function switchToAll() { switchView('semana',null,true); }
+function enterArea(a)  {
+  if(a==='estudos') switchView('estudos');
+  else if(a==='trabalho') switchView('trabalho');
+  else if(a==='pessoal') switchView('pessoal');
+}
+
+// ════════════════════════════════════════════════
+//  FAB ACTION (dinâmico por view)
+// ════════════════════════════════════════════════
+function fabAction() {
+  if (activeView==='hoje'||activeView==='semana') openModal('new');
+  else if (activeView==='marcos') openModal('marco');
+  else if (activeView==='rotina') openModal('rotina');
+  else openModal('new');
+}
+
+// ════════════════════════════════════════════════
+//  TODAY VIEW
+// ════════════════════════════════════════════════
+function renderToday() {
+  const td = today(), d = new Date();
+  const dt = tasks.filter(t=>t.date===td);
+  const done = dt.filter(t=>t.done).length;
+  const nm = marcos.filter(m=>m.date>=td).sort((a,b)=>a.date.localeCompare(b.date))[0];
+  document.getElementById('todayCard').innerHTML = `
+    <div class="today-label">Hoje</div>
+    <div class="today-dayname">${DAYS_FULL[d.getDay()]}</div>
+    <div class="today-fulldate">${d.getDate()} de ${MONTHS_PT[d.getMonth()]} de ${d.getFullYear()}</div>
+    <div class="today-stats">
+      <div class="today-stat"><span class="today-stat-num">${dt.length}</span><span class="today-stat-lbl">tarefas</span></div>
+      <div class="today-stat"><span class="today-stat-num">${done}</span><span class="today-stat-lbl">concluídas</span></div>
+      ${nm?`<div class="today-stat" style="margin-left:auto;text-align:right">
+        <span class="today-stat-num" style="font-size:.9rem">${nm.icon||'📍'} ${nm.title.slice(0,20)}${nm.title.length>20?'…':''}</span>
+        <span class="today-stat-lbl">próx. marco · ${diffDays(nm.date)}d</span>
+      </div>`:''}
+    </div>`;
+  const filtered = dt.filter(t=>activeFilter==='all'||t.cat===activeFilter);
+  renderTaskList('todayTasks', filtered);
+}
+
+function filterTasks(cat,btn) {
+  activeFilter=cat;
+  document.querySelectorAll('.chip').forEach(c=>c.classList.remove('active'));
+  btn.classList.add('active');
+  renderToday();
+}
+
+function renderTaskList(cid, list) {
+  const el = document.getElementById(cid);
+  if (!list.length) { el.innerHTML=`<div class="empty"><div class="empty-icon">✨</div><div class="empty-title">Nenhuma tarefa</div><div class="empty-sub">Toque em + para adicionar</div></div>`; return; }
+  const sorted = [...list].sort((a,b)=>(a.time||'').localeCompare(b.time||''));
+  const blocks = {manha:[],tarde:[],noite:[],sem:[]};
+  sorted.forEach(t=>{
+    const h=parseInt((t.time||'00').split(':')[0]);
+    if(!t.time) blocks.sem.push(t);
+    else if(h<12) blocks.manha.push(t);
+    else if(h<18) blocks.tarde.push(t);
+    else blocks.noite.push(t);
+  });
+  const defs=[{k:'manha',l:'🌅 Manhã'},{k:'tarde',l:'☀️ Tarde'},{k:'noite',l:'🌙 Noite'},{k:'sem',l:'📌 Sem horário'}];
+  el.innerHTML=defs.map(b=>blocks[b.k].length?`<div class="timeblock"><div class="timeblock-label">${b.l}</div>${blocks[b.k].map(taskCardHTML).join('')}</div>`:'').join('');
+}
+
+function taskCardHTML(t) {
+  return `<div class="task-card${t.done?' done':''}" onclick="openTask('${t.id}')">
+    <div class="task-stripe stripe-${t.cat}"></div>
+    <div class="task-check${t.done?' checked':''}" onclick="toggleTask(event,'${t.id}')"></div>
+    <div class="task-body">
+      <div class="task-title">${esc(t.title)}</div>
+      <div class="task-meta">
+        ${t.time?`<span class="task-time">🕐 ${t.time}</span>`:''}
+        <span class="task-tag cat-${t.cat}">${CAT_LABEL[t.cat]||t.cat}</span>
+        ${t.notes?`<span style="max-width:100px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(t.notes)}</span>`:''}
+      </div>
+    </div>
+  </div>`;
+}
+
+function toggleTask(e,id) {
+  e.stopPropagation();
+  const i=tasks.findIndex(t=>t.id===id);
+  if(i>-1){tasks[i].done=!tasks[i].done; save(SK.tasks,tasks);}
+  if(activeView==='hoje') renderToday(); else if(activeView==='semana') renderWeek();
+}
+
+// ════════════════════════════════════════════════
+//  WEEK VIEW
+// ════════════════════════════════════════════════
+function renderWeek() {
+  const base=new Date(); base.setDate(base.getDate()-2);
+  let html='';
+  for(let i=0;i<10;i++){
+    const d=new Date(base); d.setDate(base.getDate()+i);
+    const ds=fmtDate(d);
+    const has=tasks.some(t=>t.date===ds);
+    const sel=ds===selectedWeekDay;
+    html+=`<button class="week-day-btn${sel?' selected':''}" onclick="selectWeekDay('${ds}')">
+      <span class="week-day-name">${DAYS_PT[d.getDay()]}</span>
+      <span class="week-day-num">${d.getDate()}</span>
+      <span class="week-day-dot${has?'':' hidden'}"></span>
+    </button>`;
+  }
+  document.getElementById('weekStrip').innerHTML=html;
+  renderTaskList('weekTasks',tasks.filter(t=>t.date===selectedWeekDay));
+}
+function selectWeekDay(ds) { selectedWeekDay=ds; renderWeek(); }
+
+// ════════════════════════════════════════════════
+//  MARCOS VIEW
+// ════════════════════════════════════════════════
+function renderMarcos() {
+  renderMiniCal();
+  const td=today();
+  document.getElementById('marcoBadge').textContent=marcos.filter(m=>m.date>=td).length;
+  const sorted=[...marcos].sort((a,b)=>a.date.localeCompare(b.date));
+  const el=document.getElementById('marcosList');
+  if(!sorted.length){el.innerHTML=`<div class="empty"><div class="empty-icon">📍</div><div class="empty-title">Nenhum marco</div><div class="empty-sub">Adicione consultas, provas, eventos importantes</div></div>`;return;}
+  el.innerHTML=sorted.map(m=>{
+    const d=parseDate(m.date), diff=diffDays(m.date);
+    let cls='marco-countdown', txt='';
+    if(diff<0){txt=`${Math.abs(diff)}d atrás`;cls+=' past';}
+    else if(diff===0){txt='Hoje!';cls+=' today-badge';}
+    else if(diff===1) txt='Amanhã';
+    else txt=`em ${diff}d`;
+    return `<div class="marco-card" onclick="openMarco('${m.id}')">
+      <div class="marco-date-badge">
+        <div class="marco-date-day">${d.getDate()}</div>
+        <div class="marco-date-mon">${MONTHS_SHORT[d.getMonth()]}</div>
+      </div>
+      <div class="marco-info">
+        <div class="marco-title">${m.icon||'📍'} ${esc(m.title)}</div>
+        <div class="marco-sub"><span class="task-tag cat-${m.cat}" style="font-size:.62rem">${CAT_LABEL[m.cat]}</span>${m.notes?' · '+esc(m.notes):''}</div>
+      </div>
+      <div class="${cls}">${txt}</div>
+    </div>`;
+  }).join('');
+}
+
+function renderMiniCal() {
+  const year=calYear, month=calMonth;
+  const firstDay=new Date(year,month,1).getDay();
+  const days=new Date(year,month+1,0).getDate();
+  const td=today();
+  const marcoMap={};
+  marcos.forEach(m=>{ marcoMap[m.date]=true; });
+  // semana de provas
+  const spi=semestre.semProvaInicio, spf=semestre.semProvaFim;
+  const excl=new Set(semestre.semProvaExclusoes||[]);
+
+  let html=`<div class="mini-cal-header">
+    <span class="mini-cal-month">${MONTHS_PT[month]} ${year}</span>
+    <div class="mini-cal-nav">
+      <button class="mini-cal-navbtn" onclick="calPrev()">‹</button>
+      <button class="mini-cal-navbtn" onclick="calNext()">›</button>
+    </div>
+  </div><div class="cal-grid">${DAYS_PT.map(d=>`<div class="cal-dow">${d[0]}</div>`).join('')}`;
+  for(let i=0;i<firstDay;i++) html+=`<div class="cal-day other-month"></div>`;
+  for(let d=1;d<=days;d++){
+    const ds=`${year}-${String(month+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const isTd=ds===td, hasEv=!!marcoMap[ds];
+    const inProvaWeek=spi&&spf&&ds>=spi&&ds<=spf&&!excl.has(ds);
+    html+=`<div class="cal-day${isTd?' today':''}${hasEv?' has-event':''}${inProvaWeek&&!isTd?' prova-week':''}" onclick="calDayClick('${ds}')">${d}</div>`;
+  }
+  html+=`</div>`;
+  // legenda semana de provas
+  if(spi&&spf) html+=`<div style="display:flex;align-items:center;gap:6px;margin-top:10px;font-size:.68rem;color:var(--text-l)"><div style="width:12px;height:12px;border-radius:3px;background:rgba(192,200,224,.6)"></div>Semana de provas</div>`;
+  document.getElementById('miniCal').innerHTML=html;
+}
+function calPrev(){calMonth--;if(calMonth<0){calMonth=11;calYear--;} renderMiniCal();}
+function calNext(){calMonth++;if(calMonth>11){calMonth=0;calYear++;} renderMiniCal();}
+function calDayClick(ds){const m=marcos.find(x=>x.date===ds); if(m) openMarco(m.id);}
+
+// ════════════════════════════════════════════════
+//  ROTINA VIEW
+// ════════════════════════════════════════════════
+function renderRotina() {
+  const el=document.getElementById('rotinaBlocks');
+  if(!rotina.length){el.innerHTML=`<div class="empty"><div class="empty-icon">🔁</div><div class="empty-title">Nenhum bloco</div><div class="empty-sub">Adicione atividades recorrentes</div></div>`;return;}
+  const sorted=[...rotina].sort((a,b)=>(a.time||'').localeCompare(b.time||''));
+  el.innerHTML=sorted.map(r=>`<div class="task-card" onclick="openRotinaBlock('${r.id}')">
+    <div class="task-stripe stripe-${r.cat}"></div>
+    <div class="task-body" style="padding:2px 0">
+      <div class="task-title">${esc(r.title)}</div>
+      <div class="task-meta">
+        ${r.time?`<span class="task-time">🕐 ${r.time}</span>`:''}
+        <span class="task-tag cat-${r.cat}">${CAT_LABEL[r.cat]}</span>
+        <span style="font-size:.68rem;color:var(--text-l)">${r.days.map(d=>DAYS_PT[d]).join(' · ')}</span>
+      </div>
+    </div>
+  </div>`).join('');
+}
+
+// ════════════════════════════════════════════════
+//  ÁREAS VIEW
+// ════════════════════════════════════════════════
+function renderAreas() {
+  const total=conteudos.length;
+  const done=conteudos.filter(c=>c.status===2||c.status===3).length;
+  const pct=total?Math.round(done/total*100):0;
+  document.getElementById('areaStudosSub').textContent=total?`${pct}% concluído`:'Configure';
+
+  const tp=trabalhoItens.length;
+  const tpDone=trabalhoItens.filter(i=>i.done).length;
+  document.getElementById('areaTrabalhoSub').textContent=tp?`${tpDone}/${tp} concluídos`:'Adicione itens';
+
+  const pp=pessoalItens.length;
+  const ppDone=pessoalItens.filter(i=>i.done).length;
+  document.getElementById('areaPessoalSub').textContent=pp?`${ppDone}/${pp} concluídos`:'Adicione itens';
+}
+
+// ════════════════════════════════════════════════
+//  ESTUDOS VIEW
+// ════════════════════════════════════════════════
+function renderEstudos() {
+  renderEstudosBanner();
+  renderRamos();
+}
+
+function renderEstudosBanner() {
+  const el=document.getElementById('estudosSemBanner');
+  if(!semestre.id){el.innerHTML='';return;}
+  const ini=parseDate(semestre.inicio), fim=parseDate(semestre.fim), td=new Date();
+  const total=Math.max(1,Math.round((fim-ini)/86400000));
+  const passed=Math.max(0,Math.round((td-ini)/86400000));
+  const pct=Math.min(100,Math.round(passed/total*100));
+  const td2=today();
+  const isProvaWeek=semestre.semProvaInicio&&semestre.semProvaFim&&td2>=semestre.semProvaInicio&&td2<=semestre.semProvaFim;
+  el.innerHTML=`
+    ${isProvaWeek?`<div class="prova-alert"><span class="prova-alert-icon">⚡</span><span>Você está na <strong>semana de provas!</strong> Foco total.</span></div>`:''}
+    <div class="sem-banner">
+      <div class="sem-banner-left">
+        <div class="sem-banner-name">${esc(semestre.nome)}</div>
+        <div class="sem-banner-dates">${formatDateShort(semestre.inicio)} → ${formatDateShort(semestre.fim)}</div>
+        ${semestre.semProvaInicio?`<div class="sem-banner-dates" style="margin-top:3px;opacity:.75">📝 Provas: ${formatDateShort(semestre.semProvaInicio)} – ${formatDateShort(semestre.semProvaFim)}</div>`:''}
+      </div>
+      <div class="sem-banner-progress">
+        <div style="font-size:.65rem;opacity:.8;margin-bottom:4px">${pct}% do semestre</div>
+        <div class="sem-progress-bar"><div class="sem-progress-fill" style="width:${pct}%"></div></div>
+        <button class="sem-banner-cfg" onclick="openModal('semestre')">⚙️ Configurar</button>
+      </div>
+    </div>
+  `;
+}
+
+function filterEstudos(sf,btn) {
+  estudosFilter=sf;
+  document.querySelectorAll('#estudosChips .chip').forEach(c=>c.classList.remove('active'));
+  btn.classList.add('active');
+  renderRamos();
+}
+
+function renderRamos() {
+  const el=document.getElementById('ramosContainer');
+  const sorted=[...ramos].sort((a,b)=>a.ordem-b.ordem);
+  if(!sorted.length){el.innerHTML=`<div class="empty"><div class="empty-icon">📂</div><div class="empty-title">Nenhum ramo</div><div class="empty-sub">Toque em + para criar o primeiro ramo</div></div>`;return;}
+  el.innerHTML=sorted.map(ramo=>{
+    const mats=materias.filter(m=>m.ramoId===ramo.id).sort((a,b)=>a.ordem-b.ordem);
+    const isOpen=currentRamoOpen[ramo.id]!==false; // aberto por padrão
+    const contCount=mats.reduce((s,m)=>s+conteudos.filter(c=>c.materiaId===m.id).length,0);
+    const doneCount=mats.reduce((s,m)=>s+conteudos.filter(c=>c.materiaId===m.id&&(c.status===2||c.status===3)).length,0);
+    const pct=contCount?Math.round(doneCount/contCount*100):0;
+    return `<div class="ramo-section" id="ramo-${ramo.id}">
+      <div class="ramo-header" onclick="toggleRamo('${ramo.id}')">
+        <span class="ramo-color" style="background:${ramo.cor}"></span>
+        <span class="ramo-name">${esc(ramo.nome)}</span>
+        <span class="ramo-count">${mats.length} mat. · ${pct}%</span>
+        <div class="ramo-actions" onclick="event.stopPropagation()">
+          <button class="ramo-action-btn" onclick="openModal('nova-materia','${ramo.id}')" title="Nova matéria">＋</button>
+          <button class="ramo-action-btn" onclick="openModal('edit-ramo','${ramo.id}')" title="Editar">✏️</button>
+        </div>
+        <span class="ramo-arrow${isOpen?' open':''}">›</span>
+      </div>
+      ${isOpen?`<div class="materias-list">${renderMateriaCards(mats,ramo.cor)}</div>`:''}
+    </div>`;
+  }).join('');
+}
+
+function renderMateriaCards(mats,cor) {
+  if(!mats.length) return `<div style="font-size:.78rem;color:var(--text-l);padding:10px 14px">Nenhuma matéria. Toque em + no ramo para adicionar.</div>`;
+  return mats.map((m,idx)=>{
+    const conts=conteudos.filter(c=>c.materiaId===m.id);
+    // filtro global de status
+    if(estudosFilter!=='all'&&!conts.some(c=>c.status===parseInt(estudosFilter))) return '';
+    const statusCounts=[0,1,2,3].map(s=>conts.filter(c=>c.status===s).length);
+    const total=conts.length||1;
+    const pct=Math.round((statusCounts[2]+statusCounts[3])/total*100);
+    const diaStr=m.diaProva!=null?DAYS_PT[m.diaProva]:'';
+    // status dominante
+    const dom=statusCounts.reduce((best,cnt,i)=>cnt>statusCounts[best]?i:best,0);
+    return `<div class="materia-card" onclick="openMateria('${m.id}')">
+      <div class="materia-stripe" style="background:${cor}"></div>
+      <div class="materia-body">
+        <div class="materia-name">${esc(m.nome)}</div>
+        <div class="materia-meta">
+          ${diaStr?`<span>📅 Prova: ${diaStr}</span>`:''}
+          <span class="status-badge status-${dom}">${STATUS_ICON[dom]} ${STATUS_LABEL[dom]}</span>
+          <span>${conts.length} conteúdo${conts.length!==1?'s':''}</span>
+        </div>
+        <div class="progress-bar-wrap" style="margin-top:6px">
+          <div class="progress-bar-fill" style="width:${pct}%;background:${cor};opacity:.7"></div>
+        </div>
+      </div>
+      <div class="materia-right" style="padding-right:8px;gap:2px" onclick="event.stopPropagation()">
+        <button onclick="moveMateria('${m.id}',-1)" style="background:none;border:none;font-size:.9rem;cursor:pointer;color:var(--text-l);padding:2px 4px;line-height:1" title="Mover para cima" ${idx===0?'disabled style="opacity:.25"':''}>↑</button>
+        <button onclick="moveMateria('${m.id}',1)" style="background:none;border:none;font-size:.9rem;cursor:pointer;color:var(--text-l);padding:2px 4px;line-height:1" title="Mover para baixo" ${idx===mats.length-1?'disabled style="opacity:.25"':''}>↓</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function moveMateria(id, dir) {
+  const m=materias.find(x=>x.id===id); if(!m) return;
+  const grupRamo=materias.filter(x=>x.ramoId===m.ramoId).sort((a,b)=>a.ordem-b.ordem);
+  const idx=grupRamo.findIndex(x=>x.id===id);
+  const swapIdx=idx+dir;
+  if(swapIdx<0||swapIdx>=grupRamo.length) return;
+  // trocar ordem
+  const tmpOrdem=grupRamo[idx].ordem;
+  grupRamo[idx].ordem=grupRamo[swapIdx].ordem;
+  grupRamo[swapIdx].ordem=tmpOrdem;
+  // persistir
+  grupRamo.forEach(x=>{ const i=materias.findIndex(m=>m.id===x.id); if(i>-1) materias[i]=x; });
+  save(SK.materias,materias);
+  renderRamos();
+}
+
+function toggleRamo(id) {
+  currentRamoOpen[id] = currentRamoOpen[id]===false ? true : false;
+  renderRamos();
+}
+
+function openMateria(id) {
+  currentMateriaId=id;
+  switchView('materia');
+  renderMateriaDetail();
+}
+
+// ════════════════════════════════════════════════
+//  MATÉRIA DETAIL VIEW
+// ════════════════════════════════════════════════
+function renderMateriaDetail() {
+  const m=materias.find(x=>x.id===currentMateriaId);
+  if(!m){document.getElementById('materiaDetailContent').innerHTML='';return;}
+  const ramo=ramos.find(r=>r.id===m.ramoId);
+  const conts=conteudos.filter(c=>c.materiaId===m.id).sort((a,b)=>a.ordem-b.ordem);
+  const counts=[0,1,2,3].map(s=>conts.filter(c=>c.status===s).length);
+  const pct=conts.length?Math.round((counts[2]+counts[3])/conts.length*100):0;
+
+  // alerta semana de provas
+  const td=today();
+  const isProvaWeek=semestre.semProvaInicio&&semestre.semProvaFim&&td>=semestre.semProvaInicio&&td<=semestre.semProvaFim;
+
+  let html=`
+    <!-- info card -->
+    <div class="detail-card" style="margin-bottom:14px">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
+        <div style="width:12px;height:12px;border-radius:50%;background:${ramo?.cor||'#aaa'}"></div>
+        <span style="font-size:.75rem;color:var(--text-l)">${esc(ramo?.nome||'')}</span>
+        ${m.diaProva!=null?`<span class="task-tag cat-estudo" style="margin-left:auto">📅 ${DAYS_PT[m.diaProva]}</span>`:''}
+      </div>
+      <!-- status summary -->
+      <div style="display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap">
+        ${[0,1,2,3].map(s=>`<div style="flex:1;min-width:60px;background:white;border:1px solid var(--beige);border-radius:8px;padding:8px;text-align:center">
+          <div style="font-size:1rem">${STATUS_ICON[s]}</div>
+          <div style="font-size:1.1rem;font-weight:700;color:var(--text)">${counts[s]}</div>
+          <div style="font-size:.6rem;color:var(--text-l)">${STATUS_LABEL[s]}</div>
+        </div>`).join('')}
+      </div>
+      <div style="font-size:.72rem;color:var(--text-l);margin-bottom:4px">${pct}% concluído (finalizado ou resumido)</div>
+      <div class="progress-bar-wrap">
+        <div class="progress-bar-fill" style="width:${pct}%;background:${ramo?.cor||'#8090C8'}"></div>
+      </div>
+    </div>
+    ${isProvaWeek?`<div class="prova-alert" style="margin-bottom:14px"><span class="prova-alert-icon">⚡</span><span>Semana de provas! Priorize os conteúdos pendentes.</span></div>`:''}
+    <div class="sec-header">
+      <span class="sec-title">Conteúdos</span>
+      <span class="sec-link" onclick="openModal('novo-conteudo')">+ Adicionar</span>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:8px" id="conteudosList">
+  `;
+  if(!conts.length) {
+    html+=`<div class="empty"><div class="empty-icon">📄</div><div class="empty-title">Nenhum conteúdo</div><div class="empty-sub">Adicione tópicos, capítulos e referências</div></div>`;
+  } else {
+    html+=conts.map(c=>conteudoItemHTML(c,ramo?.cor)).join('');
+  }
+  html+=`</div>`;
+  document.getElementById('materiaDetailContent').innerHTML=html;
+}
+
+function conteudoItemHTML(c,cor) {
+  const sBg = ['var(--s0-bg)','var(--s1-bg)','var(--s2-bg)','var(--s3-bg)'][c.status];
+  const sFg = ['var(--s0-fg)','var(--s1-fg)','var(--s2-fg)','var(--s3-fg)'][c.status];
+  return `<div class="conteudo-item" onclick="openModal('edit-conteudo','${c.id}')">
+    <button class="conteudo-status-btn" style="background:${sBg};color:${sFg}"
+      onclick="event.stopPropagation();cycleStatus('${c.id}')" title="Alterar status">
+      ${STATUS_ICON[c.status]}
+    </button>
+    <div class="conteudo-body">
+      <div class="conteudo-title">${esc(c.titulo)}</div>
+      ${c.referencia?`<div class="conteudo-ref">📖 ${esc(c.referencia)}</div>`:''}
+      ${c.capitulos?`<div class="conteudo-meta">Cap. ${esc(c.capitulos)}</div>`:''}
+    </div>
+    <span class="status-badge status-${c.status}">${STATUS_LABEL[c.status]}</span>
+  </div>`;
+}
+
+function cycleStatus(id) {
+  const i=conteudos.findIndex(c=>c.id===id);
+  if(i>-1){conteudos[i].status=(conteudos[i].status+1)%4; save(SK.conteudos,conteudos); renderMateriaDetail();}
+}
+
+// ════════════════════════════════════════════════
+//  MODAL SYSTEM
+// ════════════════════════════════════════════════
+function openModal(mode,id) {
+  modalMode=mode; editingId=id||null;
+  document.getElementById('modalContent').innerHTML = buildModal(mode,id);
+  document.getElementById('modalOverlay').classList.add('open');
+}
+function closeModal() { document.getElementById('modalOverlay').classList.remove('open'); }
+function closeModalOutside(e) { if(e.target===document.getElementById('modalOverlay')) closeModal(); }
+
+function buildModal(mode,id) {
+  if(mode==='new'||mode==='edit-task')      return taskForm(id?tasks.find(t=>t.id===id):null);
+  if(mode==='marco'||mode==='edit-marco')   return marcoForm(id?marcos.find(m=>m.id===id):null);
+  if(mode==='rotina'||mode==='edit-rotina') return rotinaForm(id?rotina.find(r=>r.id===id):null);
+  if(mode==='view-task')   return taskDetail(tasks.find(t=>t.id===id));
+  if(mode==='view-marco')  return marcoDetail(marcos.find(m=>m.id===id));
+  if(mode==='view-rotina') return rotinaDetail(rotina.find(r=>r.id===id));
+  if(mode==='semestre')    return semestreForm();
+  if(mode==='novo-ramo')   return ramoForm(null);
+  if(mode==='edit-ramo')   return ramoForm(ramos.find(r=>r.id===id));
+  if(mode==='nova-materia') return materiaForm(null,id); // id=ramoId
+  if(mode==='edit-materia') return materiaForm(materias.find(m=>m.id===id),null);
+  if(mode==='novo-conteudo') return conteudoForm(null);
+  if(mode==='edit-conteudo') return conteudoForm(conteudos.find(c=>c.id===id));
+  if(mode==='novo-trab')    return trabForm(null);
+  if(mode==='edit-trab')    return trabForm(trabalhoItens.find(x=>x.id===id));
+  if(mode==='novo-pes')     return pessoalForm(null);
+  if(mode==='edit-pes')     return pessoalForm(pessoalItens.find(x=>x.id===id));
+  return '';
+}
+
+// ── TASK FORM ──
+function taskForm(t) {
+  return `<div class="modal-title">${t?'Editar tarefa':'Nova tarefa'}</div>
+  <div class="form-group"><label class="form-label">Título</label>
+  <input class="form-input" id="f-title" value="${t?esc(t.title):''}" placeholder="O que você precisa fazer?"></div>
+  <div class="modal-row">
+    <div class="form-group"><label class="form-label">Data</label><input class="form-input" type="date" id="f-date" value="${t?t.date:today()}"></div>
+    <div class="form-group"><label class="form-label">Horário</label><input class="form-input" type="time" id="f-time" value="${t?t.time:''}"></div>
+  </div>
+  <div class="form-group"><label class="form-label">Categoria</label>
+  <div class="cat-picker" id="catPicker">
+    ${['saude','estudo','social','trabalho','pessoal'].map(c=>`<button class="cat-option cat-${c}${(t?t.cat===c:c==='pessoal')?' selected':''}" data-cat="${c}" onclick="pickCat('${c}')">${CAT_ICON[c]} ${CAT_LABEL[c]}</button>`).join('')}
+  </div></div>
+  <div class="form-group"><label class="form-label">Notas</label>
+  <textarea class="form-textarea" id="f-notes" placeholder="Detalhes…">${t?esc(t.notes||''):''}</textarea></div>
+  <button class="btn-primary" onclick="saveTask()">Salvar</button>
+  ${t?`<button class="btn-danger" onclick="deleteTask('${t.id}')">🗑 Excluir tarefa</button>`:''}`;
+}
+function pickCat(cat) { document.querySelectorAll('.cat-option').forEach(b=>b.classList.toggle('selected',b.dataset.cat===cat)); }
+function saveTask() {
+  const title=document.getElementById('f-title').value.trim(); if(!title) return;
+  const obj={id:editingId||uid(),title,date:document.getElementById('f-date').value||today(),time:document.getElementById('f-time').value,cat:document.querySelector('.cat-option.selected')?.dataset.cat||'pessoal',done:false,notes:document.getElementById('f-notes').value};
+  if(editingId){const i=tasks.findIndex(t=>t.id===editingId);if(i>-1){obj.done=tasks[i].done;tasks[i]=obj;}}else tasks.push(obj);
+  save(SK.tasks,tasks); closeModal();
+  if(activeView==='hoje') renderToday(); else if(activeView==='semana') renderWeek();
+}
+function deleteTask(id) { tasks=tasks.filter(t=>t.id!==id); save(SK.tasks,tasks); closeModal(); if(activeView==='hoje') renderToday(); else renderWeek(); }
+
+// ── MARCO FORM ──
+function marcoForm(m) {
+  return `<div class="modal-title">${m?'Editar marco':'Nova data importante'}</div>
+  <div class="form-group"><label class="form-label">Título</label>
+  <input class="form-input" id="mf-title" value="${m?esc(m.title):''}" placeholder="Nome do evento…"></div>
+  <div class="modal-row">
+    <div class="form-group"><label class="form-label">Data</label><input class="form-input" type="date" id="mf-date" value="${m?m.date:today()}"></div>
+    <div class="form-group"><label class="form-label">Ícone</label>
+    <select class="form-select" id="mf-icon">${['📍','📝','🩺','💼','🎂','✈️','🎓','💊','🏆','🎯'].map(ic=>`<option value="${ic}"${m&&m.icon===ic?' selected':''}>${ic}</option>`).join('')}</select></div>
+  </div>
+  <div class="form-group"><label class="form-label">Categoria</label>
+  <div class="cat-picker" id="catPicker">
+    ${['saude','estudo','social','trabalho','pessoal'].map(c=>`<button class="cat-option cat-${c}${(m?m.cat===c:c==='pessoal')?' selected':''}" data-cat="${c}" onclick="pickCat('${c}')">${CAT_ICON[c]} ${CAT_LABEL[c]}</button>`).join('')}
+  </div></div>
+  <div class="form-group"><label class="form-label">Notas</label>
+  <textarea class="form-textarea" id="mf-notes" placeholder="Local, instruções…">${m?esc(m.notes||''):''}</textarea></div>
+  <button class="btn-primary" onclick="saveMarco()">Salvar</button>
+  ${m?`<button class="btn-danger" onclick="deleteMarco('${m.id}')">🗑 Excluir</button>`:''}`;
+}
+function saveMarco() {
+  const title=document.getElementById('mf-title').value.trim(); if(!title) return;
+  const obj={id:editingId||uid(),title,date:document.getElementById('mf-date').value||today(),icon:document.getElementById('mf-icon').value,cat:document.querySelector('.cat-option.selected')?.dataset.cat||'pessoal',notes:document.getElementById('mf-notes').value};
+  if(editingId){const i=marcos.findIndex(m=>m.id===editingId);if(i>-1)marcos[i]=obj;}else marcos.push(obj);
+  save(SK.marcos,marcos); closeModal(); renderMarcos();
+  document.getElementById('marcoBadge').textContent=marcos.filter(m=>m.date>=today()).length;
+}
+function deleteMarco(id) { marcos=marcos.filter(m=>m.id!==id); save(SK.marcos,marcos); closeModal(); renderMarcos(); }
+
+// ── ROTINA FORM ──
+function rotinaForm(r) {
+  const days=r?r.days:[1,2,3,4,5];
+  return `<div class="modal-title">${r?'Editar bloco':'Novo bloco de rotina'}</div>
+  <div class="form-group"><label class="form-label">Atividade</label>
+  <input class="form-input" id="rf-title" value="${r?esc(r.title):''}" placeholder="Academia, estudo…"></div>
+  <div class="form-group"><label class="form-label">Horário</label><input class="form-input" type="time" id="rf-time" value="${r?r.time:'07:00'}"></div>
+  <div class="form-group"><label class="form-label">Dias da semana</label>
+  <div style="display:flex;gap:6px;flex-wrap:wrap">
+    ${DAYS_PT.map((d,i)=>`<button class="cat-option${days.includes(i)?' selected':''}" style="padding:6px 10px;font-size:.73rem" id="rd-${i}" onclick="toggleRDay(${i})">${d}</button>`).join('')}
+  </div></div>
+  <div class="form-group"><label class="form-label">Categoria</label>
+  <div class="cat-picker" id="catPicker">
+    ${['saude','estudo','social','trabalho','pessoal'].map(c=>`<button class="cat-option cat-${c}${(r?r.cat===c:c==='pessoal')?' selected':''}" data-cat="${c}" onclick="pickCat('${c}')">${CAT_ICON[c]} ${CAT_LABEL[c]}</button>`).join('')}
+  </div></div>
+  <div class="form-group"><label class="form-label">Notas</label>
+  <input class="form-input" id="rf-notes" value="${r?esc(r.notes||''):''}" placeholder="Duração, local…"></div>
+  <button class="btn-primary" onclick="saveRotina()">Salvar</button>
+  ${r?`<button class="btn-danger" onclick="deleteRotina('${r.id}')">🗑 Remover bloco</button>`:''}`;
+}
+function toggleRDay(i) { const b=document.getElementById('rd-'+i); b.classList.toggle('selected'); }
+function saveRotina() {
+  const title=document.getElementById('rf-title').value.trim(); if(!title) return;
+  const days=[...document.querySelectorAll('[id^="rd-"].selected')].map(b=>parseInt(b.id.replace('rd-','')));
+  const obj={id:editingId||uid(),title,time:document.getElementById('rf-time').value,days:days.length?days:[1,2,3,4,5],cat:document.querySelector('.cat-option.selected')?.dataset.cat||'pessoal',notes:document.getElementById('rf-notes').value};
+  if(editingId){const i=rotina.findIndex(r=>r.id===editingId);if(i>-1)rotina[i]=obj;}else rotina.push(obj);
+  save(SK.rotina,rotina); closeModal(); renderRotina();
+}
+function deleteRotina(id) { rotina=rotina.filter(r=>r.id!==id); save(SK.rotina,rotina); closeModal(); renderRotina(); }
+
+// ── SEMESTRE FORM ──
+function semestreForm() {
+  const s=semestre;
+  const excStr=(s.semProvaExclusoes||[]).join(', ');
+  // lista de outros semestres cadastrados
+  const outrosList=semestres.filter(x=>x.id!==s.id);
+  const outrosHTML=outrosList.length?`
+    <div style="margin-bottom:14px">
+      <div class="form-label" style="display:block;margin-bottom:8px">Semestres cadastrados</div>
+      ${outrosList.map(x=>`<div style="display:flex;align-items:center;gap:8px;padding:9px 12px;background:white;border-radius:var(--radius-sm);border:1.5px solid var(--beige);margin-bottom:6px">
+        <div style="flex:1;font-size:.83rem;font-weight:500;color:var(--text)">${esc(x.nome)}</div>
+        <div style="font-size:.7rem;color:var(--text-l)">${formatDateShort(x.inicio)} → ${formatDateShort(x.fim)}</div>
+        <button onclick="ativarSemestre('${x.id}')" style="background:var(--brown);color:white;border:none;border-radius:20px;padding:3px 10px;font-size:.68rem;cursor:pointer">Ativar</button>
+        <button onclick="editarSemestre('${x.id}')" style="background:none;border:none;font-size:.8rem;cursor:pointer;color:var(--text-l)">✏️</button>
+      </div>`).join('')}
+    </div>`:'';
+
+  return `<div class="modal-title">⚙️ Período Ativo</div>
+  ${outrosHTML}
+  <div style="background:var(--cream2);border-radius:var(--radius-sm);padding:10px 12px;margin-bottom:14px;font-size:.75rem;color:var(--text-m);font-weight:600">
+    ✏️ Editando: ${esc(s.nome||'Novo período')}
+  </div>
+  <div class="form-group"><label class="form-label">Nome do período</label>
+  <input class="form-input" id="sf-nome" value="${esc(s.nome||'')}" placeholder="ex: 1º Semestre 2025"></div>
+  <div class="form-group"><label class="form-label">Tipo</label>
+  <select class="form-select" id="sf-tipo">
+    <option value="faculdade"${s.tipo==='faculdade'?' selected':''}>Faculdade (semestre)</option>
+    <option value="concurso"${s.tipo==='concurso'?' selected':''}>Concurso público (ciclo)</option>
+    <option value="outro"${s.tipo==='outro'?' selected':''}>Outro</option>
+  </select></div>
+  <div class="modal-row">
+    <div class="form-group"><label class="form-label">Início</label><input class="form-input" type="date" id="sf-ini" value="${s.inicio||''}"></div>
+    <div class="form-group"><label class="form-label">Fim</label><input class="form-input" type="date" id="sf-fim" value="${s.fim||''}"></div>
+  </div>
+  <div style="background:var(--cat-estudo);border-radius:var(--radius-sm);padding:12px 14px;margin-bottom:14px">
+    <div style="font-size:.75rem;font-weight:700;color:#2D3D7B;margin-bottom:10px;text-transform:uppercase;letter-spacing:.05em">📝 Semana de Provas</div>
+    <div class="modal-row" style="margin:0">
+      <div class="form-group" style="margin-bottom:8px"><label class="form-label">Início</label><input class="form-input" type="date" id="sf-spi" value="${s.semProvaInicio||''}"></div>
+      <div class="form-group" style="margin-bottom:8px"><label class="form-label">Fim</label><input class="form-input" type="date" id="sf-spf" value="${s.semProvaFim||''}"></div>
+    </div>
+    <div class="form-group" style="margin-bottom:0">
+      <label class="form-label">Dias excluídos (datas sem prova)</label>
+      <input class="form-input" id="sf-excl" value="${esc(excStr)}" placeholder="2025-06-10, 2025-06-12 (separados por vírgula)">
+      <div style="font-size:.68rem;color:#2D3D7B;opacity:.7;margin-top:4px">Esses dias ficam sem destaque no calendário</div>
+    </div>
+  </div>
+  <button class="btn-primary" onclick="saveSemestre()">Salvar período ativo</button>
+  <button class="btn-secondary" onclick="novoSemestreForm()" style="margin-top:8px">＋ Cadastrar novo período</button>`;
+}
+function saveSemestre() {
+  const excRaw=document.getElementById('sf-excl').value;
+  const excl=excRaw.split(',').map(s=>s.trim()).filter(s=>s.match(/^\d{4}-\d{2}-\d{2}$/));
+  semestre={
+    id:semestre.id||uid(), nome:document.getElementById('sf-nome').value.trim(),
+    tipo:document.getElementById('sf-tipo').value,
+    inicio:document.getElementById('sf-ini').value, fim:document.getElementById('sf-fim').value,
+    semProvaInicio:document.getElementById('sf-spi').value||null,
+    semProvaFim:document.getElementById('sf-spf').value||null,
+    semProvaExclusoes:excl,
+  };
+  save(SK.semestre,semestre);
+  // atualizar na lista
+  const idx=semestres.findIndex(s=>s.id===semestre.id);
+  if(idx>-1) semestres[idx]=semestre; else semestres.push(semestre);
+  save(SK.semestres,semestres);
+  // Adicionar semana de provas nos marcos automaticamente
+  if(semestre.semProvaInicio) {
+    const existing=marcos.find(m=>m._semProva&&m._semId===semestre.id);
+    if(existing){existing.date=semestre.semProvaInicio;existing.title=`Semana de Provas — ${semestre.nome}`;save(SK.marcos,marcos);}
+    else{marcos.push({id:uid(),title:`Semana de Provas — ${semestre.nome}`,date:semestre.semProvaInicio,cat:'estudo',notes:`Até ${semestre.semProvaFim||''}`,icon:'📝',_semProva:true,_semId:semestre.id});save(SK.marcos,marcos);}
+  }
+  closeModal(); renderEstudos(); renderMarcos();
+}
+function ativarSemestre(id) {
+  const s=semestres.find(x=>x.id===id);
+  if(!s) return;
+  semestre=s; save(SK.semestre,semestre);
+  closeModal(); renderEstudos();
+}
+function editarSemestre(id) {
+  const s=semestres.find(x=>x.id===id);
+  if(!s) return;
+  semestre=s; save(SK.semestre,semestre);
+  openModal('semestre');
+}
+function novoSemestreForm() {
+  // cria um semestre em branco temporário para edição
+  const novoId=uid();
+  semestre={id:novoId,nome:'',tipo:'faculdade',inicio:'',fim:'',semProvaInicio:null,semProvaFim:null,semProvaExclusoes:[]};
+  openModal('semestre');
+}
+
+// ── RAMO FORM ──
+function ramoForm(r) {
+  const cor=r?r.cor:RAMO_COLORS[ramos.length%RAMO_COLORS.length];
+  return `<div class="modal-title">${r?'Editar ramo':'Novo ramo'}</div>
+  <div class="form-group"><label class="form-label">Nome do ramo / área</label>
+  <input class="form-input" id="rf2-nome" value="${r?esc(r.nome):''}" placeholder="ex: Direito Civil, Português, Matemática…"></div>
+  <div class="form-group"><label class="form-label">Cor de identificação</label>
+  <div style="display:flex;gap:8px;flex-wrap:wrap" id="corPicker">
+    ${RAMO_COLORS.map(c=>`<button onclick="pickCor('${c}')" style="width:28px;height:28px;border-radius:50%;background:${c};border:3px solid ${c===cor?'var(--brown)':'transparent'};cursor:pointer;transition:.15s" id="cp-${c.replace('#','')}"></button>`).join('')}
+  </div></div>
+  <button class="btn-primary" onclick="saveRamo()">Salvar</button>
+  ${r?`<button class="btn-danger" onclick="deleteRamo('${r.id}')">🗑 Excluir ramo</button>`:''}`;
+}
+function pickCor(c) { document.querySelectorAll('#corPicker button').forEach(b=>b.style.borderColor='transparent'); document.getElementById('cp-'+c.replace('#',''))?.style.setProperty('border-color','var(--brown)'); }
+function saveRamo() {
+  const nome=document.getElementById('rf2-nome').value.trim(); if(!nome) return;
+  const cor=[...document.querySelectorAll('#corPicker button')].find(b=>b.style.borderColor!=='transparent')?.style.background||RAMO_COLORS[0];
+  const obj={id:editingId||uid(),nome,cor,ordem:editingId?(ramos.find(r=>r.id===editingId)?.ordem||0):ramos.length};
+  if(editingId){const i=ramos.findIndex(r=>r.id===editingId);if(i>-1)ramos[i]=obj;}else ramos.push(obj);
+  save(SK.ramos,ramos); closeModal(); renderEstudos();
+}
+function deleteRamo(id) {
+  if(!confirm('Excluir este ramo e todas as matérias?')) return;
+  const mids=materias.filter(m=>m.ramoId===id).map(m=>m.id);
+  conteudos=conteudos.filter(c=>!mids.includes(c.materiaId));
+  materias=materias.filter(m=>m.ramoId!==id);
+  ramos=ramos.filter(r=>r.id!==id);
+  save(SK.ramos,ramos); save(SK.materias,materias); save(SK.conteudos,conteudos);
+  closeModal(); renderEstudos();
+}
+
+// ── MATÉRIA FORM ──
+function materiaForm(m, ramoIdOverride) {
+  const ramoId=m?m.ramoId:ramoIdOverride;
+  return `<div class="modal-title">${m?'Editar matéria':'Nova matéria'}</div>
+  <div class="form-group"><label class="form-label">Nome da matéria</label>
+  <input class="form-input" id="mf2-nome" value="${m?esc(m.nome):''}" placeholder="ex: Teoria Geral dos Contratos, Gramática…"></div>
+  ${!m?`<input type="hidden" id="mf2-ramoId" value="${ramoId||''}">`:
+  `<div class="form-group"><label class="form-label">Ramo</label>
+  <select class="form-select" id="mf2-ramoId">
+    ${ramos.map(r=>`<option value="${r.id}"${r.id===m.ramoId?' selected':''}>${r.nome}</option>`).join('')}
+  </select></div>`}
+  <div class="form-group"><label class="form-label">Dia da semana da prova</label>
+  <select class="form-select" id="mf2-dia">
+    <option value="">Não definido</option>
+    ${DAYS_PT.map((d,i)=>`<option value="${i}"${m&&m.diaProva===i?' selected':''}>${d}</option>`).join('')}
+  </select></div>
+  <button class="btn-primary" onclick="saveMateria()">Salvar</button>
+  ${m?`<button class="btn-danger" onclick="deleteMateria('${m.id}')">🗑 Excluir matéria</button>`:''}`;
+}
+function saveMateria() {
+  const nome=document.getElementById('mf2-nome').value.trim(); if(!nome) return;
+  const ramoId=document.getElementById('mf2-ramoId').value;
+  const diaVal=document.getElementById('mf2-dia').value;
+  const obj={id:editingId||uid(),ramoId,nome,diaProva:diaVal!==''?parseInt(diaVal):null,ordem:editingId?(materias.find(m=>m.id===editingId)?.ordem||0):materias.filter(m=>m.ramoId===ramoId).length,semestre:semestre.id};
+  if(editingId){const i=materias.findIndex(m=>m.id===editingId);if(i>-1)materias[i]=obj;}else materias.push(obj);
+  save(SK.materias,materias); closeModal(); renderEstudos();
+}
+function deleteMateria(id) {
+  conteudos=conteudos.filter(c=>c.materiaId!==id);
+  materias=materias.filter(m=>m.id!==id);
+  save(SK.materias,materias); save(SK.conteudos,conteudos);
+  closeModal(); renderEstudos();
+}
+
+// ── CONTEÚDO FORM ──
+function conteudoForm(c) {
+  return `<div class="modal-title">${c?'Editar conteúdo':'Novo conteúdo'}</div>
+  <div class="form-group"><label class="form-label">Título do tópico</label>
+  <input class="form-input" id="cf-titulo" value="${c?esc(c.titulo):''}" placeholder="ex: Vícios do consentimento, Nexo de causalidade…"></div>
+  <div class="form-group"><label class="form-label">Referência / Livro</label>
+  <input class="form-input" id="cf-ref" value="${c?esc(c.referencia||''):''}" placeholder="ex: Flávio Tartuce, Rogério Greco…"></div>
+  <div class="form-group"><label class="form-label">Capítulos</label>
+  <input class="form-input" id="cf-cap" value="${c?esc(c.capitulos||''):''}" placeholder="ex: 3-5, 8, Anexo I"></div>
+  <div class="form-group"><label class="form-label">Status</label>
+  <div style="display:flex;gap:8px;flex-wrap:wrap" id="statusPicker">
+    ${[0,1,2,3].map(s=>{
+      const bgs=['var(--s0-bg)','var(--s1-bg)','var(--s2-bg)','var(--s3-bg)'][s];
+      const fgs=['var(--s0-fg)','var(--s1-fg)','var(--s2-fg)','var(--s3-fg)'][s];
+      return `<button onclick="pickStatus(${s})" id="sp-${s}" class="cat-option${(!c&&s===0)||(c&&c.status===s)?' selected':''}" style="background:${bgs};color:${fgs};border-color:${(!c&&s===0)||(c&&c.status===s)?'var(--brown)':'transparent'}">${STATUS_ICON[s]} ${STATUS_LABEL[s]}</button>`;
+    }).join('')}
+  </div></div>
+  <button class="btn-primary" onclick="saveConteudo()">Salvar</button>
+  ${c?`<button class="btn-danger" onclick="deleteConteudo('${c.id}')">🗑 Excluir conteúdo</button>`:''}`;
+}
+function pickStatus(s) {
+  document.querySelectorAll('#statusPicker button').forEach((b,i)=>{
+    const bgs=['var(--s0-bg)','var(--s1-bg)','var(--s2-bg)','var(--s3-bg)'][i];
+    b.style.borderColor='transparent'; b.classList.remove('selected');
+  });
+  const btn=document.getElementById('sp-'+s);
+  btn.classList.add('selected'); btn.style.borderColor='var(--brown)';
+}
+function saveConteudo() {
+  const titulo=document.getElementById('cf-titulo').value.trim(); if(!titulo) return;
+  const statusSel=[...document.querySelectorAll('#statusPicker button.selected')][0];
+  const status=statusSel?parseInt(statusSel.id.replace('sp-','')):0;
+  const obj={id:editingId||uid(),materiaId:currentMateriaId,titulo,referencia:document.getElementById('cf-ref').value,capitulos:document.getElementById('cf-cap').value,status,ordem:editingId?(conteudos.find(c=>c.id===editingId)?.ordem||0):conteudos.filter(c=>c.materiaId===currentMateriaId).length};
+  if(editingId){const i=conteudos.findIndex(c=>c.id===editingId);if(i>-1)conteudos[i]=obj;}else conteudos.push(obj);
+  save(SK.conteudos,conteudos); closeModal(); renderMateriaDetail();
+}
+function deleteConteudo(id) { conteudos=conteudos.filter(c=>c.id!==id); save(SK.conteudos,conteudos); closeModal(); renderMateriaDetail(); }
+
+// ── DETAIL MODALS ──
+function openTask(id)        { openModal('view-task',id); }
+function openMarco(id)       { openModal('view-marco',id); }
+function openRotinaBlock(id) { openModal('view-rotina',id); }
+
+function taskDetail(t) {
+  if(!t) return '';
+  return `<div class="detail-card">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
+      <span class="task-tag cat-${t.cat}">${CAT_ICON[t.cat]} ${CAT_LABEL[t.cat]}</span>
+      <button style="background:none;border:none;font-size:.78rem;color:var(--text-l);cursor:pointer" onclick="openModal('edit-task','${t.id}')">✏️ Editar</button>
+    </div>
+    <div class="detail-title" style="margin-top:10px">${esc(t.title)}</div>
+    <div class="detail-row"><div class="detail-icon">📅</div><div class="detail-val">${formatDatePT(t.date)}</div></div>
+    ${t.time?`<div class="detail-row"><div class="detail-icon">🕐</div><div class="detail-val">${t.time}</div></div>`:''}
+    ${t.notes?`<div class="detail-row"><div class="detail-icon">📝</div><div class="detail-val">${esc(t.notes)}</div></div>`:''}
+    <div class="detail-row"><div class="detail-icon">✅</div><div class="detail-val">${t.done?'Concluída':'Pendente'}</div></div>
+  </div>
+  <button class="btn-primary" onclick="toggleTask(event,'${t.id}');closeModal()">${t.done?'Marcar como pendente':'Marcar como concluída'}</button>`;
+}
+function marcoDetail(m) {
+  if(!m) return '';
+  const diff=diffDays(m.date);
+  const dt=diff<0?`${Math.abs(diff)} dias atrás`:diff===0?'Hoje!':diff===1?'Amanhã':`Em ${diff} dias`;
+  return `<div class="detail-card">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
+      <span class="task-tag cat-${m.cat}">${CAT_ICON[m.cat]} ${CAT_LABEL[m.cat]}</span>
+      <button style="background:none;border:none;font-size:.78rem;color:var(--text-l);cursor:pointer" onclick="openModal('edit-marco','${m.id}')">✏️ Editar</button>
+    </div>
+    <div class="detail-title" style="margin-top:10px">${m.icon||'📍'} ${esc(m.title)}</div>
+    <div class="detail-row"><div class="detail-icon">📅</div><div class="detail-val">${formatDatePT(m.date)} <span style="color:var(--brown);font-weight:600">(${dt})</span></div></div>
+    ${m.notes?`<div class="detail-row"><div class="detail-icon">📍</div><div class="detail-val">${esc(m.notes)}</div></div>`:''}
+  </div>`;
+}
+function rotinaDetail(r) {
+  if(!r) return '';
+  return `<div class="detail-card">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
+      <span class="task-tag cat-${r.cat}">${CAT_ICON[r.cat]} ${CAT_LABEL[r.cat]}</span>
+      <button style="background:none;border:none;font-size:.78rem;color:var(--text-l);cursor:pointer" onclick="openModal('edit-rotina','${r.id}')">✏️ Editar</button>
+    </div>
+    <div class="detail-title" style="margin-top:10px">🔁 ${esc(r.title)}</div>
+    ${r.time?`<div class="detail-row"><div class="detail-icon">🕐</div><div class="detail-val">${r.time}</div></div>`:''}
+    <div class="detail-row"><div class="detail-icon">📆</div><div class="detail-val">${r.days.map(d=>DAYS_FULL[d]).join(', ')}</div></div>
+    ${r.notes?`<div class="detail-row"><div class="detail-icon">📝</div><div class="detail-val">${esc(r.notes)}</div></div>`:''}
+  </div>`;
+}
+
+// ── SEARCH ──
+function openSearch() {
+  document.getElementById('modalContent').innerHTML=`<div class="modal-title">🔍 Buscar</div>
+  <input class="form-input" id="searchInput" placeholder="Pesquisar tarefas, marcos, matérias…" oninput="doSearch(this.value)" style="margin-bottom:14px">
+  <div id="searchResults"></div>`;
+  document.getElementById('modalOverlay').classList.add('open');
+  setTimeout(()=>document.getElementById('searchInput')?.focus(),200);
+}
+function doSearch(q) {
+  const el=document.getElementById('searchResults'); if(!q.trim()){el.innerHTML='';return;}
+  const lq=q.toLowerCase();
+  const rt=tasks.filter(t=>t.title.toLowerCase().includes(lq)||t.notes?.toLowerCase().includes(lq));
+  const rm=marcos.filter(m=>m.title.toLowerCase().includes(lq));
+  const rc=conteudos.filter(c=>c.titulo.toLowerCase().includes(lq)||c.referencia?.toLowerCase().includes(lq));
+  if(!rt.length&&!rm.length&&!rc.length){el.innerHTML=`<div class="empty"><div class="empty-sub">Nenhum resultado</div></div>`;return;}
+  el.innerHTML=
+    (rm.length?`<div class="timeblock-label" style="margin-bottom:8px">📍 Marcos</div>`+rm.map(m=>`<div class="marco-card" style="margin-bottom:8px" onclick="closeModal();openMarco('${m.id}')">
+      <div class="marco-date-badge"><div class="marco-date-day">${parseDate(m.date).getDate()}</div><div class="marco-date-mon">${MONTHS_SHORT[parseDate(m.date).getMonth()]}</div></div>
+      <div class="marco-info"><div class="marco-title">${m.icon||'📍'} ${esc(m.title)}</div><div class="marco-sub">${CAT_LABEL[m.cat]}</div></div>
+    </div>`).join(''):'') +
+    (rt.length?`<div class="timeblock-label" style="margin-bottom:8px;margin-top:${rm.length?12:0}px">✅ Tarefas</div>`+rt.map(taskCardHTML).join(''):'') +
+    (rc.length?`<div class="timeblock-label" style="margin-bottom:8px;margin-top:12px">📚 Conteúdos de estudo</div>`+rc.map(c=>{
+      const m=materias.find(x=>x.id===c.materiaId);
+      return `<div class="conteudo-item" style="margin-bottom:6px" onclick="closeModal();currentMateriaId='${c.materiaId}';switchView('materia')">
+        <div class="conteudo-status-btn" style="background:var(--s${c.status}-bg);color:var(--s${c.status}-fg)">${STATUS_ICON[c.status]}</div>
+        <div class="conteudo-body"><div class="conteudo-title">${esc(c.titulo)}</div><div class="conteudo-meta">${esc(m?.nome||'')}</div></div>
+      </div>`;
+    }).join(''):'');
+}
+
+// ── HELPERS ──
+function formatDatePT(ds) { if(!ds) return ''; const d=parseDate(ds); return `${DAYS_PT[d.getDay()]}, ${d.getDate()} de ${MONTHS_PT[d.getMonth()]} de ${d.getFullYear()}`; }
+function formatDateShort(ds) { if(!ds) return ''; const d=parseDate(ds); return `${d.getDate()}/${d.getMonth()+1}`; }
+
+// ════════════════════════════════════════════════
+//  ÁREA TRABALHO
+// ════════════════════════════════════════════════
+function renderTrabalho() {
+  const el=document.getElementById('trabalhoContent');
+  const TRAB_STATUS=['⚪ A fazer','🟡 Em andamento','🟢 Concluído'];
+  const TRAB_CAT=['Projeto','Reunião','Entrega','Administrativo','Outro'];
+  if(!trabalhoItens.length){
+    el.innerHTML=`<div class="empty"><div class="empty-icon">💼</div><div class="empty-title">Área de Trabalho</div><div class="empty-sub">Adicione projetos, entregas e tarefas profissionais</div></div>
+    <button class="btn-primary" onclick="openModal('novo-trab')" style="margin-top:16px">＋ Adicionar item</button>`;
+    return;
+  }
+  const groups={0:[],1:[],2:[]};
+  trabalhoItens.forEach(i=>groups[i.status>=2?2:i.status||0].push(i));
+  const labels=['⚪ A fazer','🟡 Em andamento','🟢 Concluído'];
+  const bgs=['var(--s0-bg)','var(--s1-bg)','var(--s2-bg)'];
+  const fgs=['var(--s0-fg)','var(--s1-fg)','var(--s2-fg)'];
+  let html='';
+  [0,1,2].forEach(s=>{
+    if(!groups[s].length) return;
+    html+=`<div class="timeblock-label" style="margin-bottom:8px">${labels[s]}</div>`;
+    html+=groups[s].map(item=>`<div class="task-card" style="margin-bottom:8px" onclick="openModal('edit-trab','${item.id}')">
+      <div class="task-stripe" style="background:${fgs[s]};width:4px"></div>
+      <div class="task-body" style="padding:2px 0 2px 14px">
+        <div class="task-title">${esc(item.titulo)}</div>
+        <div class="task-meta">
+          <span class="task-tag" style="background:${bgs[s]};color:${fgs[s]}">${labels[s]}</span>
+          ${item.categoria?`<span style="font-size:.7rem;color:var(--text-l)">${item.categoria}</span>`:''}
+          ${item.prazo?`<span style="font-size:.7rem;color:var(--brown)">📅 ${formatDateShort(item.prazo)}</span>`:''}
+        </div>
+        ${item.notas?`<div style="font-size:.72rem;color:var(--text-l);margin-top:4px">${esc(item.notas)}</div>`:''}
+      </div>
+    </div>`).join('');
+  });
+  el.innerHTML=html;
+}
+
+// ════════════════════════════════════════════════
+//  ÁREA PESSOAL
+// ════════════════════════════════════════════════
+function renderPessoal() {
+  const el=document.getElementById('pessoalContent');
+  const CATS=['Meta','Hábito','Projeto','Leitura','Saúde','Outro'];
+  if(!pessoalItens.length){
+    el.innerHTML=`<div class="empty"><div class="empty-icon">🌿</div><div class="empty-title">Área Pessoal</div><div class="empty-sub">Metas, hábitos, projetos de vida e desenvolvimento pessoal</div></div>
+    <button class="btn-primary" onclick="openModal('novo-pes')" style="margin-top:16px">＋ Adicionar item</button>`;
+    return;
+  }
+  const active=pessoalItens.filter(i=>!i.done);
+  const done=pessoalItens.filter(i=>i.done);
+  let html='';
+  if(active.length){
+    html+=`<div class="timeblock-label" style="margin-bottom:8px">🌱 Em curso</div>`;
+    html+=active.map(item=>`<div class="task-card" style="margin-bottom:8px" onclick="openModal('edit-pes','${item.id}')">
+      <div class="task-stripe stripe-pessoal"></div>
+      <div class="task-check${item.done?' checked':''}" onclick="event.stopPropagation();togglePessoal('${item.id}')"></div>
+      <div class="task-body">
+        <div class="task-title">${esc(item.titulo)}</div>
+        <div class="task-meta">
+          <span class="task-tag cat-pessoal">${item.categoria||'Pessoal'}</span>
+          ${item.prazo?`<span style="font-size:.7rem;color:var(--brown)">📅 ${formatDateShort(item.prazo)}</span>`:''}
+        </div>
+        ${item.notas?`<div style="font-size:.72rem;color:var(--text-l);margin-top:4px">${esc(item.notas)}</div>`:''}
+      </div>
+    </div>`).join('');
+  }
+  if(done.length){
+    html+=`<div class="timeblock-label" style="margin-bottom:8px;margin-top:${active.length?12:0}px">✅ Concluído</div>`;
+    html+=done.map(item=>`<div class="task-card done" style="margin-bottom:8px" onclick="openModal('edit-pes','${item.id}')">
+      <div class="task-stripe stripe-pessoal"></div>
+      <div class="task-check checked" onclick="event.stopPropagation();togglePessoal('${item.id}')"></div>
+      <div class="task-body"><div class="task-title">${esc(item.titulo)}</div></div>
+    </div>`).join('');
+  }
+  el.innerHTML=html;
+}
+
+function togglePessoal(id) {
+  const i=pessoalItens.findIndex(x=>x.id===id);
+  if(i>-1){pessoalItens[i].done=!pessoalItens[i].done; save(SK.pessoal,pessoalItens); renderPessoal(); renderAreas();}
+}
+
+// ── MODAIS DE TRABALHO E PESSOAL ──
+function trabForm(item) {
+  const CATS=['Projeto','Reunião','Entrega','Administrativo','Outro'];
+  return `<div class="modal-title">${item?'Editar item':'Novo item — Trabalho'}</div>
+  <div class="form-group"><label class="form-label">Título</label>
+  <input class="form-input" id="tf-titulo" value="${item?esc(item.titulo):''}" placeholder="Descrição do item…"></div>
+  <div class="modal-row">
+    <div class="form-group"><label class="form-label">Status</label>
+    <select class="form-select" id="tf-status">
+      <option value="0"${(!item||item.status===0)?' selected':''}>⚪ A fazer</option>
+      <option value="1"${(item&&item.status===1)?' selected':''}>🟡 Em andamento</option>
+      <option value="2"${(item&&item.status===2)?' selected':''}>🟢 Concluído</option>
+    </select></div>
+    <div class="form-group"><label class="form-label">Prazo</label>
+    <input class="form-input" type="date" id="tf-prazo" value="${item?item.prazo||'':''}"></div>
+  </div>
+  <div class="form-group"><label class="form-label">Categoria</label>
+  <select class="form-select" id="tf-cat">
+    ${CATS.map(c=>`<option value="${c}"${item&&item.categoria===c?' selected':''}>${c}</option>`).join('')}
+  </select></div>
+  <div class="form-group"><label class="form-label">Notas</label>
+  <textarea class="form-textarea" id="tf-notas" placeholder="Detalhes, links…">${item?esc(item.notas||''):''}</textarea></div>
+  <button class="btn-primary" onclick="saveTrab()">Salvar</button>
+  ${item?`<button class="btn-danger" onclick="deleteTrab('${item.id}')">🗑 Excluir</button>`:''}`;
+}
+function saveTrab() {
+  const titulo=document.getElementById('tf-titulo').value.trim(); if(!titulo) return;
+  const obj={id:editingId||uid(),titulo,status:parseInt(document.getElementById('tf-status').value),prazo:document.getElementById('tf-prazo').value||null,categoria:document.getElementById('tf-cat').value,notas:document.getElementById('tf-notas').value,done:parseInt(document.getElementById('tf-status').value)===2};
+  if(editingId){const i=trabalhoItens.findIndex(x=>x.id===editingId);if(i>-1)trabalhoItens[i]=obj;}else trabalhoItens.push(obj);
+  save(SK.trabalho,trabalhoItens); closeModal(); renderTrabalho(); renderAreas();
+}
+function deleteTrab(id) { trabalhoItens=trabalhoItens.filter(x=>x.id!==id); save(SK.trabalho,trabalhoItens); closeModal(); renderTrabalho(); renderAreas(); }
+
+function pessoalForm(item) {
+  const CATS=['Meta','Hábito','Projeto','Leitura','Saúde','Outro'];
+  return `<div class="modal-title">${item?'Editar item':'Novo item — Pessoal'}</div>
+  <div class="form-group"><label class="form-label">Título</label>
+  <input class="form-input" id="pf-titulo" value="${item?esc(item.titulo):''}" placeholder="Meta, hábito, projeto…"></div>
+  <div class="form-group"><label class="form-label">Categoria</label>
+  <select class="form-select" id="pf-cat">
+    ${CATS.map(c=>`<option value="${c}"${item&&item.categoria===c?' selected':''}>${c}</option>`).join('')}
+  </select></div>
+  <div class="form-group"><label class="form-label">Prazo (opcional)</label>
+  <input class="form-input" type="date" id="pf-prazo" value="${item?item.prazo||'':''}"></div>
+  <div class="form-group"><label class="form-label">Notas</label>
+  <textarea class="form-textarea" id="pf-notas" placeholder="Detalhes…">${item?esc(item.notas||''):''}</textarea></div>
+  <button class="btn-primary" onclick="savePes()">Salvar</button>
+  ${item?`<button class="btn-danger" onclick="deletePes('${item.id}')">🗑 Excluir</button>`:''}`;
+}
+function savePes() {
+  const titulo=document.getElementById('pf-titulo').value.trim(); if(!titulo) return;
+  const obj={id:editingId||uid(),titulo,categoria:document.getElementById('pf-cat').value,prazo:document.getElementById('pf-prazo').value||null,notas:document.getElementById('pf-notas').value,done:false};
+  if(editingId){const i=pessoalItens.findIndex(x=>x.id===editingId);if(i>-1){obj.done=pessoalItens[i].done;pessoalItens[i]=obj;}}else pessoalItens.push(obj);
+  save(SK.pessoal,pessoalItens); closeModal(); renderPessoal(); renderAreas();
+}
+function deletePes(id) { pessoalItens=pessoalItens.filter(x=>x.id!==id); save(SK.pessoal,pessoalItens); closeModal(); renderPessoal(); renderAreas(); }
+
+// ════════════════════════════════════════════════
+//  INIT
+// ════════════════════════════════════════════════
+renderHeaderDate();
+renderToday();
+document.getElementById('marcoBadge').textContent=marcos.filter(m=>m.date>=today()).length;
+</script>
+</body>
+</html>
