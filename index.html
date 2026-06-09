@@ -6,7 +6,12 @@
 <meta name="theme-color" content="#8B6343">
 <meta name="description" content="Rotina — Agenda & Estudos">
 <title>Rotina</title>
-<link rel="manifest" href="data:application/json,%7B%22name%22%3A%22Rotina%22%2C%22short_name%22%3A%22Rotina%22%2C%22start_url%22%3A%22.%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%23F5EFE6%22%2C%22theme_color%22%3A%22%238B6343%22%7D">
+<link rel="manifest" id="pwa-manifest">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Rotina">
+<link rel="apple-touch-icon" id="pwa-icon">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
@@ -1715,6 +1720,67 @@ function deletePes(id) { pessoalItens=pessoalItens.filter(x=>x.id!==id); save(SK
 renderHeaderDate();
 renderToday();
 document.getElementById('marcoBadge').textContent=marcos.filter(m=>m.date>=today()).length;
+</script>
+<script>
+// ── PWA: Manifest dinâmico via Blob (funciona no GitHub Pages sem arquivos extras) ──
+(function() {
+  // Ícone SVG simples gerado inline (sem arquivo externo)
+  const iconSVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+    <rect width="512" height="512" rx="100" fill="#8B6343"/>
+    <text x="256" y="340" font-size="280" text-anchor="middle" font-family="serif">📚</text>
+  </svg>`;
+  const iconBlob = new Blob([iconSVG], {type:'image/svg+xml'});
+  const iconURL  = URL.createObjectURL(iconBlob);
+  document.getElementById('pwa-icon').href = iconURL;
+
+  // Manifest
+  const manifest = {
+    name: 'Rotina',
+    short_name: 'Rotina',
+    description: 'Agenda, estudos e rotina pessoal',
+    start_url: './',
+    display: 'standalone',
+    orientation: 'portrait',
+    background_color: '#F5EFE6',
+    theme_color: '#8B6343',
+    icons: [
+      { src: iconURL, sizes: '192x192', type: 'image/svg+xml' },
+      { src: iconURL, sizes: '512x512', type: 'image/svg+xml' }
+    ]
+  };
+  const mBlob = new Blob([JSON.stringify(manifest)], {type:'application/json'});
+  document.getElementById('pwa-manifest').href = URL.createObjectURL(mBlob);
+
+  // ── Service Worker inline via Blob ──
+  const swCode = `
+const CACHE = 'rotina-v1';
+self.addEventListener('install', e => {
+  e.waitUntil(caches.open(CACHE).then(c => c.addAll(['/'])));
+  self.skipWaiting();
+});
+self.addEventListener('activate', e => {
+  e.waitUntil(caches.keys().then(keys =>
+    Promise.all(keys.filter(k => k !== CACHE).map(k => caches.delete(k)))
+  ));
+  self.clients.claim();
+});
+self.addEventListener('fetch', e => {
+  e.respondWith(
+    caches.match(e.request).then(r => r || fetch(e.request).then(res => {
+      const clone = res.clone();
+      caches.open(CACHE).then(c => c.put(e.request, clone));
+      return res;
+    }).catch(() => caches.match('/')))
+  );
+});
+`;
+  if ('serviceWorker' in navigator) {
+    const swBlob = new Blob([swCode], {type:'application/javascript'});
+    const swURL  = URL.createObjectURL(swBlob);
+    navigator.serviceWorker.register(swURL, {scope: './'})
+      .catch(e => console.warn('SW:', e));
+  }
+})();
 </script>
 </body>
 </html>
