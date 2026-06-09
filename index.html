@@ -557,9 +557,10 @@ const STATUS_ICON  = ['⚫','🟡','🟢','🔵'];
 const RAMO_COLORS  = ['#8090C8','#6EB898','#C88090','#B8A84A','#9080C8','#C8905A','#70AAC0','#C0C870'];
 
 // ════════════════════════════════════════════════
-//  SEED DATA
+//  SEED DATA (roda apenas na primeira abertura)
 // ════════════════════════════════════════════════
-if (!tasks.length) {
+const _seeded = localStorage.getItem('_seeded');
+if (!_seeded) {
   const td = today();
   tasks = [
     {id:uid(),title:'Academia — treino de pernas',cat:'saude',time:'07:00',date:td,done:false,notes:''},
@@ -568,8 +569,7 @@ if (!tasks.length) {
     {id:uid(),title:'Leitura 30 min',cat:'pessoal',time:'21:00',date:td,done:false,notes:''},
   ];
   save(SK.tasks,tasks);
-}
-if (!marcos.length) {
+
   const d=new Date();
   marcos = [
     {id:uid(),title:'Semana de Provas — 1º sem',date:addDays(d,8),cat:'estudo',notes:'Início da semana de avaliações',icon:'📝'},
@@ -578,8 +578,7 @@ if (!marcos.length) {
     {id:uid(),title:'Aniversário da mamãe',date:addDays(d,30),cat:'social',notes:'',icon:'🎂'},
   ];
   save(SK.marcos,marcos);
-}
-if (!rotina.length) {
+
   rotina = [
     {id:uid(),title:'Acordar & alongamento',time:'06:30',days:[1,2,3,4,5],cat:'saude',notes:'15 min'},
     {id:uid(),title:'Bloco de estudos',time:'08:00',days:[1,2,3,4,5],cat:'estudo',notes:'2h sem interrupções'},
@@ -588,46 +587,36 @@ if (!rotina.length) {
     {id:uid(),title:'Revisão do dia',time:'22:00',days:[0,1,2,3,4,5,6],cat:'pessoal',notes:'10 min'},
   ];
   save(SK.rotina,rotina);
-}
-if (!ramos.length) {
+
+  const sid=uid();
   ramos = [
-    {id:'r1',nome:'Direito Civil',cor:RAMO_COLORS[0],ordem:0},
-    {id:'r2',nome:'Direito Penal',cor:RAMO_COLORS[1],ordem:1},
-    {id:'r3',nome:'Direito Constitucional',cor:RAMO_COLORS[2],ordem:2},
-    {id:'r4',nome:'Direito Administrativo',cor:RAMO_COLORS[3],ordem:3},
+    {id:uid(),nome:'Direito Civil',cor:RAMO_COLORS[0],ordem:0},
+    {id:uid(),nome:'Direito Penal',cor:RAMO_COLORS[1],ordem:1},
+    {id:uid(),nome:'Direito Constitucional',cor:RAMO_COLORS[2],ordem:2},
+    {id:uid(),nome:'Direito Administrativo',cor:RAMO_COLORS[3],ordem:3},
   ];
   save(SK.ramos,ramos);
-}
-if (!materias.length) {
-  materias = [
-    {id:'m1',ramoId:'r1',nome:'Teoria Geral dos Contratos',diaProva:3,ordem:0,semestre:semestre.id||'s1'},
-    {id:'m2',ramoId:'r1',nome:'Responsabilidade Civil',diaProva:5,ordem:1,semestre:semestre.id||'s1'},
-    {id:'m3',ramoId:'r2',nome:'Parte Geral do CP',diaProva:2,ordem:0,semestre:semestre.id||'s1'},
-    {id:'m4',ramoId:'r3',nome:'Direitos Fundamentais',diaProva:4,ordem:0,semestre:semestre.id||'s1'},
-  ];
-  save(SK.materias,materias);
-}
-if (!conteudos.length) {
-  conteudos = [
-    {id:'c1',materiaId:'m1',titulo:'Conceito e formação do contrato',referencia:'Flávio Tartuce, cap. 1',capitulos:'1-2',status:2,ordem:0},
-    {id:'c2',materiaId:'m1',titulo:'Vícios do consentimento',referencia:'Flávio Tartuce, cap. 3',capitulos:'3',status:1,ordem:1},
-    {id:'c3',materiaId:'m1',titulo:'Extinção do contrato',referencia:'Flávio Tartuce, cap. 5',capitulos:'5-6',status:0,ordem:2},
-    {id:'c4',materiaId:'m2',titulo:'Ato ilícito e culpa',referencia:'Cavalieri Filho, cap. 2',capitulos:'2',status:3,ordem:0},
-    {id:'c5',materiaId:'m2',titulo:'Nexo de causalidade',referencia:'Cavalieri Filho, cap. 4',capitulos:'4-5',status:1,ordem:1},
-    {id:'c6',materiaId:'m3',titulo:'Tipicidade penal',referencia:'Rogério Greco, cap. 8',capitulos:'8',status:2,ordem:0},
-    {id:'c7',materiaId:'m4',titulo:'Gerações dos direitos fundamentais',referencia:'Novelino, cap. 3',capitulos:'3',status:0,ordem:0},
-  ];
-  save(SK.conteudos,conteudos);
+
+  // sem matérias/conteúdos de exemplo — usuário cria os seus
+  materias=[]; save(SK.materias,materias);
+  conteudos=[]; save(SK.conteudos,conteudos);
+
+  localStorage.setItem('_seeded','1');
 }
 if (!semestre.id) {
   const d = new Date();
+  const anoAtual = d.getFullYear();
   semestre = {
-    id:'s1', nome:'1º Semestre 2025', tipo:'faculdade',
-    inicio: fmtDate(new Date(d.getFullYear(),1,1)),
-    fim:    fmtDate(new Date(d.getFullYear(),6,31)),
-    semProvaInicio: addDays(d,8),
-    semProvaFim:    addDays(d,14),
+    id:'s1', nome:'1º Semestre '+anoAtual, tipo:'faculdade',
+    inicio: fmtDate(new Date(anoAtual,1,1)),
+    fim:    fmtDate(new Date(anoAtual,6,31)),
+    // 1º bimestre
+    b1ProvaInicio: null, b1ProvaFim: null,
+    // 2º bimestre
+    b2ProvaInicio: null, b2ProvaFim: null,
     semProvaExclusoes: [],
+    // campos legados mantidos por compatibilidade
+    semProvaInicio: null, semProvaFim: null,
   };
   save(SK.semestre,semestre);
 }
@@ -636,7 +625,7 @@ if (!semestres.length && semestre.id) {
   semestres = [semestre];
   save(SK.semestres, semestres);
 }
-// verificar avanço automático: se a data atual passou o fim, ativar o próximo semestre
+// verificar avanço automático de semestre
 (function autoAdvanceSemestre() {
   const td = today();
   if (semestre.fim && td > semestre.fim) {
@@ -644,6 +633,28 @@ if (!semestres.length && semestre.id) {
     if (prox) { semestre = prox; save(SK.semestre, semestre); }
   }
 })();
+
+// Retorna o bimestre ativo: 1 ou 2 (ou null se fora do semestre)
+function bimestreAtivo() {
+  const td = today();
+  if (!semestre.id) return null;
+  if (semestre.b1ProvaFim && td <= semestre.b1ProvaFim) return 1;
+  if (semestre.b2ProvaFim && td <= semestre.b2ProvaFim) return 2;
+  if (semestre.b1ProvaFim && td > semestre.b1ProvaFim && (!semestre.b2ProvaInicio || td < semestre.b2ProvaInicio)) return 2;
+  if (!semestre.b1ProvaFim) return 1; // sem datas configuradas, assume 1º
+  return 2;
+}
+
+// Label legível do bimestre ativo
+function bimestreLabel() {
+  const b = bimestreAtivo();
+  if (!b) return '';
+  const td = today();
+  const estaEmProva = b===1
+    ? (semestre.b1ProvaInicio && td >= semestre.b1ProvaInicio && semestre.b1ProvaFim && td <= semestre.b1ProvaFim)
+    : (semestre.b2ProvaInicio && td >= semestre.b2ProvaInicio && semestre.b2ProvaFim && td <= semestre.b2ProvaFim);
+  return estaEmProva ? `📝 Semana de Provas — ${b}º Bimestre` : `${b}º Bimestre`;
+}
 
 // ════════════════════════════════════════════════
 //  STATE
@@ -720,7 +731,8 @@ function updateHeader(v) {
     acts.innerHTML = '';
   } else if (v==='estudos') {
     title.textContent = 'Estudos';
-    sub.textContent = semestre.nome || '';
+    const bl = bimestreLabel();
+    sub.textContent = bl ? `${semestre.nome} · ${bl}` : (semestre.nome||'');
     acts.innerHTML = `<button class="header-btn" onclick="openModal('semestre')">⚙️</button><button class="header-btn" onclick="openModal('novo-ramo')">＋</button>`;
     const back = document.createElement('button');
     back.className='header-back'; back.id='headerBackBtn'; back.textContent='‹';
@@ -1152,13 +1164,13 @@ function renderMateriaDetail() {
   if(!conts.length) {
     html+=`<div class="empty"><div class="empty-icon">📄</div><div class="empty-title">Nenhum conteúdo</div><div class="empty-sub">Adicione tópicos, capítulos e referências</div></div>`;
   } else {
-    html+=conts.map(c=>conteudoItemHTML(c,ramo?.cor)).join('');
+    html+=conts.map((c,idx)=>conteudoItemHTML(c,ramo?.cor,idx,conts.length)).join('');
   }
   html+=`</div>`;
   document.getElementById('materiaDetailContent').innerHTML=html;
 }
 
-function conteudoItemHTML(c,cor) {
+function conteudoItemHTML(c, cor, idx, total) {
   const sBg = ['var(--s0-bg)','var(--s1-bg)','var(--s2-bg)','var(--s3-bg)'][c.status];
   const sFg = ['var(--s0-fg)','var(--s1-fg)','var(--s2-fg)','var(--s3-fg)'][c.status];
   return `<div class="conteudo-item" onclick="openModal('edit-conteudo','${c.id}')">
@@ -1171,8 +1183,25 @@ function conteudoItemHTML(c,cor) {
       ${c.referencia?`<div class="conteudo-ref">📖 ${esc(c.referencia)}</div>`:''}
       ${c.capitulos?`<div class="conteudo-meta">Cap. ${esc(c.capitulos)}</div>`:''}
     </div>
-    <span class="status-badge status-${c.status}">${STATUS_LABEL[c.status]}</span>
+    <div style="display:flex;flex-direction:column;align-items:center;gap:1px;padding:0 4px" onclick="event.stopPropagation()">
+      <button onclick="moveConteudo('${c.id}',-1)" style="background:none;border:none;font-size:.9rem;cursor:pointer;color:var(--text-l);padding:2px 4px;line-height:1" ${idx===0?'disabled style="opacity:.22;cursor:default"':''}>↑</button>
+      <button onclick="moveConteudo('${c.id}',1)"  style="background:none;border:none;font-size:.9rem;cursor:pointer;color:var(--text-l);padding:2px 4px;line-height:1" ${idx===total-1?'disabled style="opacity:.22;cursor:default"':''}>↓</button>
+    </div>
   </div>`;
+}
+
+function moveConteudo(id, dir) {
+  const c = conteudos.find(x=>x.id===id); if(!c) return;
+  const grupo = conteudos.filter(x=>x.materiaId===c.materiaId).sort((a,b)=>a.ordem-b.ordem);
+  const idx = grupo.findIndex(x=>x.id===id);
+  const swapIdx = idx + dir;
+  if(swapIdx<0||swapIdx>=grupo.length) return;
+  const tmp = grupo[idx].ordem;
+  grupo[idx].ordem = grupo[swapIdx].ordem;
+  grupo[swapIdx].ordem = tmp;
+  grupo.forEach(x=>{ const i=conteudos.findIndex(c=>c.id===x.id); if(i>-1) conteudos[i]=x; });
+  save(SK.conteudos, conteudos);
+  renderMateriaDetail();
 }
 
 function cycleStatus(id) {
@@ -1302,7 +1331,6 @@ function deleteRotina(id) { rotina=rotina.filter(r=>r.id!==id); save(SK.rotina,r
 function semestreForm() {
   const s=semestre;
   const excStr=(s.semProvaExclusoes||[]).join(', ');
-  // lista de outros semestres cadastrados
   const outrosList=semestres.filter(x=>x.id!==s.id);
   const outrosHTML=outrosList.length?`
     <div style="margin-bottom:14px">
@@ -1314,6 +1342,15 @@ function semestreForm() {
         <button onclick="editarSemestre('${x.id}')" style="background:none;border:none;font-size:.8rem;cursor:pointer;color:var(--text-l)">✏️</button>
       </div>`).join('')}
     </div>`:'';
+
+  const bimSection=(num,labelIni,labelFim,vIni,vFim)=>`
+    <div style="background:var(--cat-estudo);border-radius:var(--radius-sm);padding:12px 14px;margin-bottom:10px">
+      <div style="font-size:.75rem;font-weight:700;color:#2D3D7B;margin-bottom:10px;text-transform:uppercase;letter-spacing:.05em">📝 Semana de Provas — ${num}º Bimestre</div>
+      <div class="modal-row" style="margin:0">
+        <div class="form-group" style="margin-bottom:0"><label class="form-label">Início</label><input class="form-input" type="date" id="sf-b${num}i" value="${vIni||''}"></div>
+        <div class="form-group" style="margin-bottom:0"><label class="form-label">Fim</label><input class="form-input" type="date" id="sf-b${num}f" value="${vFim||''}"></div>
+      </div>
+    </div>`;
 
   return `<div class="modal-title">⚙️ Período Ativo</div>
   ${outrosHTML}
@@ -1329,47 +1366,57 @@ function semestreForm() {
     <option value="outro"${s.tipo==='outro'?' selected':''}>Outro</option>
   </select></div>
   <div class="modal-row">
-    <div class="form-group"><label class="form-label">Início</label><input class="form-input" type="date" id="sf-ini" value="${s.inicio||''}"></div>
-    <div class="form-group"><label class="form-label">Fim</label><input class="form-input" type="date" id="sf-fim" value="${s.fim||''}"></div>
+    <div class="form-group"><label class="form-label">Início do semestre</label><input class="form-input" type="date" id="sf-ini" value="${s.inicio||''}"></div>
+    <div class="form-group"><label class="form-label">Fim do semestre</label><input class="form-input" type="date" id="sf-fim" value="${s.fim||''}"></div>
   </div>
-  <div style="background:var(--cat-estudo);border-radius:var(--radius-sm);padding:12px 14px;margin-bottom:14px">
-    <div style="font-size:.75rem;font-weight:700;color:#2D3D7B;margin-bottom:10px;text-transform:uppercase;letter-spacing:.05em">📝 Semana de Provas</div>
-    <div class="modal-row" style="margin:0">
-      <div class="form-group" style="margin-bottom:8px"><label class="form-label">Início</label><input class="form-input" type="date" id="sf-spi" value="${s.semProvaInicio||''}"></div>
-      <div class="form-group" style="margin-bottom:8px"><label class="form-label">Fim</label><input class="form-input" type="date" id="sf-spf" value="${s.semProvaFim||''}"></div>
-    </div>
-    <div class="form-group" style="margin-bottom:0">
-      <label class="form-label">Dias excluídos (datas sem prova)</label>
-      <input class="form-input" id="sf-excl" value="${esc(excStr)}" placeholder="2025-06-10, 2025-06-12 (separados por vírgula)">
-      <div style="font-size:.68rem;color:#2D3D7B;opacity:.7;margin-top:4px">Esses dias ficam sem destaque no calendário</div>
-    </div>
+  ${bimSection(1,'Início','Fim',s.b1ProvaInicio,s.b1ProvaFim)}
+  ${bimSection(2,'Início','Fim',s.b2ProvaInicio,s.b2ProvaFim)}
+  <div class="form-group">
+    <label class="form-label">Dias excluídos das provas (sem prova)</label>
+    <input class="form-input" id="sf-excl" value="${esc(excStr)}" placeholder="2025-06-10, 2025-06-12">
+    <div style="font-size:.68rem;color:var(--text-l);margin-top:4px">Datas separadas por vírgula — não serão destacadas como dia de prova</div>
   </div>
   <button class="btn-primary" onclick="saveSemestre()">Salvar período ativo</button>
   <button class="btn-secondary" onclick="novoSemestreForm()" style="margin-top:8px">＋ Cadastrar novo período</button>`;
 }
+
 function saveSemestre() {
   const excRaw=document.getElementById('sf-excl').value;
   const excl=excRaw.split(',').map(s=>s.trim()).filter(s=>s.match(/^\d{4}-\d{2}-\d{2}$/));
+  const b1i=document.getElementById('sf-b1i').value||null;
+  const b1f=document.getElementById('sf-b1f').value||null;
+  const b2i=document.getElementById('sf-b2i').value||null;
+  const b2f=document.getElementById('sf-b2f').value||null;
   semestre={
-    id:semestre.id||uid(), nome:document.getElementById('sf-nome').value.trim(),
+    id:semestre.id||uid(),
+    nome:document.getElementById('sf-nome').value.trim(),
     tipo:document.getElementById('sf-tipo').value,
-    inicio:document.getElementById('sf-ini').value, fim:document.getElementById('sf-fim').value,
-    semProvaInicio:document.getElementById('sf-spi').value||null,
-    semProvaFim:document.getElementById('sf-spf').value||null,
+    inicio:document.getElementById('sf-ini').value,
+    fim:document.getElementById('sf-fim').value,
+    b1ProvaInicio:b1i, b1ProvaFim:b1f,
+    b2ProvaInicio:b2i, b2ProvaFim:b2f,
     semProvaExclusoes:excl,
+    // legado para compatibilidade com marcos antigos
+    semProvaInicio:b1i, semProvaFim:b1f,
   };
   save(SK.semestre,semestre);
-  // atualizar na lista
   const idx=semestres.findIndex(s=>s.id===semestre.id);
   if(idx>-1) semestres[idx]=semestre; else semestres.push(semestre);
   save(SK.semestres,semestres);
-  // Adicionar semana de provas nos marcos automaticamente
-  if(semestre.semProvaInicio) {
-    const existing=marcos.find(m=>m._semProva&&m._semId===semestre.id);
-    if(existing){existing.date=semestre.semProvaInicio;existing.title=`Semana de Provas — ${semestre.nome}`;save(SK.marcos,marcos);}
-    else{marcos.push({id:uid(),title:`Semana de Provas — ${semestre.nome}`,date:semestre.semProvaInicio,cat:'estudo',notes:`Até ${semestre.semProvaFim||''}`,icon:'📝',_semProva:true,_semId:semestre.id});save(SK.marcos,marcos);}
+
+  // Criar/atualizar marcos das semanas de provas
+  function upsertMarcoProva(semId, bim, dateIni, dateFim) {
+    if(!dateIni) return;
+    const tag=`_b${bim}_${semId}`;
+    const existing=marcos.find(m=>m._tag===tag);
+    const obj={id:existing?.id||uid(),title:`Semana de Provas — ${bim}º Bimestre`,date:dateIni,cat:'estudo',notes:`${semestre.nome} · até ${formatDateShort(dateFim||dateIni)}`,icon:'📝',_tag:tag};
+    if(existing){const i=marcos.indexOf(existing);marcos[i]=obj;}else marcos.push(obj);
   }
-  closeModal(); renderEstudos(); renderMarcos();
+  upsertMarcoProva(semestre.id,1,b1i,b1f);
+  upsertMarcoProva(semestre.id,2,b2i,b2f);
+  save(SK.marcos,marcos);
+
+  closeModal(); renderEstudos(); renderMarcos(); updateHeader('estudos');
 }
 function ativarSemestre(id) {
   const s=semestres.find(x=>x.id===id);
