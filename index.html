@@ -33,7 +33,7 @@
   --cat-social:   #DCC0C8;
   --cat-trabalho: #D4CCA8;
   --cat-pessoal:  #C8C0D8;
-  --cat-marco:    #D4B896;
+  --cat-marco:    #D8C8F0;
   /* status semáforo */
   --s0-bg: #E8E8E8; --s0-fg: #888;
   --s1-bg: #FFF3C4; --s1-fg: #A07800;
@@ -113,7 +113,16 @@ body { background:var(--cream); color:var(--text); font-family:'Inter',sans-seri
 .stripe-pessoal  { background:#9080C8; }
 .stripe-marco    { background:var(--brown-l); }
 
-/* ── TIME BLOCKS ── */
+/* ── PALETA DE CORES PERSONALIZADA ── */
+.color-palette { display:flex; flex-wrap:wrap; gap:7px; margin-top:6px; }
+.color-swatch { width:28px; height:28px; border-radius:50%; border:2.5px solid transparent; cursor:pointer; transition:transform .15s, border-color .15s; flex-shrink:0; }
+.color-swatch:hover { transform:scale(1.15); }
+.color-swatch.selected { border-color:var(--brown); transform:scale(1.18); box-shadow:0 0 0 2px white, 0 0 0 4px var(--brown); }
+
+/* ── RECORRÊNCIA BADGE ── */
+.recur-badge { font-size:.6rem; font-weight:700; text-transform:uppercase; letter-spacing:.05em; padding:2px 6px; border-radius:10px; background:rgba(0,0,0,.07); color:inherit; }
+
+
 .timeblock { margin-bottom:18px; }
 .timeblock-label { font-size:.7rem; font-weight:600; text-transform:uppercase; letter-spacing:.1em; color:var(--text-l); margin-bottom:8px; display:flex; align-items:center; gap:8px; }
 .timeblock-label::after { content:''; flex:1; height:1px; background:var(--beige); }
@@ -145,9 +154,9 @@ body { background:var(--cream); color:var(--text); font-family:'Inter',sans-seri
 .marco-info { flex:1; min-width:0; }
 .marco-title { font-size:.88rem; font-weight:600; color:var(--text); }
 .marco-sub { font-size:.73rem; color:var(--text-l); margin-top:3px; }
-.marco-countdown { font-size:.7rem; font-weight:600; color:var(--brown); background:var(--cat-marco); padding:3px 8px; border-radius:20px; flex-shrink:0; }
+.marco-countdown { font-size:.7rem; font-weight:600; color:#6B4A9B; background:var(--cat-marco); padding:3px 8px; border-radius:20px; flex-shrink:0; }
 .marco-countdown.past { color:var(--text-l); background:var(--cream2); }
-.marco-countdown.today-badge { color:white; background:var(--brown); }
+.marco-countdown.today-badge { color:white; background:#6B4A9B; }
 
 /* ── WEEK STRIP ── */
 .week-strip { display:flex; gap:6px; margin-bottom:20px; overflow-x:auto; padding-bottom:4px; }
@@ -339,6 +348,28 @@ body { background:var(--cream); color:var(--text); font-family:'Inter',sans-seri
 /* ── Ordem drag indicator ── */
 .order-num { width:22px; height:22px; background:var(--cream2); border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:.68rem; font-weight:700; color:var(--text-l); flex-shrink:0; }
 
+/* ── Refs list no conteúdo ── */
+.ref-block { background:var(--cream2); border-radius:var(--radius-sm); padding:10px 12px; margin-bottom:8px; }
+.ref-block-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:6px; }
+.ref-block-name { font-size:.82rem; font-weight:600; color:var(--text); flex:1; }
+.ref-block-del { background:none; border:none; color:#C87070; font-size:.75rem; cursor:pointer; padding:0 4px; flex-shrink:0; }
+.cap-list { display:flex; flex-direction:column; gap:4px; padding-left:8px; }
+.cap-item { display:flex; align-items:center; gap:6px; }
+.cap-num { font-size:.78rem; color:var(--text-m); flex:1; font-family:monospace; }
+.cap-del { background:none; border:none; color:var(--text-l); font-size:.7rem; cursor:pointer; padding:0 2px; }
+.cap-add-row { display:flex; gap:6px; margin-top:6px; }
+.cap-add-row .form-input { flex:1; padding:7px 10px; font-size:.8rem; }
+.cap-add-btn { background:var(--brown); color:white; border:none; border-radius:var(--radius-sm); padding:7px 12px; font-size:.8rem; cursor:pointer; white-space:nowrap; }
+.ref-add-row { display:flex; gap:6px; margin-bottom:14px; }
+.ref-add-row .form-input { flex:1; }
+.ref-add-row .cap-add-btn { white-space:nowrap; }
+
+/* ── Conteúdo card refs display ── */
+.conteudo-refs { margin-top:4px; display:flex; flex-direction:column; gap:2px; }
+.conteudo-ref-row { font-size:.68rem; color:var(--brown); display:flex; gap:4px; align-items:baseline; flex-wrap:wrap; }
+.conteudo-ref-dout { font-weight:600; }
+.conteudo-ref-caps { color:var(--text-l); }
+
 @media (prefers-reduced-motion:reduce) { *,*::before,*::after { transition-duration:.01ms !important; } }
 </style>
 </head>
@@ -363,7 +394,7 @@ body { background:var(--cream); color:var(--text); font-family:'Inter',sans-seri
   <nav class="nav" id="topNav">
     <button class="nav-btn active" onclick="switchView('hoje',this)">Hoje</button>
     <button class="nav-btn" onclick="switchView('semana',this)">Semana</button>
-    <button class="nav-btn" onclick="switchView('marcos',this)">Marcos<span class="badge" id="marcoBadge">0</span></button>
+    <button class="nav-btn" onclick="switchView('marcos',this)">Calendário<span class="badge" id="marcoBadge">0</span></button>
     <button class="nav-btn" onclick="switchView('rotina',this)">Rotina</button>
   </nav>
 
@@ -393,11 +424,11 @@ body { background:var(--cream); color:var(--text); font-family:'Inter',sans-seri
       <div class="tasks-list" id="weekTasks"></div>
     </div>
 
-    <!-- ─── VIEW: MARCOS ─── -->
+    <!-- ─── VIEW: CALENDÁRIO ─── -->
     <div class="view" id="view-marcos">
       <div class="mini-cal" id="miniCal"></div>
       <div class="sec-header">
-        <span class="sec-title">Datas importantes</span>
+        <span class="sec-title">Calendário</span>
         <span class="sec-link" onclick="openModal('marco')">+ Adicionar</span>
       </div>
       <div class="marcos-list" id="marcosList"></div>
@@ -543,6 +574,29 @@ const DAYS_PT      = ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
 const DAYS_FULL    = ['Domingo','Segunda-feira','Terça-feira','Quarta-feira','Quinta-feira','Sexta-feira','Sábado'];
 const CAT_LABEL    = {saude:'Saúde',estudo:'Estudos',social:'Social',trabalho:'Trabalho',pessoal:'Pessoal',marco:'Marco'};
 const CAT_ICON     = {saude:'💚',estudo:'📘',social:'🌸',trabalho:'💼',pessoal:'⭐',marco:'📍'};
+
+// Paleta completa: pastéis, tonalidades claras e escuras
+const PALETTE = [
+  // ── Pastéis suaves ──
+  '#F9C6C9','#F9C6DF','#E8C6F9','#C6D6F9','#C6EEF9','#C6F9D8','#F9ECC6','#F9D8C6',
+  // ── Pastéis médios ──
+  '#F4849A','#F484BB','#C484F4','#849CF4','#84D4F4','#84F4B2','#F4D484','#F4A884',
+  // ── Tons vivos ──
+  '#E8365C','#D936A0','#8A36D9','#3660D9','#36B0D9','#36D976','#D9A836','#D96036',
+  // ── Escuros profundos ──
+  '#8B1A2E','#7A1A5C','#4A1A8B','#1A2E8B','#1A608B','#1A7A40','#7A5A1A','#7A301A',
+  // ── Neutros e terrosos ──
+  '#C8B8A0','#A89070','#8B7355','#6B5A40','#D0C8BC','#B0C0B0','#A0B4C8','#C0A0B8',
+];
+
+function colorSwatchHTML(selected) {
+  return PALETTE.map(c=>`<div class="color-swatch${selected===c?' selected':''}" style="background:${c}" onclick="pickColor('${c}')" title="${c}"></div>`).join('');
+}
+function pickColor(c) {
+  document.querySelectorAll('.color-swatch').forEach(s=>s.classList.toggle('selected',s.style.background===c||s.style.background===hexToRgb(c)));
+  document.getElementById('_selectedColor').value=c;
+}
+function hexToRgb(hex){try{const r=parseInt(hex.slice(1,3),16),g=parseInt(hex.slice(3,5),16),b=parseInt(hex.slice(5,7),16);return `rgb(${r}, ${g}, ${b})`;}catch{return hex;}}
 const STATUS_LABEL = ['Não estudado','Iniciado','Finalizado','Resumido'];
 const STATUS_ICON  = ['⚫','🟡','🟢','🔵'];
 const RAMO_COLORS  = ['#8090C8','#6EB898','#C88090','#B8A84A','#9080C8','#C8905A','#70AAC0','#C0C870'];
@@ -657,7 +711,41 @@ let selectedWeekDay = today();
 let calYear = new Date().getFullYear(), calMonth = new Date().getMonth();
 let currentRamoOpen = {};  // ramoId -> bool
 let currentMateriaId = null;
-let modalMode = null, editingId = null;
+let modalMode = null, editingId = null, _pendingMateriaId = null;
+
+// ── CÁLCULO DE MENÇÃO ──
+function calcMencao(notas) {
+  if(!notas) return null;
+  const vals = [notas.b1Trab, notas.b1Prova, notas.b2Trab, notas.b2Prova].filter(v=>v!=null);
+  if(!vals.length) return null;
+
+  // Média por bimestre (trabalho + prova) → média final dos bimestres com nota
+  let mediaFinal = null;
+  const b1ok = notas.b1Trab!=null && notas.b1Prova!=null;
+  const b2ok = notas.b2Trab!=null && notas.b2Prova!=null;
+  if(b1ok && b2ok) {
+    const mb1 = (notas.b1Trab + notas.b1Prova) / 2;
+    const mb2 = (notas.b2Trab + notas.b2Prova) / 2;
+    mediaFinal = (mb1 + mb2) / 2;
+  } else if(b1ok) {
+    mediaFinal = (notas.b1Trab + notas.b1Prova) / 2;
+  } else if(b2ok) {
+    mediaFinal = (notas.b2Trab + notas.b2Prova) / 2;
+  } else {
+    // parcial: média simples dos valores existentes
+    mediaFinal = vals.reduce((s,v)=>s+v,0)/vals.length;
+  }
+
+  const m = parseFloat(mediaFinal.toFixed(2));
+  let mencao, cor, bg, label;
+  if(m>=9)      { mencao='A'; cor='#1a6b3c'; bg='#d4edda'; label='Excelente'; }
+  else if(m>=7) { mencao='B'; cor='#1a4fa6'; bg='#d0e4ff'; label='Bom'; }
+  else if(m>=5) { mencao='C'; cor='#7a5c00'; bg='#fff3cd'; label='Regular'; }
+  else if(m>=3) { mencao='D'; cor='#a14800'; bg='#ffe4cc'; label='Insuficiente'; }
+  else          { mencao='E'; cor='#8b1c1c'; bg='#fde8e8'; label='Reprovado'; }
+  const parcial = !(b1ok && b2ok);
+  return { mencao, cor, bg, label, media: m.toFixed(2).replace('.',','), parcial };
+}
 
 // ════════════════════════════════════════════════
 //  NAVIGATION
@@ -714,7 +802,7 @@ function updateHeader(v) {
   if (oldBack) oldBack.remove();
 
   if (v==='hoje'||v==='semana'||v==='marcos'||v==='rotina') {
-    title.textContent = 'Rotina';
+    title.textContent = v==='marcos' ? 'Calendário' : 'Rotina';
     sub.textContent = headerDateStr();
     acts.innerHTML = `<button class="header-btn" onclick="openSearch()">🔍</button><button class="header-btn" onclick="openModal('new')">＋</button>`;
   } else if (v==='areas') {
@@ -806,11 +894,110 @@ function renderToday() {
       <div class="today-stat"><span class="today-stat-num">${done}</span><span class="today-stat-lbl">concluídas</span></div>
       ${nm?`<div class="today-stat" style="margin-left:auto;text-align:right">
         <span class="today-stat-num" style="font-size:.9rem">${nm.icon||'📍'} ${nm.title.slice(0,20)}${nm.title.length>20?'…':''}</span>
-        <span class="today-stat-lbl">próx. marco · ${diffDays(nm.date)}d</span>
+        <span class="today-stat-lbl">próx. evento · ${diffDays(nm.date)}d</span>
       </div>`:''}
     </div>`;
   const filtered = dt.filter(t=>activeFilter==='all'||t.cat===activeFilter);
-  renderTaskList('todayTasks', filtered);
+  renderTodayFull('todayTasks', filtered, td, d.getDay());
+}
+
+function renderTodayFull(cid, taskList, td, weekday) {
+  const el = document.getElementById(cid);
+
+  // ── Bloco 1: Tarefas ──
+  let html = '';
+  if(taskList.length) {
+    const sorted = [...taskList].sort((a,b)=>(a.time||'99:99').localeCompare(b.time||'99:99'));
+    html += `<div class="timeblock"><div class="timeblock-label">📋 Tarefas</div>${sorted.map(taskCardHTML).join('')}</div>`;
+  }
+
+  // ── Bloco 2: Rotina do dia ──
+  const rotinaHoje = rotina.filter(r=>r.days&&r.days.includes(weekday))
+    .sort((a,b)=>(a.time||'').localeCompare(b.time||''));
+  // aulas do semestre ativo vinculadas ao dia de hoje
+  const aulasHoje = getAulasHoje(weekday);
+  const todosBlocos = [...rotinaHoje.map(r=>({...r,_tipo:'rotina'})), ...aulasHoje.map(a=>({...a,_tipo:'aula'}))];
+  todosBlocos.sort((a,b)=>(a.time||'').localeCompare(b.time||''));
+
+  if(todosBlocos.length) {
+    html += `<div class="timeblock"><div class="timeblock-label">🔁 Rotina</div>`;
+    html += todosBlocos.map(b => {
+      const concKey = `rot_${td}_${b.id}`;
+      const conc = localStorage.getItem(concKey)==='1';
+      if(b._tipo==='aula') {
+        return `<div class="task-card${conc?' done':''}">
+          <div class="task-stripe stripe-estudo"></div>
+          <div class="task-check${conc?' checked':''}" onclick="toggleRotinaConc('${concKey}','${cid}','${td}',${weekday})"></div>
+          <div class="task-body">
+            <div class="task-title">📚 ${esc(b.title)}</div>
+            <div class="task-meta">
+              ${b.time?`<span class="task-time">🕐 ${b.time}</span>`:''}
+              <span class="task-tag cat-estudo">Aula</span>
+              ${b.ramo?`<span style="font-size:.68rem;color:var(--text-l)">${esc(b.ramo)}</span>`:''}
+            </div>
+          </div>
+        </div>`;
+      }
+      return `<div class="task-card${conc?' done':''}">
+        <div class="task-stripe stripe-${b.cat}"></div>
+        <div class="task-check${conc?' checked':''}" onclick="toggleRotinaConc('${concKey}','${cid}','${td}',${weekday})"></div>
+        <div class="task-body">
+          <div class="task-title">${esc(b.title)}</div>
+          <div class="task-meta">
+            ${b.time?`<span class="task-time">🕐 ${b.time}</span>`:''}
+            <span class="task-tag cat-${b.cat}">${CAT_LABEL[b.cat]||b.cat}</span>
+          </div>
+        </div>
+      </div>`;
+    }).join('');
+    html += `</div>`;
+  }
+
+  // ── Bloco 3: Eventos do dia (marcos) ──
+  const eventosHoje = marcos.filter(m=>m.date===td);
+  if(eventosHoje.length) {
+    html += `<div class="timeblock"><div class="timeblock-label">📍 Eventos de hoje</div>`;
+    html += eventosHoje.map(m=>{
+      const concKey = `ev_${td}_${m.id}`;
+      const conc = localStorage.getItem(concKey)==='1';
+      const cor = m.cor||'#C8C0D8';
+      return `<div class="task-card${conc?' done':''}">
+        <div class="task-stripe" style="background:${cor}"></div>
+        <div class="task-check${conc?' checked':''}" onclick="toggleEvento('${concKey}','${cid}','${td}',${weekday})"></div>
+        <div class="task-body" onclick="openMarco('${m.id}')">
+          <div class="task-title">${m.icon||'📍'} ${esc(m.title)}</div>
+          <div class="task-meta"><span class="task-tag" style="background:${cor}33;color:var(--text-m)">${CAT_LABEL[m.cat]||m.cat}</span>${m.notes?`<span style="font-size:.68rem;color:var(--text-l)">${esc(m.notes)}</span>`:''}</div>
+        </div>
+      </div>`;
+    }).join('');
+    html += `</div>`;
+  }
+
+  if(!html) html = `<div class="empty"><div class="empty-icon">✨</div><div class="empty-title">Dia livre</div><div class="empty-sub">Nenhuma tarefa, rotina ou evento hoje</div></div>`;
+  el.innerHTML = html;
+}
+
+// Aulas da semana vigente vindas das matérias do semestre ativo
+function getAulasHoje(weekday) {
+  const td = today();
+  if(!semestre.id || (semestre.fim && td > semestre.fim)) return [];
+  const aulas = [];
+  materias.filter(m=>m.semestre===semestre.id).forEach(m=>{
+    const ramo = ramos.find(r=>r.id===m.ramoId);
+    (m.aulas||[]).filter(a=>a.dia===weekday).forEach(a=>{
+      aulas.push({id:`aula_${m.id}_${a.dia}_${a.hora}`, title:m.nome, time:a.hora, ramo:ramo?.nome||'', cat:'estudo'});
+    });
+  });
+  return aulas;
+}
+
+function toggleRotinaConc(key, cid, td, weekday) {
+  localStorage.setItem(key, localStorage.getItem(key)==='1'?'0':'1');
+  renderTodayFull(cid, tasks.filter(t=>t.date===td&&(activeFilter==='all'||t.cat===activeFilter)), td, weekday);
+}
+function toggleEvento(key, cid, td, weekday) {
+  localStorage.setItem(key, localStorage.getItem(key)==='1'?'0':'1');
+  renderTodayFull(cid, tasks.filter(t=>t.date===td&&(activeFilter==='all'||t.cat===activeFilter)), td, weekday);
 }
 
 function filterTasks(cat,btn) {
@@ -867,16 +1054,21 @@ function renderWeek() {
   for(let i=0;i<10;i++){
     const d=new Date(base); d.setDate(base.getDate()+i);
     const ds=fmtDate(d);
-    const has=tasks.some(t=>t.date===ds);
+    const wd=d.getDay();
+    const hasTask=tasks.some(t=>t.date===ds);
+    const hasRot=rotina.some(r=>r.days&&r.days.includes(wd))||materias.some(m=>m.semestre===semestre.id&&(m.aulas||[]).some(a=>a.dia===wd));
+    const hasMarco=marcos.some(m=>m.date===ds);
+    const hasDot=hasTask||hasRot||hasMarco;
     const sel=ds===selectedWeekDay;
     html+=`<button class="week-day-btn${sel?' selected':''}" onclick="selectWeekDay('${ds}')">
       <span class="week-day-name">${DAYS_PT[d.getDay()]}</span>
       <span class="week-day-num">${d.getDate()}</span>
-      <span class="week-day-dot${has?'':' hidden'}"></span>
+      <span class="week-day-dot${hasDot?'':' hidden'}"></span>
     </button>`;
   }
   document.getElementById('weekStrip').innerHTML=html;
-  renderTaskList('weekTasks',tasks.filter(t=>t.date===selectedWeekDay));
+  const selDate=new Date(selectedWeekDay+'T12:00:00');
+  renderTodayFull('weekTasks', tasks.filter(t=>t.date===selectedWeekDay), selectedWeekDay, selDate.getDay());
 }
 function selectWeekDay(ds) { selectedWeekDay=ds; renderWeek(); }
 
@@ -886,27 +1078,36 @@ function selectWeekDay(ds) { selectedWeekDay=ds; renderWeek(); }
 function renderMarcos() {
   renderMiniCal();
   const td=today();
-  document.getElementById('marcoBadge').textContent=marcos.filter(m=>m.date>=td).length;
-  const sorted=[...marcos].sort((a,b)=>a.date.localeCompare(b.date));
+  document.getElementById('marcoBadge').textContent=marcos.filter(m=>m.date>=td&&!m._isRecur||m.date>=td).length;
+  // mostrar apenas uma instância por série na lista (a próxima futura)
+  const seen=new Set();
+  const sorted=[...marcos].sort((a,b)=>a.date.localeCompare(b.date)).filter(m=>{
+    const key=m._baseId||m.id;
+    if(seen.has(key)&&m._isRecur) return false;
+    seen.add(key); return true;
+  });
   const el=document.getElementById('marcosList');
-  if(!sorted.length){el.innerHTML=`<div class="empty"><div class="empty-icon">📍</div><div class="empty-title">Nenhum marco</div><div class="empty-sub">Adicione consultas, provas, eventos importantes</div></div>`;return;}
+  if(!sorted.length){el.innerHTML=`<div class="empty"><div class="empty-icon">📅</div><div class="empty-title">Nenhum evento</div><div class="empty-sub">Adicione consultas, provas, viagens e datas importantes</div></div>`;return;}
   el.innerHTML=sorted.map(m=>{
     const d=parseDate(m.date), diff=diffDays(m.date);
+    const cor=m.cor||'#C8C0D8';
+    // versão escura da cor para texto (simplificado)
     let cls='marco-countdown', txt='';
     if(diff<0){txt=`${Math.abs(diff)}d atrás`;cls+=' past';}
     else if(diff===0){txt='Hoje!';cls+=' today-badge';}
     else if(diff===1) txt='Amanhã';
     else txt=`em ${diff}d`;
-    return `<div class="marco-card" onclick="openMarco('${m.id}')">
-      <div class="marco-date-badge">
+    const recurLabel = m.recur&&m.recur!=='none'?`<span class="recur-badge">${{daily:'Diário',weekly:'Semanal',monthly:'Mensal',yearly:'Anual'}[m.recur]||''}</span>`:'';
+    return `<div class="marco-card" onclick="openMarco('${m.id}')" style="border-left:4px solid ${cor}">
+      <div class="marco-date-badge" style="background:${cor}22">
         <div class="marco-date-day">${d.getDate()}</div>
         <div class="marco-date-mon">${MONTHS_SHORT[d.getMonth()]}</div>
       </div>
       <div class="marco-info">
-        <div class="marco-title">${m.icon||'📍'} ${esc(m.title)}</div>
-        <div class="marco-sub"><span class="task-tag cat-${m.cat}" style="font-size:.62rem">${CAT_LABEL[m.cat]}</span>${m.notes?' · '+esc(m.notes):''}</div>
+        <div class="marco-title">${m.icon||'📍'} ${esc(m.title)} ${recurLabel}</div>
+        <div class="marco-sub"><span class="task-tag" style="background:${cor}33;color:var(--text-m)">${CAT_LABEL[m.cat]||m.cat}</span>${m.notes?' · '+esc(m.notes):''}</div>
       </div>
-      <div class="${cls}">${txt}</div>
+      <div class="${cls}" style="${diff>=0&&diff!==0?`background:${cor}33;color:var(--text-m)`:''}">${txt}</div>
     </div>`;
   }).join('');
 }
@@ -918,9 +1119,8 @@ function renderMiniCal() {
   const td=today();
   const marcoMap={};
   marcos.forEach(m=>{ marcoMap[m.date]=true; });
-  // semana de provas
-  const spi=semestre.semProvaInicio, spf=semestre.semProvaFim;
-  const excl=new Set(semestre.semProvaExclusoes||[]);
+  // destacar datas de prova das matérias
+  const provaSet=new Set(materias.map(m=>m.dataProva).filter(Boolean));
 
   let html=`<div class="mini-cal-header">
     <span class="mini-cal-month">${MONTHS_PT[month]} ${year}</span>
@@ -932,13 +1132,11 @@ function renderMiniCal() {
   for(let i=0;i<firstDay;i++) html+=`<div class="cal-day other-month"></div>`;
   for(let d=1;d<=days;d++){
     const ds=`${year}-${String(month+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
-    const isTd=ds===td, hasEv=!!marcoMap[ds];
-    const inProvaWeek=spi&&spf&&ds>=spi&&ds<=spf&&!excl.has(ds);
-    html+=`<div class="cal-day${isTd?' today':''}${hasEv?' has-event':''}${inProvaWeek&&!isTd?' prova-week':''}" onclick="calDayClick('${ds}')">${d}</div>`;
+    const isTd=ds===td, hasEv=!!marcoMap[ds], isProva=provaSet.has(ds);
+    html+=`<div class="cal-day${isTd?' today':''}${hasEv?' has-event':''}${isProva&&!isTd?' prova-week':''}" onclick="calDayClick('${ds}')">${d}</div>`;
   }
   html+=`</div>`;
-  // legenda semana de provas
-  if(spi&&spf) html+=`<div style="display:flex;align-items:center;gap:6px;margin-top:10px;font-size:.68rem;color:var(--text-l)"><div style="width:12px;height:12px;border-radius:3px;background:rgba(192,200,224,.6)"></div>Semana de provas</div>`;
+  if(provaSet.size) html+=`<div style="display:flex;align-items:center;gap:6px;margin-top:10px;font-size:.68rem;color:var(--text-l)"><div style="width:12px;height:12px;border-radius:3px;background:rgba(192,200,224,.6)"></div>Datas de prova</div>`;
   document.getElementById('miniCal').innerHTML=html;
 }
 function calPrev(){calMonth--;if(calMonth<0){calMonth=11;calYear--;} renderMiniCal();}
@@ -999,14 +1197,11 @@ function renderEstudosBanner() {
   const passed=Math.max(0,Math.round((td-ini)/86400000));
   const pct=Math.min(100,Math.round(passed/total*100));
   const td2=today();
-  const isProvaWeek=semestre.semProvaInicio&&semestre.semProvaFim&&td2>=semestre.semProvaInicio&&td2<=semestre.semProvaFim;
   el.innerHTML=`
-    ${isProvaWeek?`<div class="prova-alert"><span class="prova-alert-icon">⚡</span><span>Você está na <strong>semana de provas!</strong> Foco total.</span></div>`:''}
     <div class="sem-banner">
       <div class="sem-banner-left">
         <div class="sem-banner-name">${esc(semestre.nome)}</div>
         <div class="sem-banner-dates">${formatDateShort(semestre.inicio)} → ${formatDateShort(semestre.fim)}</div>
-        ${semestre.semProvaInicio?`<div class="sem-banner-dates" style="margin-top:3px;opacity:.75">📝 Provas: ${formatDateShort(semestre.semProvaInicio)} – ${formatDateShort(semestre.semProvaFim)}</div>`:''}
       </div>
       <div class="sem-banner-progress">
         <div style="font-size:.65rem;opacity:.8;margin-bottom:4px">${pct}% do semestre</div>
@@ -1054,20 +1249,23 @@ function renderMateriaCards(mats,cor) {
   if(!mats.length) return `<div style="font-size:.78rem;color:var(--text-l);padding:10px 14px">Nenhuma matéria. Toque em + no ramo para adicionar.</div>`;
   return mats.map((m,idx)=>{
     const conts=conteudos.filter(c=>c.materiaId===m.id);
-    // filtro global de status
     if(estudosFilter!=='all'&&!conts.some(c=>c.status===parseInt(estudosFilter))) return '';
     const statusCounts=[0,1,2,3].map(s=>conts.filter(c=>c.status===s).length);
     const total=conts.length||1;
     const pct=Math.round((statusCounts[2]+statusCounts[3])/total*100);
-    const diaStr=m.diaProva!=null?DAYS_PT[m.diaProva]:'';
-    // status dominante
     const dom=statusCounts.reduce((best,cnt,i)=>cnt>statusCounts[best]?i:best,0);
+    const temAulas = m.aulas&&m.aulas.length>0;
+    const vinculada = !!m.semestre;
+    const aulasStr = temAulas ? m.aulas.map(a=>`${DAYS_PT[a.dia]} ${a.hora}`).join(' · ') : '';
     return `<div class="materia-card" onclick="openMateria('${m.id}')">
       <div class="materia-stripe" style="background:${cor}"></div>
       <div class="materia-body">
-        <div class="materia-name">${esc(m.nome)}</div>
+        <div class="materia-name" style="display:flex;align-items:center;gap:6px">
+          ${esc(m.nome)}
+          ${!vinculada?`<span title="Sem semestre vinculado" style="font-size:.6rem;background:#f0f0f0;color:#999;border-radius:4px;padding:1px 5px;font-weight:600">sem semestre</span>`:''}
+        </div>
         <div class="materia-meta">
-          ${diaStr?`<span>📅 Prova: ${diaStr}</span>`:''}
+          ${aulasStr?`<span>🏫 ${aulasStr}</span>`:''}
           <span class="status-badge status-${dom}">${STATUS_ICON[dom]} ${STATUS_LABEL[dom]}</span>
           <span>${conts.length} conteúdo${conts.length!==1?'s':''}</span>
         </div>
@@ -1076,8 +1274,8 @@ function renderMateriaCards(mats,cor) {
         </div>
       </div>
       <div class="materia-right" style="padding-right:8px;gap:2px" onclick="event.stopPropagation()">
-        <button onclick="moveMateria('${m.id}',-1)" style="background:none;border:none;font-size:.9rem;cursor:pointer;color:var(--text-l);padding:2px 4px;line-height:1" title="Mover para cima" ${idx===0?'disabled style="opacity:.25"':''}>↑</button>
-        <button onclick="moveMateria('${m.id}',1)" style="background:none;border:none;font-size:.9rem;cursor:pointer;color:var(--text-l);padding:2px 4px;line-height:1" title="Mover para baixo" ${idx===mats.length-1?'disabled style="opacity:.25"':''}>↓</button>
+        <button onclick="moveMateria('${m.id}',-1)" style="background:none;border:none;font-size:.9rem;cursor:pointer;color:var(--text-l);padding:2px 4px;line-height:1" ${idx===0?'disabled style="opacity:.25"':''}>↑</button>
+        <button onclick="moveMateria('${m.id}',1)" style="background:none;border:none;font-size:.9rem;cursor:pointer;color:var(--text-l);padding:2px 4px;line-height:1" ${idx===mats.length-1?'disabled style="opacity:.25"':''}>↓</button>
       </div>
     </div>`;
   }).join('');
@@ -1121,19 +1319,66 @@ function renderMateriaDetail() {
   const counts=[0,1,2,3].map(s=>conts.filter(c=>c.status===s).length);
   const pct=conts.length?Math.round((counts[2]+counts[3])/conts.length*100):0;
 
-  // alerta semana de provas
   const td=today();
-  const isProvaWeek=semestre.semProvaInicio&&semestre.semProvaFim&&td>=semestre.semProvaInicio&&td<=semestre.semProvaFim;
+
+  // alertas por bimestre
+  function provaAlert(dataStr, label) {
+    if(!dataStr) return '';
+    const diff=diffDays(dataStr);
+    if(diff===null) return '';
+    if(diff<0) return `<div style="background:var(--cream2);border-radius:8px;padding:8px 12px;font-size:.76rem;color:var(--text-l);display:flex;gap:8px;align-items:center"><span>✅</span><span>${label}: prova realizada em ${formatDatePT(dataStr)}</span></div>`;
+    if(diff>7) return '';
+    const msg = diff===0?`<strong>Hoje!</strong> Concentração máxima.`:diff===1?`<strong>Amanhã!</strong> Revise os pontos principais.`:`Em <strong>${diff} dias</strong> (${formatDatePT(dataStr)}). Priorize os pendentes.`;
+    return `<div class="prova-alert"><span class="prova-alert-icon">⚡</span><span>${label}: prova ${msg}</span></div>`;
+  }
+
+  // datas importantes vinculadas
+  const datasVinculadas = marcos.filter(x=>x.materiaId===m.id).sort((a,b)=>a.date<b.date?-1:1);
+  const datasHTML = datasVinculadas.length ? datasVinculadas.map(d=>{
+    const diff=diffDays(d.date);
+    const past=diff!==null&&diff<0;
+    return `<div style="display:flex;align-items:center;gap:8px;padding:8px 10px;background:${past?'var(--cream2)':'white'};border:1px solid var(--beige);border-radius:8px;font-size:.78rem;cursor:pointer;margin-bottom:5px" onclick="openModal('edit-marco','${d.id}')">
+      <span>${d.icon||'📍'}</span>
+      <span style="flex:1;font-weight:500;${past?'color:var(--text-l);text-decoration:line-through':''}">${esc(d.title)}</span>
+      <span style="color:${diff===0?'#c0392b':diff!=null&&diff<=3&&!past?'#e67e22':'var(--text-l)'}">
+        ${diff===0?'Hoje':diff===1?'Amanhã':diff!=null&&diff>0?`em ${diff}d`:formatDatePT(d.date)}
+      </span>
+    </div>`;
+  }).join('') : '';
+
+  // menção
+  const mencaoInfo = calcMencao(m.notas||{});
+  const mencaoHTML = mencaoInfo ? `
+    <div style="background:${mencaoInfo.bg};border-radius:var(--radius-sm);padding:10px 14px;margin-bottom:14px;display:flex;align-items:center;gap:12px">
+      <div style="font-size:1.8rem;font-weight:900;color:${mencaoInfo.cor};min-width:32px;text-align:center">${mencaoInfo.mencao}</div>
+      <div>
+        <div style="font-size:.85rem;font-weight:700;color:${mencaoInfo.cor}">Média: ${mencaoInfo.media}${mencaoInfo.parcial?' <span style="font-size:.65rem;font-weight:400">(parcial)</span>':''}</div>
+        <div style="font-size:.7rem;color:${mencaoInfo.cor};opacity:.85">${mencaoInfo.label}</div>
+      </div>
+      <button onclick="openModal('edit-materia','${m.id}')" style="margin-left:auto;background:none;border:1.5px solid ${mencaoInfo.cor};color:${mencaoInfo.cor};border-radius:20px;padding:4px 12px;font-size:.68rem;cursor:pointer;opacity:.75">editar notas</button>
+    </div>` : '';
+
+  // datas de prova por bimestre
+  const provaDatasHTML = (m.b1DataProva||m.b2DataProva) ? `
+    <div style="display:flex;gap:8px;margin-bottom:10px">
+      ${m.b1DataProva?`<div style="flex:1;background:var(--cat-estudo);border-radius:8px;padding:8px 10px;text-align:center">
+        <div style="font-size:.62rem;font-weight:700;color:#2D3D7B;text-transform:uppercase">1º Bim.</div>
+        <div style="font-size:.82rem;font-weight:600;color:#2D3D7B;margin-top:2px">📅 ${formatDatePT(m.b1DataProva)}</div>
+      </div>`:''}
+      ${m.b2DataProva?`<div style="flex:1;background:var(--cat-estudo);border-radius:8px;padding:8px 10px;text-align:center">
+        <div style="font-size:.62rem;font-weight:700;color:#2D3D7B;text-transform:uppercase">2º Bim.</div>
+        <div style="font-size:.82rem;font-weight:600;color:#2D3D7B;margin-top:2px">📅 ${formatDatePT(m.b2DataProva)}</div>
+      </div>`:''}
+    </div>` : '';
 
   let html=`
-    <!-- info card -->
     <div class="detail-card" style="margin-bottom:14px">
       <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
         <div style="width:12px;height:12px;border-radius:50%;background:${ramo?.cor||'#aaa'}"></div>
         <span style="font-size:.75rem;color:var(--text-l)">${esc(ramo?.nome||'')}</span>
-        ${m.diaProva!=null?`<span class="task-tag cat-estudo" style="margin-left:auto">📅 ${DAYS_PT[m.diaProva]}</span>`:''}
+        <button onclick="openModal('edit-materia','${m.id}')" style="margin-left:auto;background:none;border:none;font-size:.85rem;cursor:pointer;color:var(--text-l)">✏️</button>
       </div>
-      <!-- status summary -->
+      ${provaDatasHTML}
       <div style="display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap">
         ${[0,1,2,3].map(s=>`<div style="flex:1;min-width:60px;background:white;border:1px solid var(--beige);border-radius:8px;padding:8px;text-align:center">
           <div style="font-size:1rem">${STATUS_ICON[s]}</div>
@@ -1141,12 +1386,22 @@ function renderMateriaDetail() {
           <div style="font-size:.6rem;color:var(--text-l)">${STATUS_LABEL[s]}</div>
         </div>`).join('')}
       </div>
-      <div style="font-size:.72rem;color:var(--text-l);margin-bottom:4px">${pct}% concluído (finalizado ou resumido)</div>
-      <div class="progress-bar-wrap">
-        <div class="progress-bar-fill" style="width:${pct}%;background:${ramo?.cor||'#8090C8'}"></div>
-      </div>
+      <div style="font-size:.72rem;color:var(--text-l);margin-bottom:4px">${pct}% concluído</div>
+      <div class="progress-bar-wrap"><div class="progress-bar-fill" style="width:${pct}%;background:${ramo?.cor||'#8090C8'}"></div></div>
     </div>
-    ${isProvaWeek?`<div class="prova-alert" style="margin-bottom:14px"><span class="prova-alert-icon">⚡</span><span>Semana de provas! Priorize os conteúdos pendentes.</span></div>`:''}
+
+    ${mencaoHTML}
+    ${provaAlert(m.b1DataProva,'1º Bimestre')}
+    ${provaAlert(m.b2DataProva,'2º Bimestre')}
+
+    ${datasVinculadas.length||true?`<div style="margin-bottom:14px">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
+        <div style="font-size:.73rem;font-weight:700;color:var(--text-m);text-transform:uppercase;letter-spacing:.04em">📍 Datas Importantes</div>
+        <button onclick="openModalDataMateria('${m.id}')" style="background:none;border:1.5px solid var(--brown);color:var(--brown);border-radius:20px;padding:3px 10px;font-size:.7rem;cursor:pointer">＋</button>
+      </div>
+      ${datasHTML||`<div style="font-size:.75rem;color:var(--text-l)">Nenhuma data vinculada.</div>`}
+    </div>` : ''}
+
     <div class="sec-header">
       <span class="sec-title">Conteúdos</span>
       <span class="sec-link" onclick="openModal('novo-conteudo')">+ Adicionar</span>
@@ -1165,6 +1420,13 @@ function renderMateriaDetail() {
 function conteudoItemHTML(c, cor, idx, total) {
   const sBg = ['var(--s0-bg)','var(--s1-bg)','var(--s2-bg)','var(--s3-bg)'][c.status];
   const sFg = ['var(--s0-fg)','var(--s1-fg)','var(--s2-fg)','var(--s3-fg)'][c.status];
+  // suporte legado (referencia/capitulos) e novo (refs[])
+  const refs = c.refs && c.refs.length ? c.refs : (c.referencia ? [{id:'leg',doutrina:c.referencia,capitulos:c.capitulos?[{id:'lc',numero:c.capitulos}]:[]}] : []);
+  const refsHTML = refs.length ? `<div class="conteudo-refs">${refs.map(r=>`
+    <div class="conteudo-ref-row">
+      <span class="conteudo-ref-dout">📖 ${esc(r.doutrina)}</span>
+      ${r.capitulos&&r.capitulos.length?`<span class="conteudo-ref-caps">· Cap. ${r.capitulos.map(cc=>esc(cc.numero)).join(', ')}</span>`:''}
+    </div>`).join('')}</div>` : '';
   return `<div class="conteudo-item" onclick="openModal('edit-conteudo','${c.id}')">
     <button class="conteudo-status-btn" style="background:${sBg};color:${sFg}"
       onclick="event.stopPropagation();cycleStatus('${c.id}')" title="Alterar status">
@@ -1172,8 +1434,7 @@ function conteudoItemHTML(c, cor, idx, total) {
     </button>
     <div class="conteudo-body">
       <div class="conteudo-title">${esc(c.titulo)}</div>
-      ${c.referencia?`<div class="conteudo-ref">📖 ${esc(c.referencia)}</div>`:''}
-      ${c.capitulos?`<div class="conteudo-meta">Cap. ${esc(c.capitulos)}</div>`:''}
+      ${refsHTML}
     </div>
     <div style="display:flex;flex-direction:column;align-items:center;gap:1px;padding:0 4px" onclick="event.stopPropagation()">
       <button onclick="moveConteudo('${c.id}',-1)" style="background:none;border:none;font-size:.9rem;cursor:pointer;color:var(--text-l);padding:2px 4px;line-height:1" ${idx===0?'disabled style="opacity:.22;cursor:default"':''}>↑</button>
@@ -1214,7 +1475,8 @@ function closeModalOutside(e) { if(e.target===document.getElementById('modalOver
 
 function buildModal(mode,id) {
   if(mode==='new'||mode==='edit-task')      return taskForm(id?tasks.find(t=>t.id===id):null);
-  if(mode==='marco'||mode==='edit-marco')   return marcoForm(id?marcos.find(m=>m.id===id):null);
+  if(mode==='marco'||mode==='edit-marco')   return marcoForm(id?marcos.find(m=>m.id===id):null, null);
+  if(mode==='marco-materia')               return marcoForm(null, _pendingMateriaId);
   if(mode==='rotina'||mode==='edit-rotina') return rotinaForm(id?rotina.find(r=>r.id===id):null);
   if(mode==='view-task')   return taskDetail(tasks.find(t=>t.id===id));
   if(mode==='view-marco')  return marcoDetail(marcos.find(m=>m.id===id));
@@ -1262,32 +1524,126 @@ function saveTask() {
 function deleteTask(id) { tasks=tasks.filter(t=>t.id!==id); save(SK.tasks,tasks); closeModal(); if(activeView==='hoje') renderToday(); else renderWeek(); }
 
 // ── MARCO FORM ──
-function marcoForm(m) {
-  return `<div class="modal-title">${m?'Editar marco':'Nova data importante'}</div>
+function marcoForm(m, forceMateriaId) {
+  const matOpts = materias.map(mt=>{
+    const r=ramos.find(r=>r.id===mt.ramoId);
+    return `<option value="${mt.id}"${(m&&m.materiaId===mt.id)||(forceMateriaId&&forceMateriaId===mt.id)?' selected':''}>${r?r.nome+' — ':''} ${esc(mt.nome)}</option>`;
+  }).join('');
+  const corAtual = m?.cor || PALETTE[0];
+  const RECUR_OPTS = [
+    {v:'none',  l:'Não repetir'},
+    {v:'daily', l:'Diariamente'},
+    {v:'weekly',l:'Semanalmente'},
+    {v:'monthly',l:'Mensalmente'},
+    {v:'yearly',l:'Anualmente'},
+  ];
+  return `<div class="modal-title">${m?'Editar evento':'Novo evento'}</div>
   <div class="form-group"><label class="form-label">Título</label>
   <input class="form-input" id="mf-title" value="${m?esc(m.title):''}" placeholder="Nome do evento…"></div>
   <div class="modal-row">
     <div class="form-group"><label class="form-label">Data</label><input class="form-input" type="date" id="mf-date" value="${m?m.date:today()}"></div>
     <div class="form-group"><label class="form-label">Ícone</label>
-    <select class="form-select" id="mf-icon">${['📍','📝','🩺','💼','🎂','✈️','🎓','💊','🏆','🎯'].map(ic=>`<option value="${ic}"${m&&m.icon===ic?' selected':''}>${ic}</option>`).join('')}</select></div>
+    <select class="form-select" id="mf-icon">${['📍','📝','🩺','💼','🎂','✈️','🎓','💊','🏆','🎯','🔔','⚡','🌟','🎉'].map(ic=>`<option value="${ic}"${m&&m.icon===ic?' selected':''}>${ic}</option>`).join('')}</select></div>
   </div>
+
+  <div class="form-group">
+    <label class="form-label">Cor do evento</label>
+    <div class="color-palette">${colorSwatchHTML(corAtual)}</div>
+    <input type="hidden" id="_selectedColor" value="${corAtual}">
+  </div>
+
+  <div class="form-group"><label class="form-label">Repetir</label>
+  <select class="form-select" id="mf-recur">
+    ${RECUR_OPTS.map(o=>`<option value="${o.v}"${(m?.recur||'none')===o.v?' selected':''}>${o.l}</option>`).join('')}
+  </select></div>
+
+  <div class="form-group" id="mf-recur-end-wrap" style="${m?.recur&&m.recur!=='none'?'':'display:none'}">
+    <label class="form-label">Repetir até (opcional)</label>
+    <input class="form-input" type="date" id="mf-recur-end" value="${m?.recurEnd||''}">
+  </div>
+
   <div class="form-group"><label class="form-label">Categoria</label>
   <div class="cat-picker" id="catPicker">
     ${['saude','estudo','social','trabalho','pessoal'].map(c=>`<button class="cat-option cat-${c}${(m?m.cat===c:c==='pessoal')?' selected':''}" data-cat="${c}" onclick="pickCat('${c}')">${CAT_ICON[c]} ${CAT_LABEL[c]}</button>`).join('')}
   </div></div>
+
+  ${materias.length?`<div class="form-group"><label class="form-label">Vincular à matéria (opcional)</label>
+  <select class="form-select" id="mf-materia">
+    <option value="">— Nenhuma —</option>
+    ${matOpts}
+  </select></div>`:''}
+
   <div class="form-group"><label class="form-label">Notas</label>
   <textarea class="form-textarea" id="mf-notes" placeholder="Local, instruções…">${m?esc(m.notes||''):''}</textarea></div>
   <button class="btn-primary" onclick="saveMarco()">Salvar</button>
-  ${m?`<button class="btn-danger" onclick="deleteMarco('${m.id}')">🗑 Excluir</button>`:''}`;
+  ${m?`<button class="btn-danger" onclick="deleteMarco('${m.id}')">🗑 Excluir</button>`:''}
+  <script>document.getElementById('mf-recur').addEventListener('change',function(){document.getElementById('mf-recur-end-wrap').style.display=this.value==='none'?'none':'';});<\/script>`;
 }
+
 function saveMarco() {
   const title=document.getElementById('mf-title').value.trim(); if(!title) return;
-  const obj={id:editingId||uid(),title,date:document.getElementById('mf-date').value||today(),icon:document.getElementById('mf-icon').value,cat:document.querySelector('.cat-option.selected')?.dataset.cat||'pessoal',notes:document.getElementById('mf-notes').value};
-  if(editingId){const i=marcos.findIndex(m=>m.id===editingId);if(i>-1)marcos[i]=obj;}else marcos.push(obj);
+  const materiaId=document.getElementById('mf-materia')?.value||null;
+  const cor=document.getElementById('_selectedColor')?.value||PALETTE[0];
+  const recur=document.getElementById('mf-recur')?.value||'none';
+  const recurEnd=document.getElementById('mf-recur-end')?.value||null;
+  const baseDate=document.getElementById('mf-date').value||today();
+
+  const base={
+    id:editingId||uid(), title,
+    date:baseDate,
+    icon:document.getElementById('mf-icon').value,
+    cat:document.querySelector('.cat-option.selected')?.dataset.cat||'pessoal',
+    notes:document.getElementById('mf-notes').value,
+    materiaId:materiaId||undefined,
+    cor, recur, recurEnd:recur!=='none'?recurEnd:null,
+    _baseId: editingId||null,
+  };
+
+  // Remover instâncias anteriores desta recorrência se editando
+  if(editingId) {
+    marcos=marcos.filter(m=>m.id!==editingId && m._baseId!==editingId);
+  }
+
+  const novos=[base];
+  // Gerar instâncias futuras de recorrência
+  if(recur!=='none') {
+    const endLimit=recurEnd?recurEnd:'2099-12-31';
+    let cur=new Date(baseDate+'T12:00:00');
+    const baseId=base.id;
+    for(let i=0;i<200;i++){
+      if(recur==='daily')   cur.setDate(cur.getDate()+1);
+      else if(recur==='weekly')  cur.setDate(cur.getDate()+7);
+      else if(recur==='monthly') cur.setMonth(cur.getMonth()+1);
+      else if(recur==='yearly')  cur.setFullYear(cur.getFullYear()+1);
+      const ds=fmtDate(cur);
+      if(ds>endLimit) break;
+      novos.push({...base, id:uid(), date:ds, _baseId:baseId, _isRecur:true});
+    }
+  }
+
+  novos.forEach(n=>{
+    const idx=marcos.findIndex(m=>m.id===n.id);
+    if(idx>-1) marcos[idx]=n; else marcos.push(n);
+  });
+
   save(SK.marcos,marcos); closeModal(); renderMarcos();
   document.getElementById('marcoBadge').textContent=marcos.filter(m=>m.date>=today()).length;
+  if(materiaId && activeView==='materia') renderMateriaDetail();
+  _pendingMateriaId=null;
 }
-function deleteMarco(id) { marcos=marcos.filter(m=>m.id!==id); save(SK.marcos,marcos); closeModal(); renderMarcos(); }
+
+function deleteMarco(id) {
+  const m=marcos.find(x=>x.id===id);
+  if(m?._baseId || m?.recur!=='none') {
+    if(confirm('Excluir somente este evento ou toda a série?')=== false) return;
+    // excluir série toda
+    const baseId=m._baseId||m.id;
+    marcos=marcos.filter(x=>x.id!==baseId&&x._baseId!==baseId);
+  } else {
+    marcos=marcos.filter(x=>x.id!==id);
+  }
+  save(SK.marcos,marcos); closeModal(); renderMarcos();
+}
 
 // ── ROTINA FORM ──
 function rotinaForm(r) {
@@ -1322,7 +1678,6 @@ function deleteRotina(id) { rotina=rotina.filter(r=>r.id!==id); save(SK.rotina,r
 // ── SEMESTRE FORM ──
 function semestreForm() {
   const s=semestre;
-  const excStr=(s.semProvaExclusoes||[]).join(', ');
   const outrosList=semestres.filter(x=>x.id!==s.id);
   const outrosHTML=outrosList.length?`
     <div style="margin-bottom:14px">
@@ -1334,15 +1689,6 @@ function semestreForm() {
         <button onclick="editarSemestre('${x.id}')" style="background:none;border:none;font-size:.8rem;cursor:pointer;color:var(--text-l)">✏️</button>
       </div>`).join('')}
     </div>`:'';
-
-  const bimSection=(num,labelIni,labelFim,vIni,vFim)=>`
-    <div style="background:var(--cat-estudo);border-radius:var(--radius-sm);padding:12px 14px;margin-bottom:10px">
-      <div style="font-size:.75rem;font-weight:700;color:#2D3D7B;margin-bottom:10px;text-transform:uppercase;letter-spacing:.05em">📝 Semana de Provas — ${num}º Bimestre</div>
-      <div class="modal-row" style="margin:0">
-        <div class="form-group" style="margin-bottom:0"><label class="form-label">Início</label><input class="form-input" type="date" id="sf-b${num}i" value="${vIni||''}"></div>
-        <div class="form-group" style="margin-bottom:0"><label class="form-label">Fim</label><input class="form-input" type="date" id="sf-b${num}f" value="${vFim||''}"></div>
-      </div>
-    </div>`;
 
   return `<div class="modal-title">⚙️ Período Ativo</div>
   ${outrosHTML}
@@ -1361,53 +1707,25 @@ function semestreForm() {
     <div class="form-group"><label class="form-label">Início do semestre</label><input class="form-input" type="date" id="sf-ini" value="${s.inicio||''}"></div>
     <div class="form-group"><label class="form-label">Fim do semestre</label><input class="form-input" type="date" id="sf-fim" value="${s.fim||''}"></div>
   </div>
-  ${bimSection(1,'Início','Fim',s.b1ProvaInicio,s.b1ProvaFim)}
-  ${bimSection(2,'Início','Fim',s.b2ProvaInicio,s.b2ProvaFim)}
-  <div class="form-group">
-    <label class="form-label">Dias excluídos das provas (sem prova)</label>
-    <input class="form-input" id="sf-excl" value="${esc(excStr)}" placeholder="2025-06-10, 2025-06-12">
-    <div style="font-size:.68rem;color:var(--text-l);margin-top:4px">Datas separadas por vírgula — não serão destacadas como dia de prova</div>
-  </div>
   <button class="btn-primary" onclick="saveSemestre()">Salvar período ativo</button>
   <button class="btn-secondary" onclick="novoSemestreForm()" style="margin-top:8px">＋ Cadastrar novo período</button>`;
 }
 
 function saveSemestre() {
-  const excRaw=document.getElementById('sf-excl').value;
-  const excl=excRaw.split(',').map(s=>s.trim()).filter(s=>s.match(/^\d{4}-\d{2}-\d{2}$/));
-  const b1i=document.getElementById('sf-b1i').value||null;
-  const b1f=document.getElementById('sf-b1f').value||null;
-  const b2i=document.getElementById('sf-b2i').value||null;
-  const b2f=document.getElementById('sf-b2f').value||null;
   semestre={
     id:semestre.id||uid(),
     nome:document.getElementById('sf-nome').value.trim(),
     tipo:document.getElementById('sf-tipo').value,
     inicio:document.getElementById('sf-ini').value,
     fim:document.getElementById('sf-fim').value,
-    b1ProvaInicio:b1i, b1ProvaFim:b1f,
-    b2ProvaInicio:b2i, b2ProvaFim:b2f,
-    semProvaExclusoes:excl,
-    // legado para compatibilidade com marcos antigos
-    semProvaInicio:b1i, semProvaFim:b1f,
+    semProvaExclusoes:[],
+    b1ProvaInicio:null,b1ProvaFim:null,b2ProvaInicio:null,b2ProvaFim:null,
+    semProvaInicio:null,semProvaFim:null,
   };
   save(SK.semestre,semestre);
   const idx=semestres.findIndex(s=>s.id===semestre.id);
   if(idx>-1) semestres[idx]=semestre; else semestres.push(semestre);
   save(SK.semestres,semestres);
-
-  // Criar/atualizar marcos das semanas de provas
-  function upsertMarcoProva(semId, bim, dateIni, dateFim) {
-    if(!dateIni) return;
-    const tag=`_b${bim}_${semId}`;
-    const existing=marcos.find(m=>m._tag===tag);
-    const obj={id:existing?.id||uid(),title:`Semana de Provas — ${bim}º Bimestre`,date:dateIni,cat:'estudo',notes:`${semestre.nome} · até ${formatDateShort(dateFim||dateIni)}`,icon:'📝',_tag:tag};
-    if(existing){const i=marcos.indexOf(existing);marcos[i]=obj;}else marcos.push(obj);
-  }
-  upsertMarcoProva(semestre.id,1,b1i,b1f);
-  upsertMarcoProva(semestre.id,2,b2i,b2f);
-  save(SK.marcos,marcos);
-
   closeModal(); renderEstudos(); renderMarcos(); updateHeader('estudos');
 }
 function ativarSemestre(id) {
@@ -1462,30 +1780,150 @@ function deleteRamo(id) {
 
 // ── MATÉRIA FORM ──
 function materiaForm(m, ramoIdOverride) {
-  const ramoId=m?m.ramoId:ramoIdOverride;
+  const ramoId = m ? m.ramoId : ramoIdOverride;
+  // datas importantes vinculadas a esta matéria
+  const mId = m ? m.id : null;
+  const datasVinculadas = mId ? marcos.filter(x=>x.materiaId===mId) : [];
+
+  // helper para calcular menção a partir das notas salvas
+  const notas = m ? (m.notas||{}) : {};
+  const mencaoInfo = m ? calcMencao(notas) : null;
+
+  const datasHTML = datasVinculadas.length ? `
+    <div style="margin-bottom:4px">
+      ${datasVinculadas.map(d=>`<div style="display:flex;align-items:center;gap:8px;padding:7px 10px;background:var(--cream2);border-radius:8px;margin-bottom:5px;font-size:.78rem">
+        <span>${d.icon||'📍'}</span>
+        <span style="flex:1;font-weight:500">${esc(d.title)}</span>
+        <span style="color:var(--text-l)">${formatDatePT(d.date)}</span>
+        <button onclick="deleteMarco('${d.id}');openModal('edit-materia','${mId}')" style="background:none;border:none;font-size:.8rem;cursor:pointer;color:#e57373">✕</button>
+      </div>`).join('')}
+    </div>` : `<div style="font-size:.75rem;color:var(--text-l);margin-bottom:8px">Nenhuma data vinculada.</div>`;
+
   return `<div class="modal-title">${m?'Editar matéria':'Nova matéria'}</div>
+
+  <!-- IDENTIFICAÇÃO -->
   <div class="form-group"><label class="form-label">Nome da matéria</label>
-  <input class="form-input" id="mf2-nome" value="${m?esc(m.nome):''}" placeholder="ex: Teoria Geral dos Contratos, Gramática…"></div>
+  <input class="form-input" id="mf2-nome" value="${m?esc(m.nome):''}" placeholder="ex: Teoria Geral dos Contratos…"></div>
   ${!m?`<input type="hidden" id="mf2-ramoId" value="${ramoId||''}">`:
   `<div class="form-group"><label class="form-label">Ramo</label>
   <select class="form-select" id="mf2-ramoId">
     ${ramos.map(r=>`<option value="${r.id}"${r.id===m.ramoId?' selected':''}>${r.nome}</option>`).join('')}
   </select></div>`}
-  <div class="form-group"><label class="form-label">Dia da semana da prova</label>
-  <select class="form-select" id="mf2-dia">
-    <option value="">Não definido</option>
-    ${DAYS_PT.map((d,i)=>`<option value="${i}"${m&&m.diaProva===i?' selected':''}>${d}</option>`).join('')}
-  </select></div>
+
+  <!-- DIAS E HORÁRIOS DE AULA -->
+  <div style="background:white;border:1.5px solid var(--beige);border-radius:var(--radius-sm);padding:12px 14px;margin-bottom:14px">
+    <div style="font-size:.73rem;font-weight:700;color:var(--text-m);margin-bottom:10px;text-transform:uppercase;letter-spacing:.05em">🏫 Dias e Horários das Aulas</div>
+    <div style="font-size:.72rem;color:var(--text-l);margin-bottom:10px">Sem aulas definidas → matéria não será vinculada ao semestre.</div>
+    <div id="aulasContainer">
+      ${(m&&m.aulas&&m.aulas.length?m.aulas:[{dia:1,hora:'08:00'}]).map((a,i)=>`
+      <div class="modal-row aula-row" style="margin-bottom:8px;align-items:center" id="aula-row-${i}">
+        <div class="form-group" style="margin-bottom:0;flex:2">
+          <select class="form-select aula-dia">
+            ${DAYS_FULL.map((d,di)=>`<option value="${di}"${a.dia===di?' selected':''}>${d}</option>`).join('')}
+          </select>
+        </div>
+        <div class="form-group" style="margin-bottom:0;flex:1">
+          <input class="form-input aula-hora" type="time" value="${a.hora||'08:00'}">
+        </div>
+        <button onclick="removeAulaRow(this)" style="background:none;border:none;font-size:1rem;cursor:pointer;color:#e57373;padding:0 4px;flex-shrink:0">✕</button>
+      </div>`).join('')}
+    </div>
+    <button onclick="addAulaRow()" style="background:none;border:1.5px dashed var(--beige);border-radius:8px;width:100%;padding:8px;font-size:.75rem;color:var(--text-l);cursor:pointer;margin-top:4px">＋ Adicionar horário</button>
+  </div>
+
+  <!-- DATAS DE PROVA POR BIMESTRE -->
+  <div style="background:var(--cat-estudo);border-radius:var(--radius-sm);padding:12px 14px;margin-bottom:14px">
+    <div style="font-size:.73rem;font-weight:700;color:#2D3D7B;margin-bottom:10px;text-transform:uppercase;letter-spacing:.05em">📅 Datas das Provas</div>
+    <div class="modal-row" style="margin:0">
+      <div class="form-group" style="margin-bottom:0">
+        <label class="form-label">1º Bimestre</label>
+        <input class="form-input" type="date" id="mf2-b1" value="${m&&m.b1DataProva?m.b1DataProva:''}">
+      </div>
+      <div class="form-group" style="margin-bottom:0">
+        <label class="form-label">2º Bimestre</label>
+        <input class="form-input" type="date" id="mf2-b2" value="${m&&m.b2DataProva?m.b2DataProva:''}">
+      </div>
+    </div>
+  </div>
+
+  <!-- NOTAS -->
+  <div style="background:white;border:1.5px solid var(--beige);border-radius:var(--radius-sm);padding:12px 14px;margin-bottom:14px">
+    <div style="font-size:.73rem;font-weight:700;color:var(--text-m);margin-bottom:10px;text-transform:uppercase;letter-spacing:.05em">📊 Notas</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">
+      <div>
+        <div style="font-size:.68rem;color:var(--text-l);margin-bottom:4px;font-weight:600">1º BIMESTRE</div>
+        <div class="form-group" style="margin-bottom:6px"><label class="form-label">Trabalho</label>
+        <input class="form-input" type="number" min="0" max="10" step="0.1" id="mf2-n1t" value="${notas.b1Trab!=null?notas.b1Trab:''}" placeholder="0,0–10,0"></div>
+        <div class="form-group" style="margin-bottom:0"><label class="form-label">Prova</label>
+        <input class="form-input" type="number" min="0" max="10" step="0.1" id="mf2-n1p" value="${notas.b1Prova!=null?notas.b1Prova:''}" placeholder="0,0–10,0"></div>
+      </div>
+      <div>
+        <div style="font-size:.68rem;color:var(--text-l);margin-bottom:4px;font-weight:600">2º BIMESTRE</div>
+        <div class="form-group" style="margin-bottom:6px"><label class="form-label">Trabalho</label>
+        <input class="form-input" type="number" min="0" max="10" step="0.1" id="mf2-n2t" value="${notas.b2Trab!=null?notas.b2Trab:''}" placeholder="0,0–10,0"></div>
+        <div class="form-group" style="margin-bottom:0"><label class="form-label">Prova</label>
+        <input class="form-input" type="number" min="0" max="10" step="0.1" id="mf2-n2p" value="${notas.b2Prova!=null?notas.b2Prova:''}" placeholder="0,0–10,0"></div>
+      </div>
+    </div>
+    ${mencaoInfo ? `<div style="margin-top:10px;padding:10px 12px;border-radius:8px;background:${mencaoInfo.bg};display:flex;align-items:center;gap:12px">
+      <div style="font-size:1.6rem;font-weight:900;color:${mencaoInfo.cor}">${mencaoInfo.mencao}</div>
+      <div>
+        <div style="font-size:.85rem;font-weight:700;color:${mencaoInfo.cor}">Média: ${mencaoInfo.media}</div>
+        <div style="font-size:.68rem;color:${mencaoInfo.cor};opacity:.8">${mencaoInfo.label}</div>
+      </div>
+    </div>` : '<div style="font-size:.72rem;color:var(--text-l);margin-top:6px">Preencha as notas para ver a menção.</div>'}
+  </div>
+
+  <!-- DATAS IMPORTANTES VINCULADAS -->
+  ${m ? `<div style="margin-bottom:14px">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+      <div style="font-size:.73rem;font-weight:700;color:var(--text-m);text-transform:uppercase;letter-spacing:.05em">📍 Datas Importantes</div>
+      <button onclick="openModalDataMateria('${m.id}')" style="background:var(--brown);color:white;border:none;border-radius:20px;padding:4px 12px;font-size:.72rem;cursor:pointer">＋ Adicionar</button>
+    </div>
+    ${datasHTML}
+  </div>` : ''}
+
   <button class="btn-primary" onclick="saveMateria()">Salvar</button>
   ${m?`<button class="btn-danger" onclick="deleteMateria('${m.id}')">🗑 Excluir matéria</button>`:''}`;
 }
+
 function saveMateria() {
-  const nome=document.getElementById('mf2-nome').value.trim(); if(!nome) return;
-  const ramoId=document.getElementById('mf2-ramoId').value; if(!ramoId) return;
-  const diaVal=document.getElementById('mf2-dia').value;
-  const obj={id:editingId||uid(),ramoId,nome,diaProva:diaVal!==''?parseInt(diaVal):null,ordem:editingId?(materias.find(m=>m.id===editingId)?.ordem||0):materias.filter(m=>m.ramoId===ramoId).length,semestre:semestre.id};
+  const nome = document.getElementById('mf2-nome').value.trim(); if(!nome) return;
+  const ramoId = document.getElementById('mf2-ramoId').value; if(!ramoId) return;
+  const b1DataProva = document.getElementById('mf2-b1')?.value || null;
+  const b2DataProva = document.getElementById('mf2-b2')?.value || null;
+  const aulas = coletarAulas();
+  const n1t = document.getElementById('mf2-n1t')?.value;
+  const n1p = document.getElementById('mf2-n1p')?.value;
+  const n2t = document.getElementById('mf2-n2t')?.value;
+  const n2p = document.getElementById('mf2-n2p')?.value;
+  const notas = {
+    b1Trab:  n1t!==''&&n1t!=null ? parseFloat(n1t) : null,
+    b1Prova: n1p!==''&&n1p!=null ? parseFloat(n1p) : null,
+    b2Trab:  n2t!==''&&n2t!=null ? parseFloat(n2t) : null,
+    b2Prova: n2p!==''&&n2p!=null ? parseFloat(n2p) : null,
+  };
+  const existing = editingId ? materias.find(m=>m.id===editingId) : null;
+  // Vincula ao semestre SOMENTE se tiver pelo menos 1 aula definida
+  const semestreVinculo = aulas.length > 0 ? semestre.id : null;
+  const obj = {
+    id: editingId||uid(), ramoId, nome,
+    b1DataProva, b2DataProva,
+    dataProva: b1DataProva, // legado
+    aulas,
+    notas,
+    semestre: semestreVinculo,
+    ordem: existing ? existing.ordem : materias.filter(m=>m.ramoId===ramoId).length,
+  };
   if(editingId){const i=materias.findIndex(m=>m.id===editingId);if(i>-1)materias[i]=obj;}else materias.push(obj);
-  save(SK.materias,materias); closeModal(); renderEstudos();
+  save(SK.materias, materias); closeModal(); renderEstudos();
+  if(activeView==='materia') renderMateriaDetail();
+}
+
+// Abrir modal de data importante já vinculada à matéria
+function openModalDataMateria(materiaId) {
+  _pendingMateriaId = materiaId;
+  openModal('marco-materia');
 }
 function deleteMateria(id) {
   conteudos=conteudos.filter(c=>c.materiaId!==id);
@@ -1494,15 +1932,110 @@ function deleteMateria(id) {
   closeModal(); renderEstudos();
 }
 
-// ── CONTEÚDO FORM ──
+// ── AULAS HELPERS ──
+function addAulaRow() {
+  const container = document.getElementById('aulasContainer');
+  const idx = container.querySelectorAll('.aula-row').length;
+  const div = document.createElement('div');
+  div.className = 'modal-row aula-row';
+  div.style.cssText = 'margin-bottom:8px;align-items:center';
+  div.id = `aula-row-${idx}`;
+  div.innerHTML = `
+    <div class="form-group" style="margin-bottom:0;flex:2">
+      <select class="form-select aula-dia">
+        ${DAYS_FULL.map((d,i)=>`<option value="${i}"${i===1?' selected':''}>${d}</option>`).join('')}
+      </select>
+    </div>
+    <div class="form-group" style="margin-bottom:0;flex:1">
+      <input class="form-input aula-hora" type="time" value="08:00">
+    </div>
+    <button onclick="removeAulaRow(this)" style="background:none;border:none;font-size:1rem;cursor:pointer;color:#e57373;padding:0 4px;flex-shrink:0">✕</button>`;
+  container.appendChild(div);
+}
+function removeAulaRow(btn) {
+  btn.closest('.aula-row').remove();
+}
+function coletarAulas() {
+  const rows = document.querySelectorAll('#aulasContainer .aula-row');
+  const aulas = [];
+  rows.forEach(row => {
+    const dia = parseInt(row.querySelector('.aula-dia').value);
+    const hora = row.querySelector('.aula-hora').value;
+    if(hora) aulas.push({dia, hora});
+  });
+  return aulas;
+}
+
+// Fim do semestre: desvincula matérias (mantém cadastro, remove vínculo de semestre)
+function verificarFimSemestre() {
+  const td = today();
+  if(!semestre.fim || td <= semestre.fim) return;
+  // semestre encerrou — remover vínculo das matérias
+  let changed = false;
+  materias.forEach((m,i)=>{
+    if(m.semestre===semestre.id && m._semEncerrado!==semestre.id) {
+      materias[i]._semEncerrado = semestre.id;
+      changed = true;
+    }
+  });
+  if(changed) save(SK.materias, materias);
+}
+// Estado temporário das refs no modal (array de {id, doutrina, capitulos:[{id,numero}]})
+let _modalRefs = [];
+
+function sortCaps(caps) {
+  // Ordenação numérica de capítulos tipo 7, 7.1, 7.1.1, 10, etc.
+  return [...caps].sort((a,b)=>{
+    const pa=a.numero.split('.').map(Number);
+    const pb=b.numero.split('.').map(Number);
+    for(let i=0;i<Math.max(pa.length,pb.length);i++){
+      const na=pa[i]||0, nb=pb[i]||0;
+      if(na!==nb) return na-nb;
+    }
+    return 0;
+  });
+}
+
 function conteudoForm(c) {
+  // Migrar legado → novo formato
+  if(c && c.refs) { _modalRefs = c.refs.map(r=>({...r, capitulos:[...r.capitulos]})); }
+  else if(c && c.referencia) { _modalRefs = [{id:uid(), doutrina:c.referencia, capitulos: c.capitulos?[{id:uid(),numero:c.capitulos}]:[]}]; }
+  else { _modalRefs = []; }
+
+  return buildConteudoFormHTML(c);
+}
+
+function buildConteudoFormHTML(c) {
+  const refsHTML = _modalRefs.map((r,ri)=>`
+    <div class="ref-block" id="ref-block-${r.id}">
+      <div class="ref-block-header">
+        <span class="ref-block-name">📖 ${esc(r.doutrina)}</span>
+        <button class="ref-block-del" onclick="deleteRef('${r.id}')">🗑 Excluir doutrina</button>
+      </div>
+      <div class="cap-list" id="caps-${r.id}">
+        ${sortCaps(r.capitulos).map(cap=>`
+          <div class="cap-item" id="cap-item-${cap.id}">
+            <span class="cap-num">Cap. ${esc(cap.numero)}</span>
+            <button class="cap-del" onclick="deleteCap('${r.id}','${cap.id}')" title="Remover capítulo">✕</button>
+          </div>`).join('')}
+      </div>
+      <div class="cap-add-row">
+        <input class="form-input" id="cap-input-${r.id}" placeholder="ex: 7 / 7.1 / 7.1.1" onkeydown="if(event.key==='Enter'){event.preventDefault();addCap('${r.id}')}">
+        <button class="cap-add-btn" onclick="addCap('${r.id}')">+ Cap.</button>
+      </div>
+    </div>`).join('');
+
   return `<div class="modal-title">${c?'Editar conteúdo':'Novo conteúdo'}</div>
   <div class="form-group"><label class="form-label">Título do tópico</label>
   <input class="form-input" id="cf-titulo" value="${c?esc(c.titulo):''}" placeholder="ex: Vícios do consentimento, Nexo de causalidade…"></div>
-  <div class="form-group"><label class="form-label">Referência / Livro</label>
-  <input class="form-input" id="cf-ref" value="${c?esc(c.referencia||''):''}" placeholder="ex: Flávio Tartuce, Rogério Greco…"></div>
-  <div class="form-group"><label class="form-label">Capítulos</label>
-  <input class="form-input" id="cf-cap" value="${c?esc(c.capitulos||''):''}" placeholder="ex: 3-5, 8, Anexo I"></div>
+  <div class="form-group">
+    <label class="form-label">Doutrinas &amp; Capítulos</label>
+    <div id="refs-container">${refsHTML}</div>
+    <div class="ref-add-row">
+      <input class="form-input" id="ref-nova-doutrina" placeholder="Nome da doutrina / livro…" onkeydown="if(event.key==='Enter'){event.preventDefault();addRef()}">
+      <button class="cap-add-btn" onclick="addRef()">+ Doutrina</button>
+    </div>
+  </div>
   <div class="form-group"><label class="form-label">Status</label>
   <div style="display:flex;gap:8px;flex-wrap:wrap" id="statusPicker">
     ${[0,1,2,3].map(s=>{
@@ -1514,19 +2047,90 @@ function conteudoForm(c) {
   <button class="btn-primary" onclick="saveConteudo()">Salvar</button>
   ${c?`<button class="btn-danger" onclick="deleteConteudo('${c.id}')">🗑 Excluir conteúdo</button>`:''}`;
 }
+
+function addRef() {
+  const inp = document.getElementById('ref-nova-doutrina');
+  const doutrina = inp.value.trim(); if(!doutrina) return;
+  _modalRefs.push({id:uid(), doutrina, capitulos:[]});
+  inp.value='';
+  reRenderRefs();
+}
+
+function deleteRef(refId) {
+  _modalRefs = _modalRefs.filter(r=>r.id!==refId);
+  reRenderRefs();
+}
+
+function addCap(refId) {
+  const inp = document.getElementById('cap-input-'+refId);
+  const numero = inp.value.trim(); if(!numero) return;
+  const ref = _modalRefs.find(r=>r.id===refId); if(!ref) return;
+  ref.capitulos.push({id:uid(), numero});
+  inp.value='';
+  reRenderCaps(refId);
+}
+
+function deleteCap(refId, capId) {
+  const ref = _modalRefs.find(r=>r.id===refId); if(!ref) return;
+  ref.capitulos = ref.capitulos.filter(c=>c.id!==capId);
+  reRenderCaps(refId);
+}
+
+function reRenderRefs() {
+  // Salva o status picker atual antes de re-renderizar
+  const statusSel=[...document.querySelectorAll('#statusPicker button.selected')][0];
+  const curStatus=statusSel?parseInt(statusSel.id.replace('sp-','')):null;
+  const titulo=document.getElementById('cf-titulo')?.value||'';
+
+  const cont = document.getElementById('refs-container');
+  if(!cont) return;
+  cont.innerHTML = _modalRefs.map((r)=>`
+    <div class="ref-block" id="ref-block-${r.id}">
+      <div class="ref-block-header">
+        <span class="ref-block-name">📖 ${esc(r.doutrina)}</span>
+        <button class="ref-block-del" onclick="deleteRef('${r.id}')">🗑 Excluir doutrina</button>
+      </div>
+      <div class="cap-list" id="caps-${r.id}">
+        ${sortCaps(r.capitulos).map(cap=>`
+          <div class="cap-item" id="cap-item-${cap.id}">
+            <span class="cap-num">Cap. ${esc(cap.numero)}</span>
+            <button class="cap-del" onclick="deleteCap('${r.id}','${cap.id}')" title="Remover capítulo">✕</button>
+          </div>`).join('')}
+      </div>
+      <div class="cap-add-row">
+        <input class="form-input" id="cap-input-${r.id}" placeholder="ex: 7 / 7.1 / 7.1.1" onkeydown="if(event.key==='Enter'){event.preventDefault();addCap('${r.id}')}">
+        <button class="cap-add-btn" onclick="addCap('${r.id}')">+ Cap.</button>
+      </div>
+    </div>`).join('');
+  // Restaura o título caso o form já tivesse algo
+  if(document.getElementById('cf-titulo')) document.getElementById('cf-titulo').value=titulo;
+  // Restaura status
+  if(curStatus!==null) pickStatus(curStatus);
+}
+
+function reRenderCaps(refId) {
+  const ref=_modalRefs.find(r=>r.id===refId); if(!ref) return;
+  const el=document.getElementById('caps-'+refId); if(!el) return;
+  el.innerHTML=sortCaps(ref.capitulos).map(cap=>`
+    <div class="cap-item" id="cap-item-${cap.id}">
+      <span class="cap-num">Cap. ${esc(cap.numero)}</span>
+      <button class="cap-del" onclick="deleteCap('${refId}','${cap.id}')" title="Remover capítulo">✕</button>
+    </div>`).join('');
+}
+
 function pickStatus(s) {
   document.querySelectorAll('#statusPicker button').forEach((b,i)=>{
     const bgs=['var(--s0-bg)','var(--s1-bg)','var(--s2-bg)','var(--s3-bg)'][i];
     b.style.borderColor='transparent'; b.classList.remove('selected');
   });
   const btn=document.getElementById('sp-'+s);
-  btn.classList.add('selected'); btn.style.borderColor='var(--brown)';
+  if(btn){btn.classList.add('selected'); btn.style.borderColor='var(--brown)';}
 }
 function saveConteudo() {
   const titulo=document.getElementById('cf-titulo').value.trim(); if(!titulo) return;
   const statusSel=[...document.querySelectorAll('#statusPicker button.selected')][0];
   const status=statusSel?parseInt(statusSel.id.replace('sp-','')):0;
-  const obj={id:editingId||uid(),materiaId:currentMateriaId,titulo,referencia:document.getElementById('cf-ref').value,capitulos:document.getElementById('cf-cap').value,status,ordem:editingId?(conteudos.find(c=>c.id===editingId)?.ordem||0):conteudos.filter(c=>c.materiaId===currentMateriaId).length};
+  const obj={id:editingId||uid(),materiaId:currentMateriaId,titulo,refs:_modalRefs,status,ordem:editingId?(conteudos.find(c=>c.id===editingId)?.ordem||0):conteudos.filter(c=>c.materiaId===currentMateriaId).length};
   if(editingId){const i=conteudos.findIndex(c=>c.id===editingId);if(i>-1)conteudos[i]=obj;}else conteudos.push(obj);
   save(SK.conteudos,conteudos); closeModal(); renderMateriaDetail();
 }
@@ -1583,7 +2187,7 @@ function rotinaDetail(r) {
 // ── SEARCH ──
 function openSearch() {
   document.getElementById('modalContent').innerHTML=`<div class="modal-title">🔍 Buscar</div>
-  <input class="form-input" id="searchInput" placeholder="Pesquisar tarefas, marcos, matérias…" oninput="doSearch(this.value)" style="margin-bottom:14px">
+  <input class="form-input" id="searchInput" placeholder="Pesquisar tarefas, eventos, matérias…" oninput="doSearch(this.value)" style="margin-bottom:14px">
   <div id="searchResults"></div>`;
   document.getElementById('modalOverlay').classList.add('open');
   setTimeout(()=>document.getElementById('searchInput')?.focus(),200);
@@ -1593,7 +2197,7 @@ function doSearch(q) {
   const lq=q.toLowerCase();
   const rt=tasks.filter(t=>t.title.toLowerCase().includes(lq)||t.notes?.toLowerCase().includes(lq));
   const rm=marcos.filter(m=>m.title.toLowerCase().includes(lq));
-  const rc=conteudos.filter(c=>c.titulo.toLowerCase().includes(lq)||c.referencia?.toLowerCase().includes(lq));
+  const rc=conteudos.filter(c=>c.titulo.toLowerCase().includes(lq)||(c.refs&&c.refs.some(r=>r.doutrina.toLowerCase().includes(lq)))||c.referencia?.toLowerCase().includes(lq));
   if(!rt.length&&!rm.length&&!rc.length){el.innerHTML=`<div class="empty"><div class="empty-sub">Nenhum resultado</div></div>`;return;}
   el.innerHTML=
     (rm.length?`<div class="timeblock-label" style="margin-bottom:8px">📍 Marcos</div>`+rm.map(m=>`<div class="marco-card" style="margin-bottom:8px" onclick="closeModal();openMarco('${m.id}')">
@@ -1756,6 +2360,7 @@ function deletePes(id) { pessoalItens=pessoalItens.filter(x=>x.id!==id); save(SK
 // ════════════════════════════════════════════════
 //  INIT
 // ════════════════════════════════════════════════
+verificarFimSemestre();
 renderHeaderDate();
 renderToday();
 document.getElementById('marcoBadge').textContent=marcos.filter(m=>m.date>=today()).length;
