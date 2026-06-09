@@ -483,16 +483,7 @@ body { background:var(--cream); color:var(--text); font-family:'Inter',sans-seri
   <!-- BOTTOM NAV -->
   <nav class="bottom-nav">
     <button class="bn-btn active" id="bn-hoje" onclick="switchView('hoje',null,true)">
-      <span class="bn-icon">☀️</span>Hoje
-    </button>
-    <button class="bn-btn" id="bn-semana" onclick="switchView('semana',null,true)">
-      <span class="bn-icon">📅</span>Semana
-    </button>
-    <button class="bn-btn" id="bn-marcos" onclick="switchView('marcos',null,true)">
-      <span class="bn-icon">📍</span>Marcos
-    </button>
-    <button class="bn-btn" id="bn-rotina" onclick="switchView('rotina',null,true)">
-      <span class="bn-icon">🔁</span>Rotina
+      <span class="bn-icon">☀️</span>Agenda
     </button>
     <button class="bn-btn" id="bn-areas" onclick="switchView('areas',null,true)">
       <span class="bn-icon">🗂️</span>Áreas
@@ -694,6 +685,7 @@ function switchView(v, tabBtn, fromBottom=false) {
   document.querySelectorAll('.bn-btn').forEach(b=>b.classList.remove('active'));
   document.getElementById('bn-'+v)?.classList.add('active');
   if (['estudos','materia','trabalho','pessoal'].includes(v)) document.getElementById('bn-areas')?.classList.add('active');
+  if (['hoje','semana','marcos','rotina'].includes(v)) document.getElementById('bn-hoje')?.classList.add('active');
 
   // header
   updateHeader(v);
@@ -1230,7 +1222,7 @@ function buildModal(mode,id) {
   if(mode==='semestre')    return semestreForm();
   if(mode==='novo-ramo')   return ramoForm(null);
   if(mode==='edit-ramo')   return ramoForm(ramos.find(r=>r.id===id));
-  if(mode==='nova-materia') return materiaForm(null,id); // id=ramoId
+  if(mode==='nova-materia') { editingId=null; return materiaForm(null,id); } // id=ramoId, não deve ser editingId
   if(mode==='edit-materia') return materiaForm(materias.find(m=>m.id===id),null);
   if(mode==='novo-conteudo') return conteudoForm(null);
   if(mode==='edit-conteudo') return conteudoForm(conteudos.find(c=>c.id===id));
@@ -1489,7 +1481,7 @@ function materiaForm(m, ramoIdOverride) {
 }
 function saveMateria() {
   const nome=document.getElementById('mf2-nome').value.trim(); if(!nome) return;
-  const ramoId=document.getElementById('mf2-ramoId').value;
+  const ramoId=document.getElementById('mf2-ramoId').value; if(!ramoId) return;
   const diaVal=document.getElementById('mf2-dia').value;
   const obj={id:editingId||uid(),ramoId,nome,diaProva:diaVal!==''?parseInt(diaVal):null,ordem:editingId?(materias.find(m=>m.id===editingId)?.ordem||0):materias.filter(m=>m.ramoId===ramoId).length,semestre:semestre.id};
   if(editingId){const i=materias.findIndex(m=>m.id===editingId);if(i>-1)materias[i]=obj;}else materias.push(obj);
