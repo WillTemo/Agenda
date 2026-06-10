@@ -143,6 +143,28 @@ body { background:var(--cream); color:var(--text); font-family:'Inter',sans-seri
 .cal-day.today.has-event::after { background:var(--cream); }
 .cal-day.prova-week { background:rgba(192,200,224,.35); border-radius:0; }
 .cal-day.prova-week.today { background:var(--brown); }
+/* Dia exato de prova de matéria */
+.cal-day.prova-dia::after { width:5px; height:5px; border-radius:50%; background:#8090C8; bottom:2px; }
+.cal-day.has-event.prova-dia::after { background:linear-gradient(to right,var(--brown-l) 50%,#8090C8 50%); width:8px; }
+
+/* ── ADD TRAY — seletor unificado de registro ── */
+.add-tray-backdrop { position:fixed; inset:0; background:rgba(30,15,5,.48); z-index:350; opacity:0; pointer-events:none; transition:opacity .25s; }
+.add-tray-backdrop.open { opacity:1; pointer-events:all; }
+.add-tray { position:fixed; bottom:0; left:50%; transform:translateX(-50%) translateY(110%); width:100%; max-width:430px; z-index:351; padding:0 12px 10px; transition:transform .32s cubic-bezier(.32,1,.28,1); }
+.add-tray-backdrop.open .add-tray { transform:translateX(-50%) translateY(0); }
+.add-tray-label { text-align:center; font-size:.68rem; font-weight:700; text-transform:uppercase; letter-spacing:.1em; color:rgba(255,255,255,.7); margin-bottom:10px; }
+.add-tray-opts { display:flex; flex-direction:column; gap:8px; }
+.add-tray-opt { display:flex; align-items:center; gap:14px; background:white; border:none; border-radius:16px; padding:15px 18px; cursor:pointer; text-align:left; width:100%; transition:transform .1s; box-shadow:0 4px 24px rgba(30,15,5,.15); }
+.add-tray-opt:active { transform:scale(.97); }
+.add-tray-opt-icon { width:44px; height:44px; border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:1.3rem; flex-shrink:0; }
+.add-tray-opt-label { font-size:.95rem; font-weight:700; color:var(--text); font-family:'Inter',sans-serif; line-height:1.2; }
+.add-tray-opt-sub { font-size:.72rem; color:var(--text-l); margin-top:2px; }
+.add-tray-cancel { width:100%; background:rgba(255,255,255,.95); border:none; border-radius:16px; padding:15px; font-family:'Inter',sans-serif; font-size:.9rem; font-weight:600; color:var(--text-m); cursor:pointer; margin-top:8px; box-shadow:0 2px 12px rgba(30,15,5,.1); }
+/* ── ROTINA: modo de edição ── */
+.rot-mode-chips { display:flex; gap:8px; margin-bottom:14px; }
+.rot-mode-chip { flex:1; padding:10px 8px; background:white; border:2px solid var(--beige); border-radius:var(--radius-sm); font-size:.78rem; font-weight:600; color:var(--text-m); cursor:pointer; text-align:center; font-family:'Inter',sans-serif; transition:.15s; }
+.rot-mode-chip.active { border-color:var(--brown); background:var(--cream2); color:var(--brown); }
+.rot-override-info { background:var(--cat-estudo); border-radius:var(--radius-sm); padding:9px 12px; margin-bottom:12px; font-size:.75rem; color:#2D3D7B; font-weight:500; display:flex; align-items:center; gap:8px; }
 
 /* ── MARCOS ── */
 .marcos-list { display:flex; flex-direction:column; gap:10px; }
@@ -386,7 +408,7 @@ body { background:var(--cream); color:var(--text); font-family:'Inter',sans-seri
     </div>
     <div style="display:flex;gap:8px" id="headerActions">
       <button class="header-btn" onclick="openSearch()" title="Buscar">🔍</button>
-      <button class="header-btn" onclick="openModal('new')" title="Adicionar">＋</button>
+      <button class="header-btn" onclick="openAddTray()" title="Adicionar">＋</button>
     </div>
   </header>
 
@@ -429,7 +451,7 @@ body { background:var(--cream); color:var(--text); font-family:'Inter',sans-seri
       <div class="mini-cal" id="miniCal"></div>
       <div class="sec-header">
         <span class="sec-title">Calendário</span>
-        <span class="sec-link" onclick="openModal('marco')">+ Adicionar</span>
+        <span class="sec-link" onclick="addTrayOpen('marco')">+ Adicionar</span>
       </div>
       <div class="marcos-list" id="marcosList"></div>
     </div>
@@ -438,7 +460,7 @@ body { background:var(--cream); color:var(--text); font-family:'Inter',sans-seri
     <div class="view" id="view-rotina">
       <div class="sec-header">
         <span class="sec-title">Minha rotina</span>
-        <span class="sec-link" onclick="openModal('rotina')">+ Bloco</span>
+        <span class="sec-link" onclick="addTrayOpen('rotina')">+ Bloco</span>
       </div>
       <p style="font-size:.78rem;color:var(--text-l);margin-bottom:16px;line-height:1.5">
         Blocos fixos que se repetem. Não aparecem no calendário.
@@ -509,7 +531,7 @@ body { background:var(--cream); color:var(--text); font-family:'Inter',sans-seri
   </main>
 
   <!-- FAB dinâmico -->
-  <button class="fab" id="fabBtn" onclick="fabAction()">＋</button>
+  <button class="fab" id="fabBtn" onclick="openAddTray()">＋</button>
 
   <!-- BOTTOM NAV -->
   <nav class="bottom-nav">
@@ -520,6 +542,37 @@ body { background:var(--cream); color:var(--text); font-family:'Inter',sans-seri
       <span class="bn-icon">🗂️</span>Áreas
     </button>
   </nav>
+</div>
+
+<!-- ADD TRAY: seletor unificado de novo registro -->
+<div class="add-tray-backdrop" id="addTrayBackdrop" onclick="closeAddTray(event)">
+  <div class="add-tray">
+    <div class="add-tray-label">Novo registro</div>
+    <div class="add-tray-opts">
+      <button class="add-tray-opt" onclick="addTrayOpen('new')">
+        <div class="add-tray-opt-icon" style="background:var(--cat-saude)">✅</div>
+        <div>
+          <div class="add-tray-opt-label">Tarefa</div>
+          <div class="add-tray-opt-sub">Algo a fazer num dia específico</div>
+        </div>
+      </button>
+      <button class="add-tray-opt" onclick="addTrayOpen('marco')">
+        <div class="add-tray-opt-icon" style="background:var(--cat-marco)">📍</div>
+        <div>
+          <div class="add-tray-opt-label">Evento</div>
+          <div class="add-tray-opt-sub">Consulta, prova, viagem, data importante</div>
+        </div>
+      </button>
+      <button class="add-tray-opt" onclick="addTrayOpen('rotina')">
+        <div class="add-tray-opt-icon" style="background:var(--cat-pessoal)">🔁</div>
+        <div>
+          <div class="add-tray-opt-label">Rotina</div>
+          <div class="add-tray-opt-sub">Bloco fixo que se repete toda semana</div>
+        </div>
+      </button>
+    </div>
+    <button class="add-tray-cancel" onclick="closeAddTray()">Cancelar</button>
+  </div>
 </div>
 
 <!-- MODAL -->
@@ -804,7 +857,7 @@ function updateHeader(v) {
   if (v==='hoje'||v==='semana'||v==='marcos'||v==='rotina') {
     title.textContent = v==='marcos' ? 'Calendário' : 'Rotina';
     sub.textContent = headerDateStr();
-    acts.innerHTML = `<button class="header-btn" onclick="openSearch()">🔍</button><button class="header-btn" onclick="openModal('new')">＋</button>`;
+    acts.innerHTML = `<button class="header-btn" onclick="openSearch()">🔍</button><button class="header-btn" onclick="openAddTray()">＋</button>`;
   } else if (v==='areas') {
     title.textContent = 'Áreas';
     sub.textContent = '';
@@ -868,14 +921,25 @@ function enterArea(a)  {
 }
 
 // ════════════════════════════════════════════════
-//  FAB ACTION (dinâmico por view)
+//  ADD TRAY — seletor unificado de novo registro
 // ════════════════════════════════════════════════
-function fabAction() {
-  if (activeView==='hoje'||activeView==='semana') openModal('new');
-  else if (activeView==='marcos') openModal('marco');
-  else if (activeView==='rotina') openModal('rotina');
-  else openModal('new');
+function openAddTray() {
+  document.getElementById('addTrayBackdrop').classList.add('open');
 }
+function closeAddTray(e) {
+  if (e && e.target !== document.getElementById('addTrayBackdrop')) return;
+  document.getElementById('addTrayBackdrop').classList.remove('open');
+}
+function addTrayOpen(mode) {
+  document.getElementById('addTrayBackdrop').classList.remove('open');
+  // pequeno delay para a animação de fechar antes de abrir o modal
+  setTimeout(() => openModal(mode), 60);
+}
+
+// ════════════════════════════════════════════════
+//  FAB ACTION (dinâmico por view) — mantido p/ compatibilidade
+// ════════════════════════════════════════════════
+function fabAction() { openAddTray(); }
 
 // ════════════════════════════════════════════════
 //  TODAY VIEW
@@ -913,6 +977,12 @@ function renderTodayFull(cid, taskList, td, weekday) {
 
   // ── Bloco 2: Rotina do dia ──
   const rotinaHoje = rotina.filter(r=>r.days&&r.days.includes(weekday))
+    .map(r => {
+      // aplicar override de dia se existir
+      const overrideKey = 'rotOverride_'+r.id+'_'+td;
+      const stored = localStorage.getItem(overrideKey);
+      return stored ? {...r, ...JSON.parse(stored), _origId: r.id} : r;
+    })
     .sort((a,b)=>(a.time||'').localeCompare(b.time||''));
   // aulas do semestre ativo vinculadas ao dia de hoje
   const aulasHoje = getAulasHoje(weekday);
@@ -938,8 +1008,9 @@ function renderTodayFull(cid, taskList, td, weekday) {
           </div>
         </div>`;
       }
+      const rStripe = b.cor ? `style="background:${b.cor}"` : `class="task-stripe stripe-${b.cat}"`;
       return `<div class="task-card${conc?' done':''}">
-        <div class="task-stripe stripe-${b.cat}"></div>
+        <div class="task-stripe" ${rStripe}></div>
         <div class="task-check${conc?' checked':''}" onclick="toggleRotinaConc('${concKey}','${cid}','${td}',${weekday})"></div>
         <div class="task-body">
           <div class="task-title">${esc(b.title)}</div>
@@ -1024,8 +1095,9 @@ function renderTaskList(cid, list) {
 }
 
 function taskCardHTML(t) {
+  const sAttr = t.cor ? `style="background:${t.cor}"` : `class="task-stripe stripe-${t.cat}"`;
   return `<div class="task-card${t.done?' done':''}" onclick="openTask('${t.id}')">
-    <div class="task-stripe stripe-${t.cat}"></div>
+    <div class="task-stripe" ${sAttr}></div>
     <div class="task-check${t.done?' checked':''}" onclick="toggleTask(event,'${t.id}')"></div>
     <div class="task-body">
       <div class="task-title">${esc(t.title)}</div>
@@ -1119,8 +1191,13 @@ function renderMiniCal() {
   const td=today();
   const marcoMap={};
   marcos.forEach(m=>{ marcoMap[m.date]=true; });
-  // destacar datas de prova das matérias
-  const provaSet=new Set(materias.map(m=>m.dataProva).filter(Boolean));
+  // Coletar todas as datas de prova das matérias (b1DataProva, b2DataProva, e campo legado dataProva)
+  const provaSet=new Set();
+  materias.forEach(m=>{
+    if(m.b1DataProva) provaSet.add(m.b1DataProva);
+    if(m.b2DataProva) provaSet.add(m.b2DataProva);
+    if(m.dataProva)   provaSet.add(m.dataProva);
+  });
 
   let html=`<div class="mini-cal-header">
     <span class="mini-cal-month">${MONTHS_PT[month]} ${year}</span>
@@ -1133,10 +1210,18 @@ function renderMiniCal() {
   for(let d=1;d<=days;d++){
     const ds=`${year}-${String(month+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
     const isTd=ds===td, hasEv=!!marcoMap[ds], isProva=provaSet.has(ds);
-    html+=`<div class="cal-day${isTd?' today':''}${hasEv?' has-event':''}${isProva&&!isTd?' prova-week':''}" onclick="calDayClick('${ds}')">${d}</div>`;
+    let classes='cal-day';
+    if(isTd) classes+=' today';
+    if(hasEv) classes+=' has-event';
+    if(isProva&&!isTd) classes+=' prova-dia';
+    html+=`<div class="${classes}" onclick="calDayClick('${ds}')">${d}</div>`;
   }
   html+=`</div>`;
-  if(provaSet.size) html+=`<div style="display:flex;align-items:center;gap:6px;margin-top:10px;font-size:.68rem;color:var(--text-l)"><div style="width:12px;height:12px;border-radius:3px;background:rgba(192,200,224,.6)"></div>Datas de prova</div>`;
+  // Legenda
+  const legendas=[];
+  if(provaSet.size) legendas.push(`<span style="display:inline-flex;align-items:center;gap:4px"><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#8090C8"></span>Prova</span>`);
+  legendas.push(`<span style="display:inline-flex;align-items:center;gap:4px"><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--brown-l)"></span>Evento</span>`);
+  html+=`<div style="display:flex;gap:14px;margin-top:10px;font-size:.67rem;color:var(--text-l);flex-wrap:wrap">${legendas.join('')}</div>`;
   document.getElementById('miniCal').innerHTML=html;
 }
 function calPrev(){calMonth--;if(calMonth<0){calMonth=11;calYear--;} renderMiniCal();}
@@ -1150,8 +1235,10 @@ function renderRotina() {
   const el=document.getElementById('rotinaBlocks');
   if(!rotina.length){el.innerHTML=`<div class="empty"><div class="empty-icon">🔁</div><div class="empty-title">Nenhum bloco</div><div class="empty-sub">Adicione atividades recorrentes</div></div>`;return;}
   const sorted=[...rotina].sort((a,b)=>(a.time||'').localeCompare(b.time||''));
-  el.innerHTML=sorted.map(r=>`<div class="task-card" onclick="openRotinaBlock('${r.id}')">
-    <div class="task-stripe stripe-${r.cat}"></div>
+  el.innerHTML=sorted.map(r=>{
+    const sAttr = r.cor ? `style="background:${r.cor}"` : `class="task-stripe stripe-${r.cat}"`;
+    return `<div class="task-card" onclick="openRotinaBlock('${r.id}')">
+    <div class="task-stripe" ${sAttr}></div>
     <div class="task-body" style="padding:2px 0">
       <div class="task-title">${esc(r.title)}</div>
       <div class="task-meta">
@@ -1160,7 +1247,8 @@ function renderRotina() {
         <span style="font-size:.68rem;color:var(--text-l)">${r.days.map(d=>DAYS_PT[d]).join(' · ')}</span>
       </div>
     </div>
-  </div>`).join('');
+  </div>`;
+  }).join('');
 }
 
 // ════════════════════════════════════════════════
@@ -1477,14 +1565,15 @@ function buildModal(mode,id) {
   if(mode==='new'||mode==='edit-task')      return taskForm(id?tasks.find(t=>t.id===id):null);
   if(mode==='marco'||mode==='edit-marco')   return marcoForm(id?marcos.find(m=>m.id===id):null, null);
   if(mode==='marco-materia')               return marcoForm(null, _pendingMateriaId);
-  if(mode==='rotina'||mode==='edit-rotina') return rotinaForm(id?rotina.find(r=>r.id===id):null);
+  if(mode==='rotina')                       return rotinaForm(null, null);
+  if(mode==='edit-rotina')                  return rotinaForm(id?rotina.find(r=>r.id===id):null, null);
   if(mode==='view-task')   return taskDetail(tasks.find(t=>t.id===id));
   if(mode==='view-marco')  return marcoDetail(marcos.find(m=>m.id===id));
   if(mode==='view-rotina') return rotinaDetail(rotina.find(r=>r.id===id));
   if(mode==='semestre')    return semestreForm();
   if(mode==='novo-ramo')   return ramoForm(null);
   if(mode==='edit-ramo')   return ramoForm(ramos.find(r=>r.id===id));
-  if(mode==='nova-materia') { editingId=null; return materiaForm(null,id); } // id=ramoId, não deve ser editingId
+  if(mode==='nova-materia') { editingId=null; return materiaForm(null,id); }
   if(mode==='edit-materia') return materiaForm(materias.find(m=>m.id===id),null);
   if(mode==='novo-conteudo') return conteudoForm(null);
   if(mode==='edit-conteudo') return conteudoForm(conteudos.find(c=>c.id===id));
@@ -1497,6 +1586,7 @@ function buildModal(mode,id) {
 
 // ── TASK FORM ──
 function taskForm(t) {
+  const corAtual = t?.cor || PALETTE[4]; // azul-pastel por padrão
   return `<div class="modal-title">${t?'Editar tarefa':'Nova tarefa'}</div>
   <div class="form-group"><label class="form-label">Título</label>
   <input class="form-input" id="f-title" value="${t?esc(t.title):''}" placeholder="O que você precisa fazer?"></div>
@@ -1508,6 +1598,10 @@ function taskForm(t) {
   <div class="cat-picker" id="catPicker">
     ${['saude','estudo','social','trabalho','pessoal'].map(c=>`<button class="cat-option cat-${c}${(t?t.cat===c:c==='pessoal')?' selected':''}" data-cat="${c}" onclick="pickCat('${c}')">${CAT_ICON[c]} ${CAT_LABEL[c]}</button>`).join('')}
   </div></div>
+  <div class="form-group"><label class="form-label">Cor</label>
+  <div class="color-palette">${colorSwatchHTML(corAtual)}</div>
+  <input type="hidden" id="_selectedColor" value="${corAtual}">
+  </div>
   <div class="form-group"><label class="form-label">Notas</label>
   <textarea class="form-textarea" id="f-notes" placeholder="Detalhes…">${t?esc(t.notes||''):''}</textarea></div>
   <button class="btn-primary" onclick="saveTask()">Salvar</button>
@@ -1516,7 +1610,8 @@ function taskForm(t) {
 function pickCat(cat) { document.querySelectorAll('.cat-option').forEach(b=>b.classList.toggle('selected',b.dataset.cat===cat)); }
 function saveTask() {
   const title=document.getElementById('f-title').value.trim(); if(!title) return;
-  const obj={id:editingId||uid(),title,date:document.getElementById('f-date').value||today(),time:document.getElementById('f-time').value,cat:document.querySelector('.cat-option.selected')?.dataset.cat||'pessoal',done:false,notes:document.getElementById('f-notes').value};
+  const cor=document.getElementById('_selectedColor')?.value||PALETTE[4];
+  const obj={id:editingId||uid(),title,date:document.getElementById('f-date').value||today(),time:document.getElementById('f-time').value,cat:document.querySelector('.cat-option.selected')?.dataset.cat||'pessoal',done:false,notes:document.getElementById('f-notes').value,cor};
   if(editingId){const i=tasks.findIndex(t=>t.id===editingId);if(i>-1){obj.done=tasks[i].done;tasks[i]=obj;}}else tasks.push(obj);
   save(SK.tasks,tasks); closeModal();
   if(activeView==='hoje') renderToday(); else if(activeView==='semana') renderWeek();
@@ -1646,33 +1741,88 @@ function deleteMarco(id) {
 }
 
 // ── ROTINA FORM ──
-function rotinaForm(r) {
-  const days=r?r.days:[1,2,3,4,5];
-  return `<div class="modal-title">${r?'Editar bloco':'Novo bloco de rotina'}</div>
+// _rotinaOverrideDate: null = edição permanente; 'YYYY-MM-DD' = override de dia
+let _rotinaOverrideDate = null;
+
+function rotinaForm(r, overrideDate) {
+  _rotinaOverrideDate = overrideDate || null;
+  const days = r ? r.days : [1,2,3,4,5];
+  const corAtual = r?.cor || PALETTE[14]; // padrão: verde-pastel
+  const overrideInfo = overrideDate
+    ? `<div class="rot-override-info">📅 Alteração somente para <strong>${formatDatePT(overrideDate)}</strong></div>`
+    : '';
+  const modeChips = r ? `
+    <div class="rot-mode-chips">
+      <button class="rot-mode-chip${!overrideDate?' active':''}" onclick="switchRotinaMode('perm','${r.id}')">🔁 Permanente</button>
+      <button class="rot-mode-chip${overrideDate?' active':''}" onclick="switchRotinaMode('dia','${r.id}')">📅 Só hoje (${DAYS_PT[new Date().getDay()]})</button>
+    </div>` : '';
+
+  return `<div class="modal-title">${r ? (overrideDate ? 'Ajuste de hoje' : 'Editar rotina') : 'Novo bloco de rotina'}</div>
+  ${modeChips}
+  ${overrideInfo}
   <div class="form-group"><label class="form-label">Atividade</label>
   <input class="form-input" id="rf-title" value="${r?esc(r.title):''}" placeholder="Academia, estudo…"></div>
   <div class="form-group"><label class="form-label">Horário</label><input class="form-input" type="time" id="rf-time" value="${r?r.time:'07:00'}"></div>
-  <div class="form-group"><label class="form-label">Dias da semana</label>
+  ${!overrideDate ? `<div class="form-group"><label class="form-label">Dias da semana</label>
   <div style="display:flex;gap:6px;flex-wrap:wrap">
     ${DAYS_PT.map((d,i)=>`<button class="cat-option${days.includes(i)?' selected':''}" style="padding:6px 10px;font-size:.73rem" id="rd-${i}" onclick="toggleRDay(${i})">${d}</button>`).join('')}
-  </div></div>
+  </div></div>` : ''}
   <div class="form-group"><label class="form-label">Categoria</label>
   <div class="cat-picker" id="catPicker">
     ${['saude','estudo','social','trabalho','pessoal'].map(c=>`<button class="cat-option cat-${c}${(r?r.cat===c:c==='pessoal')?' selected':''}" data-cat="${c}" onclick="pickCat('${c}')">${CAT_ICON[c]} ${CAT_LABEL[c]}</button>`).join('')}
   </div></div>
+  <div class="form-group"><label class="form-label">Cor</label>
+  <div class="color-palette">${colorSwatchHTML(corAtual)}</div>
+  <input type="hidden" id="_selectedColor" value="${corAtual}">
+  </div>
   <div class="form-group"><label class="form-label">Notas</label>
   <input class="form-input" id="rf-notes" value="${r?esc(r.notes||''):''}" placeholder="Duração, local…"></div>
   <button class="btn-primary" onclick="saveRotina()">Salvar</button>
-  ${r?`<button class="btn-danger" onclick="deleteRotina('${r.id}')">🗑 Remover bloco</button>`:''}`;
+  ${r&&overrideDate&&localStorage.getItem('rotOverride_'+r.id+'_'+overrideDate)?`<button class="btn-secondary" onclick="clearRotinaOverride('${r.id}','${overrideDate}')">↩ Remover ajuste deste dia</button>`:''}
+  ${r&&!overrideDate?`<button class="btn-danger" onclick="deleteRotina('${r.id}')">🗑 Remover bloco</button>`:''}`;
 }
+
+function switchRotinaMode(mode, id) {
+  const r = rotina.find(x=>x.id===id);
+  if(!r) return;
+  editingId = id;
+  const overrideDate = mode==='dia' ? today() : null;
+  // Se há override salvo para hoje, carregar seus valores
+  const stored = mode==='dia' ? localStorage.getItem('rotOverride_'+id+'_'+today()) : null;
+  const base = stored ? {...r, ...JSON.parse(stored)} : r;
+  document.getElementById('modalContent').innerHTML = rotinaForm(base, overrideDate);
+}
+
 function toggleRDay(i) { const b=document.getElementById('rd-'+i); b.classList.toggle('selected'); }
+
 function saveRotina() {
   const title=document.getElementById('rf-title').value.trim(); if(!title) return;
+  const cor=document.getElementById('_selectedColor')?.value||PALETTE[14];
+  const cat=document.querySelector('.cat-option.selected')?.dataset.cat||'pessoal';
+  const time=document.getElementById('rf-time').value;
+  const notes=document.getElementById('rf-notes').value;
+
+  if(_rotinaOverrideDate) {
+    // Salva override apenas para este dia no localStorage
+    const key='rotOverride_'+editingId+'_'+_rotinaOverrideDate;
+    localStorage.setItem(key, JSON.stringify({title,time,cat,cor,notes}));
+    closeModal();
+    if(activeView==='hoje') renderToday(); else if(activeView==='semana') renderWeek(); else renderRotina();
+    return;
+  }
+
   const days=[...document.querySelectorAll('[id^="rd-"].selected')].map(b=>parseInt(b.id.replace('rd-','')));
-  const obj={id:editingId||uid(),title,time:document.getElementById('rf-time').value,days:days.length?days:[1,2,3,4,5],cat:document.querySelector('.cat-option.selected')?.dataset.cat||'pessoal',notes:document.getElementById('rf-notes').value};
+  const obj={id:editingId||uid(),title,time,days:days.length?days:[1,2,3,4,5],cat,cor,notes};
   if(editingId){const i=rotina.findIndex(r=>r.id===editingId);if(i>-1)rotina[i]=obj;}else rotina.push(obj);
   save(SK.rotina,rotina); closeModal(); renderRotina();
 }
+
+function clearRotinaOverride(id, date) {
+  localStorage.removeItem('rotOverride_'+id+'_'+date);
+  closeModal();
+  if(activeView==='hoje') renderToday(); else if(activeView==='semana') renderWeek(); else renderRotina();
+}
+
 function deleteRotina(id) { rotina=rotina.filter(r=>r.id!==id); save(SK.rotina,rotina); closeModal(); renderRotina(); }
 
 // ── SEMESTRE FORM ──
@@ -1749,21 +1899,26 @@ function novoSemestreForm() {
 
 // ── RAMO FORM ──
 function ramoForm(r) {
-  const cor=r?r.cor:RAMO_COLORS[ramos.length%RAMO_COLORS.length];
+  const cor = r ? r.cor : PALETTE[ramos.length % PALETTE.length];
   return `<div class="modal-title">${r?'Editar ramo':'Novo ramo'}</div>
   <div class="form-group"><label class="form-label">Nome do ramo / área</label>
   <input class="form-input" id="rf2-nome" value="${r?esc(r.nome):''}" placeholder="ex: Direito Civil, Português, Matemática…"></div>
   <div class="form-group"><label class="form-label">Cor de identificação</label>
-  <div style="display:flex;gap:8px;flex-wrap:wrap" id="corPicker">
-    ${RAMO_COLORS.map(c=>`<button onclick="pickCor('${c}')" style="width:28px;height:28px;border-radius:50%;background:${c};border:3px solid ${c===cor?'var(--brown)':'transparent'};cursor:pointer;transition:.15s" id="cp-${c.replace('#','')}"></button>`).join('')}
-  </div></div>
+  <div class="color-palette" id="corPalette">${PALETTE.map(c=>`<div class="color-swatch${c===cor?' selected':''}" style="background:${c}" onclick="pickCorRamo('${c}')"></div>`).join('')}</div>
+  <input type="hidden" id="_selectedCorRamo" value="${cor}">
+  </div>
   <button class="btn-primary" onclick="saveRamo()">Salvar</button>
   ${r?`<button class="btn-danger" onclick="deleteRamo('${r.id}')">🗑 Excluir ramo</button>`:''}`;
 }
-function pickCor(c) { document.querySelectorAll('#corPicker button').forEach(b=>b.style.borderColor='transparent'); document.getElementById('cp-'+c.replace('#',''))?.style.setProperty('border-color','var(--brown)'); }
+function pickCorRamo(c) {
+  document.querySelectorAll('#corPalette .color-swatch').forEach(s => {
+    s.classList.toggle('selected', s.style.background===c || s.style.background===hexToRgb(c));
+  });
+  document.getElementById('_selectedCorRamo').value = c;
+}
 function saveRamo() {
   const nome=document.getElementById('rf2-nome').value.trim(); if(!nome) return;
-  const cor=[...document.querySelectorAll('#corPicker button')].find(b=>b.style.borderColor!=='transparent')?.style.background||RAMO_COLORS[0];
+  const cor=document.getElementById('_selectedCorRamo')?.value || PALETTE[0];
   const obj={id:editingId||uid(),nome,cor,ordem:editingId?(ramos.find(r=>r.id===editingId)?.ordem||0):ramos.length};
   if(editingId){const i=ramos.findIndex(r=>r.id===editingId);if(i>-1)ramos[i]=obj;}else ramos.push(obj);
   save(SK.ramos,ramos); closeModal(); renderEstudos();
@@ -2139,7 +2294,12 @@ function deleteConteudo(id) { conteudos=conteudos.filter(c=>c.id!==id); save(SK.
 // ── DETAIL MODALS ──
 function openTask(id)        { openModal('view-task',id); }
 function openMarco(id)       { openModal('view-marco',id); }
-function openRotinaBlock(id) { openModal('view-rotina',id); }
+function openRotinaBlock(id) {
+  editingId = id;
+  const r = rotina.find(x=>x.id===id); if(!r) return;
+  document.getElementById('modalContent').innerHTML = rotinaForm(r, null);
+  document.getElementById('modalOverlay').classList.add('open');
+}
 
 function taskDetail(t) {
   if(!t) return '';
