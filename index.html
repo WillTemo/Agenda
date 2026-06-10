@@ -143,28 +143,6 @@ body { background:var(--cream); color:var(--text); font-family:'Inter',sans-seri
 .cal-day.today.has-event::after { background:var(--cream); }
 .cal-day.prova-week { background:rgba(192,200,224,.35); border-radius:0; }
 .cal-day.prova-week.today { background:var(--brown); }
-/* Dia exato de prova de matéria */
-.cal-day.prova-dia::after { width:5px; height:5px; border-radius:50%; background:#8090C8; bottom:2px; }
-.cal-day.has-event.prova-dia::after { background:linear-gradient(to right,var(--brown-l) 50%,#8090C8 50%); width:8px; }
-
-/* ── ADD TRAY — seletor unificado de registro ── */
-.add-tray-backdrop { position:fixed; inset:0; background:rgba(30,15,5,.48); z-index:350; opacity:0; pointer-events:none; transition:opacity .25s; }
-.add-tray-backdrop.open { opacity:1; pointer-events:all; }
-.add-tray { position:fixed; bottom:0; left:50%; transform:translateX(-50%) translateY(110%); width:100%; max-width:430px; z-index:351; padding:0 12px 10px; transition:transform .32s cubic-bezier(.32,1,.28,1); }
-.add-tray-backdrop.open .add-tray { transform:translateX(-50%) translateY(0); }
-.add-tray-label { text-align:center; font-size:.68rem; font-weight:700; text-transform:uppercase; letter-spacing:.1em; color:rgba(255,255,255,.7); margin-bottom:10px; }
-.add-tray-opts { display:flex; flex-direction:column; gap:8px; }
-.add-tray-opt { display:flex; align-items:center; gap:14px; background:white; border:none; border-radius:16px; padding:15px 18px; cursor:pointer; text-align:left; width:100%; transition:transform .1s; box-shadow:0 4px 24px rgba(30,15,5,.15); }
-.add-tray-opt:active { transform:scale(.97); }
-.add-tray-opt-icon { width:44px; height:44px; border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:1.3rem; flex-shrink:0; }
-.add-tray-opt-label { font-size:.95rem; font-weight:700; color:var(--text); font-family:'Inter',sans-serif; line-height:1.2; }
-.add-tray-opt-sub { font-size:.72rem; color:var(--text-l); margin-top:2px; }
-.add-tray-cancel { width:100%; background:rgba(255,255,255,.95); border:none; border-radius:16px; padding:15px; font-family:'Inter',sans-serif; font-size:.9rem; font-weight:600; color:var(--text-m); cursor:pointer; margin-top:8px; box-shadow:0 2px 12px rgba(30,15,5,.1); }
-/* ── ROTINA: modo de edição ── */
-.rot-mode-chips { display:flex; gap:8px; margin-bottom:14px; }
-.rot-mode-chip { flex:1; padding:10px 8px; background:white; border:2px solid var(--beige); border-radius:var(--radius-sm); font-size:.78rem; font-weight:600; color:var(--text-m); cursor:pointer; text-align:center; font-family:'Inter',sans-serif; transition:.15s; }
-.rot-mode-chip.active { border-color:var(--brown); background:var(--cream2); color:var(--brown); }
-.rot-override-info { background:var(--cat-estudo); border-radius:var(--radius-sm); padding:9px 12px; margin-bottom:12px; font-size:.75rem; color:#2D3D7B; font-weight:500; display:flex; align-items:center; gap:8px; }
 
 /* ── MARCOS ── */
 .marcos-list { display:flex; flex-direction:column; gap:10px; }
@@ -375,22 +353,81 @@ body { background:var(--cream); color:var(--text); font-family:'Inter',sans-seri
 .ref-block-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:6px; }
 .ref-block-name { font-size:.82rem; font-weight:600; color:var(--text); flex:1; }
 .ref-block-del { background:none; border:none; color:#C87070; font-size:.75rem; cursor:pointer; padding:0 4px; flex-shrink:0; }
-.cap-list { display:flex; flex-direction:column; gap:4px; padding-left:8px; }
-.cap-item { display:flex; align-items:center; gap:6px; }
+.ref-block-prog { height:4px; border-radius:2px; background:var(--beige); overflow:hidden; margin-bottom:6px; }
+.ref-block-prog-fill { height:100%; border-radius:2px; background:var(--brown-l); transition:width .3s; }
+.cap-list { display:flex; flex-direction:column; gap:3px; padding-left:0; }
+.cap-item { display:flex; align-items:center; gap:8px; padding:5px 6px; border-radius:6px; background:white; }
+.cap-item:hover { background:#f8f4ee; }
 .cap-num { font-size:.78rem; color:var(--text-m); flex:1; font-family:monospace; }
-.cap-del { background:none; border:none; color:var(--text-l); font-size:.7rem; cursor:pointer; padding:0 2px; }
+.cap-status-btn {
+  border:none; border-radius:6px; font-size:.62rem; font-weight:700; padding:2px 7px;
+  cursor:pointer; transition:opacity .15s, transform .1s; white-space:nowrap; flex-shrink:0;
+  letter-spacing:.03em; text-transform:uppercase;
+}
+.cap-status-btn:active { transform:scale(.92); }
+.cap-del { background:none; border:none; color:var(--beige); font-size:.7rem; cursor:pointer; padding:0 2px; flex-shrink:0; transition:color .15s; }
+.cap-item:hover .cap-del { color:#C87070; }
 .cap-add-row { display:flex; gap:6px; margin-top:6px; }
 .cap-add-row .form-input { flex:1; padding:7px 10px; font-size:.8rem; }
 .cap-add-btn { background:var(--brown); color:white; border:none; border-radius:var(--radius-sm); padding:7px 12px; font-size:.8rem; cursor:pointer; white-space:nowrap; }
 .ref-add-row { display:flex; gap:6px; margin-bottom:14px; }
 .ref-add-row .form-input { flex:1; }
 .ref-add-row .cap-add-btn { white-space:nowrap; }
+/* status do conteúdo calculado automaticamente */
+.status-auto-badge { font-size:.68rem; color:var(--text-l); margin-left:4px; font-weight:400; }
 
-/* ── Conteúdo card refs display ── */
+/* ── Alertas de evento na view Hoje ── */
+.event-alerts { display:flex; flex-direction:column; gap:8px; margin-bottom:14px; }
+.event-alert {
+  border-radius:var(--radius-sm); padding:12px 14px;
+  display:flex; align-items:center; gap:12px;
+  box-shadow:var(--shadow); cursor:pointer;
+  transition:transform .15s, box-shadow .15s;
+  border-left:4px solid transparent;
+}
+.event-alert:active { transform:scale(.98); }
+.event-alert-icon { font-size:1.4rem; flex-shrink:0; }
+.event-alert-body { flex:1; min-width:0; }
+.event-alert-title { font-size:.88rem; font-weight:700; color:var(--text); line-height:1.2; }
+.event-alert-row { display:flex; align-items:center; gap:6px; margin-top:4px; flex-wrap:wrap; }
+.event-alert-countdown { font-size:.72rem; font-weight:700; padding:2px 8px; border-radius:20px; flex-shrink:0; }
+.event-alert-imp { font-size:.65rem; font-weight:700; padding:2px 7px; border-radius:20px; text-transform:uppercase; letter-spacing:.04em; flex-shrink:0; }
+.event-alert-time { font-size:.7rem; color:var(--text-l); }
+/* urgência: branco → roseado → vermelho */
+.alert-u0 { background:#FAFAF8; border-left-color:#C8C0B8; }
+.alert-u1 { background:#FFF4F0; border-left-color:#E8A090; }
+.alert-u2 { background:#FFE8E2; border-left-color:#D96050; }
+.alert-u3 { background:#FFCEC6; border-left-color:#C04030; }
+/* importância */
+.imp-low  { background:#E8F4E8; color:#2D7A3A; }
+.imp-mid  { background:#FFF3DC; color:#8A6A00; }
+.imp-high { background:#FFE0DC; color:#C03020; }
 .conteudo-refs { margin-top:4px; display:flex; flex-direction:column; gap:2px; }
 .conteudo-ref-row { font-size:.68rem; color:var(--brown); display:flex; gap:4px; align-items:baseline; flex-wrap:wrap; }
 .conteudo-ref-dout { font-weight:600; }
 .conteudo-ref-caps { color:var(--text-l); }
+
+/* ── Conflito de horário na rotina ── */
+.task-card.conflict { border:1.5px solid #E8A060; background:#FFFAF4; }
+.conflict-badge { display:inline-flex; align-items:center; gap:4px; font-size:.68rem; font-weight:700; color:#C07020; background:#FFF0D8; padding:2px 8px; border-radius:20px; flex-shrink:0; cursor:pointer; border:none; }
+.conflict-sheet { position:fixed; inset:0; background:rgba(30,15,5,.48); z-index:350; opacity:0; pointer-events:none; transition:opacity .25s; }
+.conflict-sheet.open { opacity:1; pointer-events:all; }
+.conflict-sheet-inner { position:fixed; bottom:0; left:50%; transform:translateX(-50%) translateY(110%); width:100%; max-width:430px; z-index:351; padding:0 12px 10px; transition:transform .32s cubic-bezier(.32,1,.28,1); }
+.conflict-sheet.open .conflict-sheet-inner { transform:translateX(-50%) translateY(0); }
+.conflict-sheet-title { font-size:.68rem; font-weight:700; text-transform:uppercase; letter-spacing:.08em; color:rgba(255,255,255,.7); text-align:center; margin-bottom:10px; }
+.conflict-event-info { background:rgba(255,255,255,.15); border-radius:12px; padding:10px 14px; margin-bottom:10px; }
+.conflict-event-name { font-size:.9rem; font-weight:700; color:white; }
+.conflict-event-sub  { font-size:.73rem; color:rgba(255,255,255,.75); margin-top:2px; }
+.conflict-opts { display:flex; flex-direction:column; gap:8px; }
+.conflict-opt { display:flex; align-items:center; gap:14px; background:white; border:none; border-radius:16px; padding:15px 18px; cursor:pointer; text-align:left; width:100%; box-shadow:0 4px 20px rgba(30,15,5,.15); transition:transform .1s; }
+.conflict-opt:active { transform:scale(.97); }
+.conflict-opt-icon { width:40px; height:40px; border-radius:11px; display:flex; align-items:center; justify-content:center; font-size:1.2rem; flex-shrink:0; }
+.conflict-opt-label { font-size:.9rem; font-weight:700; color:var(--text); font-family:'Inter',sans-serif; line-height:1.2; }
+.conflict-opt-sub { font-size:.7rem; color:var(--text-l); margin-top:2px; }
+.conflict-cancel-btn { width:100%; background:rgba(255,255,255,.92); border:none; border-radius:16px; padding:14px; font-family:'Inter',sans-serif; font-size:.9rem; font-weight:600; color:var(--text-m); cursor:pointer; margin-top:8px; }
+/* item cancelado neste dia */
+.task-card.rot-cancelled .task-title { text-decoration:line-through; color:var(--text-l); }
+.rot-cancelled-label { font-size:.67rem; color:#C07020; background:#FFF0D8; padding:1px 7px; border-radius:20px; }
 
 @media (prefers-reduced-motion:reduce) { *,*::before,*::after { transition-duration:.01ms !important; } }
 </style>
@@ -408,7 +445,7 @@ body { background:var(--cream); color:var(--text); font-family:'Inter',sans-seri
     </div>
     <div style="display:flex;gap:8px" id="headerActions">
       <button class="header-btn" onclick="openSearch()" title="Buscar">🔍</button>
-      <button class="header-btn" onclick="openAddTray()" title="Adicionar">＋</button>
+      <button class="header-btn" onclick="openModal('new')" title="Adicionar">＋</button>
     </div>
   </header>
 
@@ -451,7 +488,7 @@ body { background:var(--cream); color:var(--text); font-family:'Inter',sans-seri
       <div class="mini-cal" id="miniCal"></div>
       <div class="sec-header">
         <span class="sec-title">Calendário</span>
-        <span class="sec-link" onclick="addTrayOpen('marco')">+ Adicionar</span>
+        <span class="sec-link" onclick="openModal('marco')">+ Adicionar</span>
       </div>
       <div class="marcos-list" id="marcosList"></div>
     </div>
@@ -460,7 +497,7 @@ body { background:var(--cream); color:var(--text); font-family:'Inter',sans-seri
     <div class="view" id="view-rotina">
       <div class="sec-header">
         <span class="sec-title">Minha rotina</span>
-        <span class="sec-link" onclick="addTrayOpen('rotina')">+ Bloco</span>
+        <span class="sec-link" onclick="openModal('rotina')">+ Bloco</span>
       </div>
       <p style="font-size:.78rem;color:var(--text-l);margin-bottom:16px;line-height:1.5">
         Blocos fixos que se repetem. Não aparecem no calendário.
@@ -531,7 +568,7 @@ body { background:var(--cream); color:var(--text); font-family:'Inter',sans-seri
   </main>
 
   <!-- FAB dinâmico -->
-  <button class="fab" id="fabBtn" onclick="openAddTray()">＋</button>
+  <button class="fab" id="fabBtn" onclick="fabAction()">＋</button>
 
   <!-- BOTTOM NAV -->
   <nav class="bottom-nav">
@@ -544,42 +581,49 @@ body { background:var(--cream); color:var(--text); font-family:'Inter',sans-seri
   </nav>
 </div>
 
-<!-- ADD TRAY: seletor unificado de novo registro -->
-<div class="add-tray-backdrop" id="addTrayBackdrop" onclick="closeAddTray(event)">
-  <div class="add-tray">
-    <div class="add-tray-label">Novo registro</div>
-    <div class="add-tray-opts">
-      <button class="add-tray-opt" onclick="addTrayOpen('new')">
-        <div class="add-tray-opt-icon" style="background:var(--cat-saude)">✅</div>
-        <div>
-          <div class="add-tray-opt-label">Tarefa</div>
-          <div class="add-tray-opt-sub">Algo a fazer num dia específico</div>
-        </div>
-      </button>
-      <button class="add-tray-opt" onclick="addTrayOpen('marco')">
-        <div class="add-tray-opt-icon" style="background:var(--cat-marco)">📍</div>
-        <div>
-          <div class="add-tray-opt-label">Evento</div>
-          <div class="add-tray-opt-sub">Consulta, prova, viagem, data importante</div>
-        </div>
-      </button>
-      <button class="add-tray-opt" onclick="addTrayOpen('rotina')">
-        <div class="add-tray-opt-icon" style="background:var(--cat-pessoal)">🔁</div>
-        <div>
-          <div class="add-tray-opt-label">Rotina</div>
-          <div class="add-tray-opt-sub">Bloco fixo que se repete toda semana</div>
-        </div>
-      </button>
-    </div>
-    <button class="add-tray-cancel" onclick="closeAddTray()">Cancelar</button>
-  </div>
-</div>
-
 <!-- MODAL -->
 <div class="modal-overlay" id="modalOverlay" onclick="closeModalOutside(event)">
   <div class="modal">
     <div class="modal-handle"></div>
     <div id="modalContent"></div>
+  </div>
+</div>
+
+<!-- CONFLICT SHEET: resolver conflito de horário -->
+<div class="conflict-sheet" id="conflictSheet" onclick="closeConflictSheet(event)">
+  <div class="conflict-sheet-inner">
+    <div class="conflict-sheet-title">⚠️ Conflito de horário</div>
+    <div class="conflict-event-info" id="conflictEventInfo"></div>
+    <div class="conflict-opts">
+      <button class="conflict-opt" id="conflictOptCancel">
+        <div class="conflict-opt-icon" style="background:#FFF0D8">🚫</div>
+        <div>
+          <div class="conflict-opt-label">Cancelar só hoje</div>
+          <div class="conflict-opt-sub">Remove este item da rotina apenas neste dia</div>
+        </div>
+      </button>
+      <button class="conflict-opt" id="conflictOptTime">
+        <div class="conflict-opt-icon" style="background:#E8F4FF">🕐</div>
+        <div>
+          <div class="conflict-opt-label">Mudar horário hoje</div>
+          <div class="conflict-opt-sub">Ajusta só para este dia, sem alterar a rotina</div>
+        </div>
+      </button>
+    </div>
+    <button class="conflict-cancel-btn" onclick="closeConflictSheet()">Manter como está</button>
+  </div>
+</div>
+
+<!-- TIME PICKER SHEET: novo horário para override de dia -->
+<div class="conflict-sheet" id="timePickerSheet" onclick="closeTimePickerSheet(event)">
+  <div class="conflict-sheet-inner">
+    <div class="conflict-sheet-title">🕐 Novo horário para hoje</div>
+    <div style="background:white;border-radius:16px;padding:20px;box-shadow:0 4px 20px rgba(30,15,5,.15)">
+      <div style="font-size:.82rem;color:var(--text-m);font-weight:600;margin-bottom:10px" id="timePickerLabel"></div>
+      <input type="time" class="form-input" id="timePickerInput" style="font-size:1.1rem;text-align:center;padding:14px">
+      <button class="btn-primary" style="margin-top:12px;width:100%" onclick="confirmTimeOverride()">Confirmar</button>
+    </div>
+    <button class="conflict-cancel-btn" onclick="closeTimePickerSheet()">Cancelar</button>
   </div>
 </div>
 
@@ -857,7 +901,7 @@ function updateHeader(v) {
   if (v==='hoje'||v==='semana'||v==='marcos'||v==='rotina') {
     title.textContent = v==='marcos' ? 'Calendário' : 'Rotina';
     sub.textContent = headerDateStr();
-    acts.innerHTML = `<button class="header-btn" onclick="openSearch()">🔍</button><button class="header-btn" onclick="openAddTray()">＋</button>`;
+    acts.innerHTML = `<button class="header-btn" onclick="openSearch()">🔍</button><button class="header-btn" onclick="openModal('new')">＋</button>`;
   } else if (v==='areas') {
     title.textContent = 'Áreas';
     sub.textContent = '';
@@ -921,25 +965,134 @@ function enterArea(a)  {
 }
 
 // ════════════════════════════════════════════════
-//  ADD TRAY — seletor unificado de novo registro
+//  CONFLICT SHEET — resolver conflitos de horário
 // ════════════════════════════════════════════════
-function openAddTray() {
-  document.getElementById('addTrayBackdrop').classList.add('open');
+let _conflictRotinaId = null;
+let _conflictDate     = null;
+let _conflictCid      = null;
+let _conflictWeekday  = null;
+
+function openConflictSheet(rotinaId, date, rotinaTitle, rotinaTime, eventoTitle, eventoTime) {
+  _conflictRotinaId = rotinaId;
+  _conflictDate     = date;
+  _conflictWeekday  = new Date(date+'T12:00:00').getDay();
+  _conflictCid      = 'todayTasks';
+
+  document.getElementById('conflictEventInfo').innerHTML = `
+    <div class="conflict-event-name">🔁 ${rotinaTitle}${rotinaTime?' · '+rotinaTime:''}</div>
+    <div class="conflict-event-sub">conflita com 📍 ${eventoTitle}${eventoTime?' · '+eventoTime:''}</div>`;
+
+  document.getElementById('conflictOptCancel').onclick = () => {
+    cancelRotinaDay(rotinaId, date);
+  };
+  document.getElementById('conflictOptTime').onclick = () => {
+    closeConflictSheet();
+    openTimePickerSheet(rotinaId, date, rotinaTitle, rotinaTime);
+  };
+
+  document.getElementById('conflictSheet').classList.add('open');
 }
-function closeAddTray(e) {
-  if (e && e.target !== document.getElementById('addTrayBackdrop')) return;
-  document.getElementById('addTrayBackdrop').classList.remove('open');
+
+function closeConflictSheet(e) {
+  if(e && e.target !== document.getElementById('conflictSheet')) return;
+  document.getElementById('conflictSheet').classList.remove('open');
 }
-function addTrayOpen(mode) {
-  document.getElementById('addTrayBackdrop').classList.remove('open');
-  // pequeno delay para a animação de fechar antes de abrir o modal
-  setTimeout(() => openModal(mode), 60);
+
+function cancelRotinaDay(rotinaId, date) {
+  localStorage.setItem(`rot_cancel_${rotinaId}_${date}`, '1');
+  document.getElementById('conflictSheet').classList.remove('open');
+  renderToday();
+}
+
+function restoreRotinaDay(rotinaId, date, cid, weekday) {
+  localStorage.removeItem(`rot_cancel_${rotinaId}_${date}`);
+  localStorage.removeItem(`rot_override_${rotinaId}_${date}`);
+  renderToday();
+}
+
+function openTimePickerSheet(rotinaId, date, title, currentTime) {
+  _conflictRotinaId = rotinaId;
+  _conflictDate     = date;
+  document.getElementById('timePickerLabel').textContent = `Novo horário para "${title}" (hoje)`;
+  document.getElementById('timePickerInput').value = currentTime || '';
+  document.getElementById('timePickerSheet').classList.add('open');
+  setTimeout(()=>document.getElementById('timePickerInput').focus(), 200);
+}
+
+function closeTimePickerSheet(e) {
+  if(e && e.target !== document.getElementById('timePickerSheet')) return;
+  document.getElementById('timePickerSheet').classList.remove('open');
+}
+
+function confirmTimeOverride() {
+  const newTime = document.getElementById('timePickerInput').value;
+  if(!newTime) return;
+  const r = rotina.find(x=>x.id===_conflictRotinaId); if(!r) return;
+  const key = `rot_override_${_conflictRotinaId}_${_conflictDate}`;
+  const existing = localStorage.getItem(key);
+  const base = existing ? JSON.parse(existing) : {};
+  localStorage.setItem(key, JSON.stringify({...r, ...base, time:newTime}));
+  document.getElementById('timePickerSheet').classList.remove('open');
+  renderToday();
 }
 
 // ════════════════════════════════════════════════
-//  FAB ACTION (dinâmico por view) — mantido p/ compatibilidade
+//  FAB ACTION (dinâmico por view)
 // ════════════════════════════════════════════════
-function fabAction() { openAddTray(); }
+function fabAction() {
+  if (activeView==='hoje'||activeView==='semana') openModal('new');
+  else if (activeView==='marcos') openModal('marco');
+  else if (activeView==='rotina') openModal('rotina');
+  else openModal('new');
+}
+
+// ════════════════════════════════════════════════
+//  EVENT ALERTS — avisos de proximidade
+// ════════════════════════════════════════════════
+function eventAlertsHTML() {
+  const td = today();
+  const IMP_LABEL = {low:'Baixa',mid:'Média',high:'Alta'};
+  const IMP_CLASS = {low:'imp-low',mid:'imp-mid',high:'imp-high'};
+  const IMP_ICON  = {low:'🟢',mid:'🟡',high:'🔴'};
+
+  // Coletar marcos que devem mostrar aviso hoje (excluindo o próprio dia)
+  const alertable = marcos.filter(m => {
+    if(!m.alertWindow || m.alertWindow==='none') return false;
+    const diff = diffDays(m.date);
+    if(diff <= 0) return false; // já passou ou é hoje → para de mostrar
+    if(m.alertWindow==='day')    return diff === 1;
+    if(m.alertWindow==='week')   return diff <= 7;
+    if(m.alertWindow==='always') return true;
+    return false;
+  }).sort((a,b)=>a.date.localeCompare(b.date));
+
+  if(!alertable.length) return '';
+
+  const cards = alertable.map(m => {
+    const diff = diffDays(m.date);
+    // urgência: 0=distante, 1=≤7d, 2=≤3d, 3=amanhã
+    const u = diff===1 ? 3 : diff<=3 ? 2 : diff<=7 ? 1 : 0;
+    const cor = m.cor || '#C8C0D8';
+    const timeStr = m.time ? ` · ${m.time}` : '';
+    const diffStr = diff===1 ? 'Amanhã!' : `em ${diff} dia${diff>1?'s':''}`;
+    return `<div class="event-alert alert-u${u}" onclick="openMarco('${m.id}')">
+      <div class="event-alert-icon">${m.icon||'📍'}</div>
+      <div class="event-alert-body">
+        <div class="event-alert-title">${esc(m.title)}</div>
+        <div class="event-alert-row">
+          <span class="event-alert-countdown" style="background:${cor}33;color:var(--text-m)">${diffStr}</span>
+          <span class="event-alert-imp ${IMP_CLASS[m.imp||'mid']}">${IMP_ICON[m.imp||'mid']} ${IMP_LABEL[m.imp||'mid']}</span>
+          ${m.notes?`<span class="event-alert-time">${esc(m.notes.slice(0,30))}${timeStr}</span>`:(timeStr?`<span class="event-alert-time">🕐${timeStr}</span>`:'')}
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+
+  return `<div class="timeblock" style="margin-bottom:0">
+    <div class="timeblock-label">🔔 Avisos</div>
+    <div class="event-alerts">${cards}</div>
+  </div>`;
+}
 
 // ════════════════════════════════════════════════
 //  TODAY VIEW
@@ -968,32 +1121,81 @@ function renderToday() {
 function renderTodayFull(cid, taskList, td, weekday) {
   const el = document.getElementById(cid);
 
+  // ── Alertas de eventos próximos ──
+  let html = eventAlertsHTML();
+
   // ── Bloco 1: Tarefas ──
-  let html = '';
   if(taskList.length) {
     const sorted = [...taskList].sort((a,b)=>(a.time||'99:99').localeCompare(b.time||'99:99'));
     html += `<div class="timeblock"><div class="timeblock-label">📋 Tarefas</div>${sorted.map(taskCardHTML).join('')}</div>`;
   }
 
-  // ── Bloco 2: Rotina do dia ──
-  const rotinaHoje = rotina.filter(r=>r.days&&r.days.includes(weekday))
-    .map(r => {
-      // aplicar override de dia se existir
-      const overrideKey = 'rotOverride_'+r.id+'_'+td;
-      const stored = localStorage.getItem(overrideKey);
-      return stored ? {...r, ...JSON.parse(stored), _origId: r.id} : r;
-    })
-    .sort((a,b)=>(a.time||'').localeCompare(b.time||''));
-  // aulas do semestre ativo vinculadas ao dia de hoje
-  const aulasHoje = getAulasHoje(weekday);
-  const todosBlocos = [...rotinaHoje.map(r=>({...r,_tipo:'rotina'})), ...aulasHoje.map(a=>({...a,_tipo:'aula'}))];
-  todosBlocos.sort((a,b)=>(a.time||'').localeCompare(b.time||''));
+  // ── Bloco 2: Rotina + Eventos unificados (detectar conflitos) ──
+  // Coletar blocos de rotina com overrides aplicados
+  const rotinaHoje = rotina.filter(r=>r.days&&r.days.includes(weekday)).map(r=>{
+    const cancelKey = `rot_cancel_${r.id}_${td}`;
+    const overKey   = `rot_override_${r.id}_${td}`;
+    const cancelled = localStorage.getItem(cancelKey)==='1';
+    const stored    = localStorage.getItem(overKey);
+    const over      = stored ? JSON.parse(stored) : null;
+    return {...r, ...(over||{}), _tipo:'rotina', _origId:r.id, _cancelled:cancelled, _overrideTime:over?.time||null};
+  });
+  const aulasHoje = getAulasHoje(weekday).map(a=>({...a,_tipo:'aula'}));
+  const eventosHoje = marcos.filter(m=>m.date===td);
 
-  if(todosBlocos.length) {
-    html += `<div class="timeblock"><div class="timeblock-label">🔁 Rotina</div>`;
-    html += todosBlocos.map(b => {
+  // Detectar conflitos: rotina vs eventos com horário
+  // Considera sobreposição de ±60min como conflito
+  function toMins(t) { if(!t) return null; const [h,m]=t.split(':').map(Number); return h*60+m; }
+  function hasConflict(rBlock, events) {
+    const rm = toMins(rBlock.time);
+    if(rm===null) return null;
+    return events.find(ev=>{
+      const em = toMins(ev.time);
+      if(em===null) return false;
+      return Math.abs(rm-em) < 60;
+    }) || null;
+  }
+
+  const todosBlocos = [
+    ...rotinaHoje.map(r=>({...r, _conflictWith: hasConflict(r, eventosHoje)})),
+    ...aulasHoje
+  ].sort((a,b)=>(a.time||'').localeCompare(b.time||''));
+
+  if(todosBlocos.length || eventosHoje.length) {
+    html += `<div class="timeblock"><div class="timeblock-label">📅 Agenda do dia</div>`;
+
+    // Renderizar eventos do dia intercalados
+    const allItems = [
+      ...todosBlocos.map(b=>({...b, _group:'rotina'})),
+      ...eventosHoje.map(m=>({...m, _tipo:'evento', _group:'evento'}))
+    ].sort((a,b)=>(a.time||'').localeCompare(b.time||''));
+
+    html += allItems.map(b=>{
+      if(b._group==='evento') {
+        const concKey = `ev_${td}_${b.id}`;
+        const conc = localStorage.getItem(concKey)==='1';
+        const cor = b.cor||'#C8C0D8';
+        return `<div class="task-card${conc?' done':''}">
+          <div class="task-stripe" style="background:${cor}"></div>
+          <div class="task-check${conc?' checked':''}" onclick="toggleEvento('${concKey}','${cid}','${td}',${weekday})"></div>
+          <div class="task-body" onclick="openMarco('${b.id}')">
+            <div class="task-title">${b.icon||'📍'} ${esc(b.title)}</div>
+            <div class="task-meta">
+              ${b.time?`<span class="task-time">🕐 ${b.time}</span>`:''}
+              <span class="task-tag" style="background:${cor}33;color:var(--text-m)">${CAT_LABEL[b.cat]||b.cat}</span>
+              ${b.notes?`<span style="font-size:.68rem;color:var(--text-l)">${esc(b.notes.slice(0,30))}</span>`:''}
+            </div>
+          </div>
+        </div>`;
+      }
+
+      // Rotina ou aula
       const concKey = `rot_${td}_${b.id}`;
       const conc = localStorage.getItem(concKey)==='1';
+      const cancelled = b._cancelled;
+      const hasConfl = !cancelled && b._conflictWith;
+      const sAttr = b.cor ? `style="background:${b.cor}"` : `class="task-stripe stripe-${b.cat||'pessoal'}"`;
+
       if(b._tipo==='aula') {
         return `<div class="task-card${conc?' done':''}">
           <div class="task-stripe stripe-estudo"></div>
@@ -1008,39 +1210,23 @@ function renderTodayFull(cid, taskList, td, weekday) {
           </div>
         </div>`;
       }
-      const rStripe = b.cor ? `style="background:${b.cor}"` : `class="task-stripe stripe-${b.cat}"`;
-      return `<div class="task-card${conc?' done':''}">
-        <div class="task-stripe" ${rStripe}></div>
+
+      return `<div class="task-card${conc?' done':''}${hasConfl?' conflict':''}${cancelled?' rot-cancelled':''}">
+        <div class="task-stripe" ${sAttr}></div>
         <div class="task-check${conc?' checked':''}" onclick="toggleRotinaConc('${concKey}','${cid}','${td}',${weekday})"></div>
-        <div class="task-body">
+        <div class="task-body" onclick="openRotinaBlock('${b._origId||b.id}')">
           <div class="task-title">${esc(b.title)}</div>
           <div class="task-meta">
-            ${b.time?`<span class="task-time">🕐 ${b.time}</span>`:''}
+            ${b.time?`<span class="task-time">🕐 ${b.time}${b._overrideTime?' (ajustado)':''}</span>`:''}
             <span class="task-tag cat-${b.cat}">${CAT_LABEL[b.cat]||b.cat}</span>
+            ${cancelled?`<span class="rot-cancelled-label">cancelado hoje</span>`:''}
           </div>
         </div>
+        ${hasConfl&&!cancelled?`<button class="conflict-badge" onclick="event.stopPropagation();openConflictSheet('${b._origId||b.id}','${td}','${esc(b.title)}','${b.time||''}','${esc(b._conflictWith.title)}','${b._conflictWith.time||''}')">⚠️ Conflito</button>`:''}
+        ${cancelled?`<button class="conflict-badge" style="background:#F0F0F0;color:var(--text-l)" onclick="event.stopPropagation();restoreRotinaDay('${b._origId||b.id}','${td}','${cid}',${weekday})">↩ Restaurar</button>`:''}
       </div>`;
     }).join('');
-    html += `</div>`;
-  }
 
-  // ── Bloco 3: Eventos do dia (marcos) ──
-  const eventosHoje = marcos.filter(m=>m.date===td);
-  if(eventosHoje.length) {
-    html += `<div class="timeblock"><div class="timeblock-label">📍 Eventos de hoje</div>`;
-    html += eventosHoje.map(m=>{
-      const concKey = `ev_${td}_${m.id}`;
-      const conc = localStorage.getItem(concKey)==='1';
-      const cor = m.cor||'#C8C0D8';
-      return `<div class="task-card${conc?' done':''}">
-        <div class="task-stripe" style="background:${cor}"></div>
-        <div class="task-check${conc?' checked':''}" onclick="toggleEvento('${concKey}','${cid}','${td}',${weekday})"></div>
-        <div class="task-body" onclick="openMarco('${m.id}')">
-          <div class="task-title">${m.icon||'📍'} ${esc(m.title)}</div>
-          <div class="task-meta"><span class="task-tag" style="background:${cor}33;color:var(--text-m)">${CAT_LABEL[m.cat]||m.cat}</span>${m.notes?`<span style="font-size:.68rem;color:var(--text-l)">${esc(m.notes)}</span>`:''}</div>
-        </div>
-      </div>`;
-    }).join('');
     html += `</div>`;
   }
 
@@ -1095,9 +1281,8 @@ function renderTaskList(cid, list) {
 }
 
 function taskCardHTML(t) {
-  const sAttr = t.cor ? `style="background:${t.cor}"` : `class="task-stripe stripe-${t.cat}"`;
   return `<div class="task-card${t.done?' done':''}" onclick="openTask('${t.id}')">
-    <div class="task-stripe" ${sAttr}></div>
+    <div class="task-stripe stripe-${t.cat}"></div>
     <div class="task-check${t.done?' checked':''}" onclick="toggleTask(event,'${t.id}')"></div>
     <div class="task-body">
       <div class="task-title">${esc(t.title)}</div>
@@ -1169,6 +1354,10 @@ function renderMarcos() {
     else if(diff===0){txt='Hoje!';cls+=' today-badge';}
     else if(diff===1) txt='Amanhã';
     else txt=`em ${diff}d`;
+    const IMP_CLASS={low:'imp-low',mid:'imp-mid',high:'imp-high'};
+    const IMP_ICON ={low:'🟢',mid:'🟡',high:'🔴'};
+    const imp=m.imp||'mid';
+    const timeStr=m.time?`<span class="event-alert-time">🕐 ${m.time}</span>`:'';
     const recurLabel = m.recur&&m.recur!=='none'?`<span class="recur-badge">${{daily:'Diário',weekly:'Semanal',monthly:'Mensal',yearly:'Anual'}[m.recur]||''}</span>`:'';
     return `<div class="marco-card" onclick="openMarco('${m.id}')" style="border-left:4px solid ${cor}">
       <div class="marco-date-badge" style="background:${cor}22">
@@ -1177,7 +1366,12 @@ function renderMarcos() {
       </div>
       <div class="marco-info">
         <div class="marco-title">${m.icon||'📍'} ${esc(m.title)} ${recurLabel}</div>
-        <div class="marco-sub"><span class="task-tag" style="background:${cor}33;color:var(--text-m)">${CAT_LABEL[m.cat]||m.cat}</span>${m.notes?' · '+esc(m.notes):''}</div>
+        <div class="marco-sub">
+          <span class="task-tag" style="background:${cor}33;color:var(--text-m)">${CAT_LABEL[m.cat]||m.cat}</span>
+          <span class="event-alert-imp ${IMP_CLASS[imp]}" style="font-size:.62rem;padding:1px 6px">${IMP_ICON[imp]} ${['Baixa','Média','Alta'][['low','mid','high'].indexOf(imp)]}</span>
+          ${timeStr}
+          ${m.notes?`<span style="font-size:.68rem;color:var(--text-l)">${esc(m.notes.slice(0,30))}</span>`:''}
+        </div>
       </div>
       <div class="${cls}" style="${diff>=0&&diff!==0?`background:${cor}33;color:var(--text-m)`:''}">${txt}</div>
     </div>`;
@@ -1191,13 +1385,8 @@ function renderMiniCal() {
   const td=today();
   const marcoMap={};
   marcos.forEach(m=>{ marcoMap[m.date]=true; });
-  // Coletar todas as datas de prova das matérias (b1DataProva, b2DataProva, e campo legado dataProva)
-  const provaSet=new Set();
-  materias.forEach(m=>{
-    if(m.b1DataProva) provaSet.add(m.b1DataProva);
-    if(m.b2DataProva) provaSet.add(m.b2DataProva);
-    if(m.dataProva)   provaSet.add(m.dataProva);
-  });
+  // destacar datas de prova das matérias
+  const provaSet=new Set(materias.map(m=>m.dataProva).filter(Boolean));
 
   let html=`<div class="mini-cal-header">
     <span class="mini-cal-month">${MONTHS_PT[month]} ${year}</span>
@@ -1210,18 +1399,10 @@ function renderMiniCal() {
   for(let d=1;d<=days;d++){
     const ds=`${year}-${String(month+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
     const isTd=ds===td, hasEv=!!marcoMap[ds], isProva=provaSet.has(ds);
-    let classes='cal-day';
-    if(isTd) classes+=' today';
-    if(hasEv) classes+=' has-event';
-    if(isProva&&!isTd) classes+=' prova-dia';
-    html+=`<div class="${classes}" onclick="calDayClick('${ds}')">${d}</div>`;
+    html+=`<div class="cal-day${isTd?' today':''}${hasEv?' has-event':''}${isProva&&!isTd?' prova-week':''}" onclick="calDayClick('${ds}')">${d}</div>`;
   }
   html+=`</div>`;
-  // Legenda
-  const legendas=[];
-  if(provaSet.size) legendas.push(`<span style="display:inline-flex;align-items:center;gap:4px"><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#8090C8"></span>Prova</span>`);
-  legendas.push(`<span style="display:inline-flex;align-items:center;gap:4px"><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--brown-l)"></span>Evento</span>`);
-  html+=`<div style="display:flex;gap:14px;margin-top:10px;font-size:.67rem;color:var(--text-l);flex-wrap:wrap">${legendas.join('')}</div>`;
+  if(provaSet.size) html+=`<div style="display:flex;align-items:center;gap:6px;margin-top:10px;font-size:.68rem;color:var(--text-l)"><div style="width:12px;height:12px;border-radius:3px;background:rgba(192,200,224,.6)"></div>Datas de prova</div>`;
   document.getElementById('miniCal').innerHTML=html;
 }
 function calPrev(){calMonth--;if(calMonth<0){calMonth=11;calYear--;} renderMiniCal();}
@@ -1235,10 +1416,8 @@ function renderRotina() {
   const el=document.getElementById('rotinaBlocks');
   if(!rotina.length){el.innerHTML=`<div class="empty"><div class="empty-icon">🔁</div><div class="empty-title">Nenhum bloco</div><div class="empty-sub">Adicione atividades recorrentes</div></div>`;return;}
   const sorted=[...rotina].sort((a,b)=>(a.time||'').localeCompare(b.time||''));
-  el.innerHTML=sorted.map(r=>{
-    const sAttr = r.cor ? `style="background:${r.cor}"` : `class="task-stripe stripe-${r.cat}"`;
-    return `<div class="task-card" onclick="openRotinaBlock('${r.id}')">
-    <div class="task-stripe" ${sAttr}></div>
+  el.innerHTML=sorted.map(r=>`<div class="task-card" onclick="openRotinaBlock('${r.id}')">
+    <div class="task-stripe stripe-${r.cat}"></div>
     <div class="task-body" style="padding:2px 0">
       <div class="task-title">${esc(r.title)}</div>
       <div class="task-meta">
@@ -1247,8 +1426,7 @@ function renderRotina() {
         <span style="font-size:.68rem;color:var(--text-l)">${r.days.map(d=>DAYS_PT[d]).join(' · ')}</span>
       </div>
     </div>
-  </div>`;
-  }).join('');
+  </div>`).join('');
 }
 
 // ════════════════════════════════════════════════
@@ -1565,15 +1743,14 @@ function buildModal(mode,id) {
   if(mode==='new'||mode==='edit-task')      return taskForm(id?tasks.find(t=>t.id===id):null);
   if(mode==='marco'||mode==='edit-marco')   return marcoForm(id?marcos.find(m=>m.id===id):null, null);
   if(mode==='marco-materia')               return marcoForm(null, _pendingMateriaId);
-  if(mode==='rotina')                       return rotinaForm(null, null);
-  if(mode==='edit-rotina')                  return rotinaForm(id?rotina.find(r=>r.id===id):null, null);
+  if(mode==='rotina'||mode==='edit-rotina') return rotinaForm(id?rotina.find(r=>r.id===id):null);
   if(mode==='view-task')   return taskDetail(tasks.find(t=>t.id===id));
   if(mode==='view-marco')  return marcoDetail(marcos.find(m=>m.id===id));
   if(mode==='view-rotina') return rotinaDetail(rotina.find(r=>r.id===id));
   if(mode==='semestre')    return semestreForm();
   if(mode==='novo-ramo')   return ramoForm(null);
   if(mode==='edit-ramo')   return ramoForm(ramos.find(r=>r.id===id));
-  if(mode==='nova-materia') { editingId=null; return materiaForm(null,id); }
+  if(mode==='nova-materia') { editingId=null; return materiaForm(null,id); } // id=ramoId, não deve ser editingId
   if(mode==='edit-materia') return materiaForm(materias.find(m=>m.id===id),null);
   if(mode==='novo-conteudo') return conteudoForm(null);
   if(mode==='edit-conteudo') return conteudoForm(conteudos.find(c=>c.id===id));
@@ -1586,7 +1763,6 @@ function buildModal(mode,id) {
 
 // ── TASK FORM ──
 function taskForm(t) {
-  const corAtual = t?.cor || PALETTE[4]; // azul-pastel por padrão
   return `<div class="modal-title">${t?'Editar tarefa':'Nova tarefa'}</div>
   <div class="form-group"><label class="form-label">Título</label>
   <input class="form-input" id="f-title" value="${t?esc(t.title):''}" placeholder="O que você precisa fazer?"></div>
@@ -1598,10 +1774,6 @@ function taskForm(t) {
   <div class="cat-picker" id="catPicker">
     ${['saude','estudo','social','trabalho','pessoal'].map(c=>`<button class="cat-option cat-${c}${(t?t.cat===c:c==='pessoal')?' selected':''}" data-cat="${c}" onclick="pickCat('${c}')">${CAT_ICON[c]} ${CAT_LABEL[c]}</button>`).join('')}
   </div></div>
-  <div class="form-group"><label class="form-label">Cor</label>
-  <div class="color-palette">${colorSwatchHTML(corAtual)}</div>
-  <input type="hidden" id="_selectedColor" value="${corAtual}">
-  </div>
   <div class="form-group"><label class="form-label">Notas</label>
   <textarea class="form-textarea" id="f-notes" placeholder="Detalhes…">${t?esc(t.notes||''):''}</textarea></div>
   <button class="btn-primary" onclick="saveTask()">Salvar</button>
@@ -1610,8 +1782,7 @@ function taskForm(t) {
 function pickCat(cat) { document.querySelectorAll('.cat-option').forEach(b=>b.classList.toggle('selected',b.dataset.cat===cat)); }
 function saveTask() {
   const title=document.getElementById('f-title').value.trim(); if(!title) return;
-  const cor=document.getElementById('_selectedColor')?.value||PALETTE[4];
-  const obj={id:editingId||uid(),title,date:document.getElementById('f-date').value||today(),time:document.getElementById('f-time').value,cat:document.querySelector('.cat-option.selected')?.dataset.cat||'pessoal',done:false,notes:document.getElementById('f-notes').value,cor};
+  const obj={id:editingId||uid(),title,date:document.getElementById('f-date').value||today(),time:document.getElementById('f-time').value,cat:document.querySelector('.cat-option.selected')?.dataset.cat||'pessoal',done:false,notes:document.getElementById('f-notes').value};
   if(editingId){const i=tasks.findIndex(t=>t.id===editingId);if(i>-1){obj.done=tasks[i].done;tasks[i]=obj;}}else tasks.push(obj);
   save(SK.tasks,tasks); closeModal();
   if(activeView==='hoje') renderToday(); else if(activeView==='semana') renderWeek();
@@ -1632,13 +1803,33 @@ function marcoForm(m, forceMateriaId) {
     {v:'monthly',l:'Mensalmente'},
     {v:'yearly',l:'Anualmente'},
   ];
+  const IMP_OPTS = [
+    {v:'low',  l:'🟢 Baixa'},
+    {v:'mid',  l:'🟡 Média'},
+    {v:'high', l:'🔴 Alta'},
+  ];
+  const ALERT_OPTS = [
+    {v:'none',  l:'Sem aviso'},
+    {v:'day',   l:'No dia anterior'},
+    {v:'week',  l:'Na semana do evento'},
+    {v:'always',l:'A partir de hoje'},
+  ];
   return `<div class="modal-title">${m?'Editar evento':'Novo evento'}</div>
   <div class="form-group"><label class="form-label">Título</label>
   <input class="form-input" id="mf-title" value="${m?esc(m.title):''}" placeholder="Nome do evento…"></div>
+
   <div class="modal-row">
     <div class="form-group"><label class="form-label">Data</label><input class="form-input" type="date" id="mf-date" value="${m?m.date:today()}"></div>
+    <div class="form-group"><label class="form-label">Horário</label><input class="form-input" type="time" id="mf-time" value="${m?.time||''}"></div>
+  </div>
+
+  <div class="modal-row">
     <div class="form-group"><label class="form-label">Ícone</label>
     <select class="form-select" id="mf-icon">${['📍','📝','🩺','💼','🎂','✈️','🎓','💊','🏆','🎯','🔔','⚡','🌟','🎉'].map(ic=>`<option value="${ic}"${m&&m.icon===ic?' selected':''}>${ic}</option>`).join('')}</select></div>
+    <div class="form-group"><label class="form-label">Importância</label>
+    <select class="form-select" id="mf-imp">
+      ${IMP_OPTS.map(o=>`<option value="${o.v}"${(m?.imp||'mid')===o.v?' selected':''}>${o.l}</option>`).join('')}
+    </select></div>
   </div>
 
   <div class="form-group">
@@ -1646,6 +1837,11 @@ function marcoForm(m, forceMateriaId) {
     <div class="color-palette">${colorSwatchHTML(corAtual)}</div>
     <input type="hidden" id="_selectedColor" value="${corAtual}">
   </div>
+
+  <div class="form-group"><label class="form-label">⏰ Aviso antecipado</label>
+  <div style="display:flex;gap:7px;flex-wrap:wrap" id="alertPicker">
+    ${ALERT_OPTS.map(o=>`<button class="cat-option${(m?.alertWindow||'none')===o.v?' selected':''}" data-alert="${o.v}" onclick="pickAlert('${o.v}')">${o.l}</button>`).join('')}
+  </div></div>
 
   <div class="form-group"><label class="form-label">Repetir</label>
   <select class="form-select" id="mf-recur">
@@ -1672,7 +1868,14 @@ function marcoForm(m, forceMateriaId) {
   <textarea class="form-textarea" id="mf-notes" placeholder="Local, instruções…">${m?esc(m.notes||''):''}</textarea></div>
   <button class="btn-primary" onclick="saveMarco()">Salvar</button>
   ${m?`<button class="btn-danger" onclick="deleteMarco('${m.id}')">🗑 Excluir</button>`:''}
-  <script>document.getElementById('mf-recur').addEventListener('change',function(){document.getElementById('mf-recur-end-wrap').style.display=this.value==='none'?'none':'';});<\/script>`;
+  <script>
+    document.getElementById('mf-recur').addEventListener('change',function(){
+      document.getElementById('mf-recur-end-wrap').style.display=this.value==='none'?'none':'';
+    });
+  <\/script>`;
+}
+function pickAlert(v) {
+  document.querySelectorAll('#alertPicker button').forEach(b=>b.classList.toggle('selected',b.dataset.alert===v));
 }
 
 function saveMarco() {
@@ -1682,15 +1885,19 @@ function saveMarco() {
   const recur=document.getElementById('mf-recur')?.value||'none';
   const recurEnd=document.getElementById('mf-recur-end')?.value||null;
   const baseDate=document.getElementById('mf-date').value||today();
+  const time=document.getElementById('mf-time')?.value||'';
+  const imp=document.getElementById('mf-imp')?.value||'mid';
+  const alertWindow=document.querySelector('#alertPicker button.selected')?.dataset.alert||'none';
 
   const base={
     id:editingId||uid(), title,
-    date:baseDate,
+    date:baseDate, time,
     icon:document.getElementById('mf-icon').value,
     cat:document.querySelector('.cat-option.selected')?.dataset.cat||'pessoal',
     notes:document.getElementById('mf-notes').value,
     materiaId:materiaId||undefined,
     cor, recur, recurEnd:recur!=='none'?recurEnd:null,
+    imp, alertWindow,
     _baseId: editingId||null,
   };
 
@@ -1741,88 +1948,33 @@ function deleteMarco(id) {
 }
 
 // ── ROTINA FORM ──
-// _rotinaOverrideDate: null = edição permanente; 'YYYY-MM-DD' = override de dia
-let _rotinaOverrideDate = null;
-
-function rotinaForm(r, overrideDate) {
-  _rotinaOverrideDate = overrideDate || null;
-  const days = r ? r.days : [1,2,3,4,5];
-  const corAtual = r?.cor || PALETTE[14]; // padrão: verde-pastel
-  const overrideInfo = overrideDate
-    ? `<div class="rot-override-info">📅 Alteração somente para <strong>${formatDatePT(overrideDate)}</strong></div>`
-    : '';
-  const modeChips = r ? `
-    <div class="rot-mode-chips">
-      <button class="rot-mode-chip${!overrideDate?' active':''}" onclick="switchRotinaMode('perm','${r.id}')">🔁 Permanente</button>
-      <button class="rot-mode-chip${overrideDate?' active':''}" onclick="switchRotinaMode('dia','${r.id}')">📅 Só hoje (${DAYS_PT[new Date().getDay()]})</button>
-    </div>` : '';
-
-  return `<div class="modal-title">${r ? (overrideDate ? 'Ajuste de hoje' : 'Editar rotina') : 'Novo bloco de rotina'}</div>
-  ${modeChips}
-  ${overrideInfo}
+function rotinaForm(r) {
+  const days=r?r.days:[1,2,3,4,5];
+  return `<div class="modal-title">${r?'Editar bloco':'Novo bloco de rotina'}</div>
   <div class="form-group"><label class="form-label">Atividade</label>
   <input class="form-input" id="rf-title" value="${r?esc(r.title):''}" placeholder="Academia, estudo…"></div>
   <div class="form-group"><label class="form-label">Horário</label><input class="form-input" type="time" id="rf-time" value="${r?r.time:'07:00'}"></div>
-  ${!overrideDate ? `<div class="form-group"><label class="form-label">Dias da semana</label>
+  <div class="form-group"><label class="form-label">Dias da semana</label>
   <div style="display:flex;gap:6px;flex-wrap:wrap">
     ${DAYS_PT.map((d,i)=>`<button class="cat-option${days.includes(i)?' selected':''}" style="padding:6px 10px;font-size:.73rem" id="rd-${i}" onclick="toggleRDay(${i})">${d}</button>`).join('')}
-  </div></div>` : ''}
+  </div></div>
   <div class="form-group"><label class="form-label">Categoria</label>
   <div class="cat-picker" id="catPicker">
     ${['saude','estudo','social','trabalho','pessoal'].map(c=>`<button class="cat-option cat-${c}${(r?r.cat===c:c==='pessoal')?' selected':''}" data-cat="${c}" onclick="pickCat('${c}')">${CAT_ICON[c]} ${CAT_LABEL[c]}</button>`).join('')}
   </div></div>
-  <div class="form-group"><label class="form-label">Cor</label>
-  <div class="color-palette">${colorSwatchHTML(corAtual)}</div>
-  <input type="hidden" id="_selectedColor" value="${corAtual}">
-  </div>
   <div class="form-group"><label class="form-label">Notas</label>
   <input class="form-input" id="rf-notes" value="${r?esc(r.notes||''):''}" placeholder="Duração, local…"></div>
   <button class="btn-primary" onclick="saveRotina()">Salvar</button>
-  ${r&&overrideDate&&localStorage.getItem('rotOverride_'+r.id+'_'+overrideDate)?`<button class="btn-secondary" onclick="clearRotinaOverride('${r.id}','${overrideDate}')">↩ Remover ajuste deste dia</button>`:''}
-  ${r&&!overrideDate?`<button class="btn-danger" onclick="deleteRotina('${r.id}')">🗑 Remover bloco</button>`:''}`;
+  ${r?`<button class="btn-danger" onclick="deleteRotina('${r.id}')">🗑 Remover bloco</button>`:''}`;
 }
-
-function switchRotinaMode(mode, id) {
-  const r = rotina.find(x=>x.id===id);
-  if(!r) return;
-  editingId = id;
-  const overrideDate = mode==='dia' ? today() : null;
-  // Se há override salvo para hoje, carregar seus valores
-  const stored = mode==='dia' ? localStorage.getItem('rotOverride_'+id+'_'+today()) : null;
-  const base = stored ? {...r, ...JSON.parse(stored)} : r;
-  document.getElementById('modalContent').innerHTML = rotinaForm(base, overrideDate);
-}
-
 function toggleRDay(i) { const b=document.getElementById('rd-'+i); b.classList.toggle('selected'); }
-
 function saveRotina() {
   const title=document.getElementById('rf-title').value.trim(); if(!title) return;
-  const cor=document.getElementById('_selectedColor')?.value||PALETTE[14];
-  const cat=document.querySelector('.cat-option.selected')?.dataset.cat||'pessoal';
-  const time=document.getElementById('rf-time').value;
-  const notes=document.getElementById('rf-notes').value;
-
-  if(_rotinaOverrideDate) {
-    // Salva override apenas para este dia no localStorage
-    const key='rotOverride_'+editingId+'_'+_rotinaOverrideDate;
-    localStorage.setItem(key, JSON.stringify({title,time,cat,cor,notes}));
-    closeModal();
-    if(activeView==='hoje') renderToday(); else if(activeView==='semana') renderWeek(); else renderRotina();
-    return;
-  }
-
   const days=[...document.querySelectorAll('[id^="rd-"].selected')].map(b=>parseInt(b.id.replace('rd-','')));
-  const obj={id:editingId||uid(),title,time,days:days.length?days:[1,2,3,4,5],cat,cor,notes};
+  const obj={id:editingId||uid(),title,time:document.getElementById('rf-time').value,days:days.length?days:[1,2,3,4,5],cat:document.querySelector('.cat-option.selected')?.dataset.cat||'pessoal',notes:document.getElementById('rf-notes').value};
   if(editingId){const i=rotina.findIndex(r=>r.id===editingId);if(i>-1)rotina[i]=obj;}else rotina.push(obj);
   save(SK.rotina,rotina); closeModal(); renderRotina();
 }
-
-function clearRotinaOverride(id, date) {
-  localStorage.removeItem('rotOverride_'+id+'_'+date);
-  closeModal();
-  if(activeView==='hoje') renderToday(); else if(activeView==='semana') renderWeek(); else renderRotina();
-}
-
 function deleteRotina(id) { rotina=rotina.filter(r=>r.id!==id); save(SK.rotina,rotina); closeModal(); renderRotina(); }
 
 // ── SEMESTRE FORM ──
@@ -1899,26 +2051,21 @@ function novoSemestreForm() {
 
 // ── RAMO FORM ──
 function ramoForm(r) {
-  const cor = r ? r.cor : PALETTE[ramos.length % PALETTE.length];
+  const cor=r?r.cor:RAMO_COLORS[ramos.length%RAMO_COLORS.length];
   return `<div class="modal-title">${r?'Editar ramo':'Novo ramo'}</div>
   <div class="form-group"><label class="form-label">Nome do ramo / área</label>
   <input class="form-input" id="rf2-nome" value="${r?esc(r.nome):''}" placeholder="ex: Direito Civil, Português, Matemática…"></div>
   <div class="form-group"><label class="form-label">Cor de identificação</label>
-  <div class="color-palette" id="corPalette">${PALETTE.map(c=>`<div class="color-swatch${c===cor?' selected':''}" style="background:${c}" onclick="pickCorRamo('${c}')"></div>`).join('')}</div>
-  <input type="hidden" id="_selectedCorRamo" value="${cor}">
-  </div>
+  <div style="display:flex;gap:8px;flex-wrap:wrap" id="corPicker">
+    ${RAMO_COLORS.map(c=>`<button onclick="pickCor('${c}')" style="width:28px;height:28px;border-radius:50%;background:${c};border:3px solid ${c===cor?'var(--brown)':'transparent'};cursor:pointer;transition:.15s" id="cp-${c.replace('#','')}"></button>`).join('')}
+  </div></div>
   <button class="btn-primary" onclick="saveRamo()">Salvar</button>
   ${r?`<button class="btn-danger" onclick="deleteRamo('${r.id}')">🗑 Excluir ramo</button>`:''}`;
 }
-function pickCorRamo(c) {
-  document.querySelectorAll('#corPalette .color-swatch').forEach(s => {
-    s.classList.toggle('selected', s.style.background===c || s.style.background===hexToRgb(c));
-  });
-  document.getElementById('_selectedCorRamo').value = c;
-}
+function pickCor(c) { document.querySelectorAll('#corPicker button').forEach(b=>b.style.borderColor='transparent'); document.getElementById('cp-'+c.replace('#',''))?.style.setProperty('border-color','var(--brown)'); }
 function saveRamo() {
   const nome=document.getElementById('rf2-nome').value.trim(); if(!nome) return;
-  const cor=document.getElementById('_selectedCorRamo')?.value || PALETTE[0];
+  const cor=[...document.querySelectorAll('#corPicker button')].find(b=>b.style.borderColor!=='transparent')?.style.background||RAMO_COLORS[0];
   const obj={id:editingId||uid(),nome,cor,ordem:editingId?(ramos.find(r=>r.id===editingId)?.ordem||0):ramos.length};
   if(editingId){const i=ramos.findIndex(r=>r.id===editingId);if(i>-1)ramos[i]=obj;}else ramos.push(obj);
   save(SK.ramos,ramos); closeModal(); renderEstudos();
@@ -2139,13 +2286,23 @@ function verificarFimSemestre() {
 let _modalRefs = [];
 
 function sortCaps(caps) {
-  // Ordenação numérica de capítulos tipo 7, 7.1, 7.1.1, 10, etc.
-  return [...caps].sort((a,b)=>{
-    const pa=a.numero.split('.').map(Number);
-    const pb=b.numero.split('.').map(Number);
-    for(let i=0;i<Math.max(pa.length,pb.length);i++){
-      const na=pa[i]||0, nb=pb[i]||0;
-      if(na!==nb) return na-nb;
+  // Ordenação numérica hierárquica: 1 < 1.1 < 1.2 < 1.10 < 2
+  // Suporta separadores . e - e segmentos alfanuméricos (ex: "1-A", "Intro", "II")
+  function parseKey(num) {
+    return String(num).split(/[.\-]/).map(seg => {
+      const n = parseInt(seg, 10);
+      return isNaN(n) ? seg.toLowerCase() : n;
+    });
+  }
+  function cmpSeg(a, b) {
+    if (typeof a === typeof b) return a < b ? -1 : a > b ? 1 : 0;
+    return typeof a === 'number' ? -1 : 1;
+  }
+  return [...caps].sort((a, b) => {
+    const ka = parseKey(a.numero), kb = parseKey(b.numero);
+    for (let i = 0; i < Math.max(ka.length, kb.length); i++) {
+      const c = cmpSeg(ka[i] ?? -Infinity, kb[i] ?? -Infinity);
+      if (c !== 0) return c;
     }
     return 0;
   });
@@ -2153,26 +2310,57 @@ function sortCaps(caps) {
 
 function conteudoForm(c) {
   // Migrar legado → novo formato
-  if(c && c.refs) { _modalRefs = c.refs.map(r=>({...r, capitulos:[...r.capitulos]})); }
-  else if(c && c.referencia) { _modalRefs = [{id:uid(), doutrina:c.referencia, capitulos: c.capitulos?[{id:uid(),numero:c.capitulos}]:[]}]; }
+  if(c && c.refs) { _modalRefs = c.refs.map(r=>({...r, capitulos:[...r.capitulos.map(cap=>({status:0,...cap}))]})); }
+  else if(c && c.referencia) { _modalRefs = [{id:uid(), doutrina:c.referencia, capitulos: c.capitulos?[{id:uid(),numero:c.capitulos,status:0}]:[]}]; }
   else { _modalRefs = []; }
 
   return buildConteudoFormHTML(c);
 }
 
+// Retorna o HTML de um único cap-item com botão de status clicável
+function capItemHTML(refId, cap) {
+  const s = cap.status ?? 0;
+  const bgs = ['var(--s0-bg)','var(--s1-bg)','var(--s2-bg)','var(--s3-bg)'];
+  const fgs = ['var(--s0-fg)','var(--s1-fg)','var(--s2-fg)','var(--s3-fg)'];
+  return `<div class="cap-item" id="cap-item-${cap.id}">
+    <button class="cap-status-btn" style="background:${bgs[s]};color:${fgs[s]}" onclick="cycleCapStatus('${refId}','${cap.id}')" title="Clique para mudar status">${STATUS_ICON[s]}</button>
+    <span class="cap-num">Cap. ${esc(cap.numero)}</span>
+    <button class="cap-del" onclick="deleteCap('${refId}','${cap.id}')" title="Remover capítulo">✕</button>
+  </div>`;
+}
+
+// Barra de progresso de uma doutrina baseada nos status dos caps
+function refProgressHTML(caps) {
+  if(!caps.length) return '';
+  const done = caps.filter(c=>(c.status??0)>=2).length;
+  const pct = Math.round(done/caps.length*100);
+  return `<div class="ref-block-prog"><div class="ref-block-prog-fill" style="width:${pct}%"></div></div>`;
+}
+
 function buildConteudoFormHTML(c) {
-  const refsHTML = _modalRefs.map((r,ri)=>`
+  // calcula status automático a partir dos caps de todos os refs
+  function autoStatus() {
+    const allCaps = _modalRefs.flatMap(r=>r.capitulos);
+    if(!allCaps.length) return null;
+    const counts = [0,1,2,3].map(s=>allCaps.filter(cap=>(cap.status??0)===s).length);
+    const total = allCaps.length;
+    if(counts[3]===total) return 3;
+    if(counts[2]+counts[3]===total) return 2;
+    if(counts[0]===total) return 0;
+    return 1;
+  }
+  const auto = autoStatus();
+  const curStatus = c?.status ?? 0;
+
+  const refsHTML = _modalRefs.map(r=>`
     <div class="ref-block" id="ref-block-${r.id}">
       <div class="ref-block-header">
         <span class="ref-block-name">📖 ${esc(r.doutrina)}</span>
-        <button class="ref-block-del" onclick="deleteRef('${r.id}')">🗑 Excluir doutrina</button>
+        <button class="ref-block-del" onclick="deleteRef('${r.id}')">🗑 Excluir</button>
       </div>
+      ${refProgressHTML(r.capitulos)}
       <div class="cap-list" id="caps-${r.id}">
-        ${sortCaps(r.capitulos).map(cap=>`
-          <div class="cap-item" id="cap-item-${cap.id}">
-            <span class="cap-num">Cap. ${esc(cap.numero)}</span>
-            <button class="cap-del" onclick="deleteCap('${r.id}','${cap.id}')" title="Remover capítulo">✕</button>
-          </div>`).join('')}
+        ${sortCaps(r.capitulos).map(cap=>capItemHTML(r.id, cap)).join('')}
       </div>
       <div class="cap-add-row">
         <input class="form-input" id="cap-input-${r.id}" placeholder="ex: 7 / 7.1 / 7.1.1" onkeydown="if(event.key==='Enter'){event.preventDefault();addCap('${r.id}')}">
@@ -2180,27 +2368,65 @@ function buildConteudoFormHTML(c) {
       </div>
     </div>`).join('');
 
+  const autoHint = auto!==null ? `<span class="status-auto-badge">(calculado dos caps: ${STATUS_ICON[auto]})</span>` : '';
+
   return `<div class="modal-title">${c?'Editar conteúdo':'Novo conteúdo'}</div>
   <div class="form-group"><label class="form-label">Título do tópico</label>
   <input class="form-input" id="cf-titulo" value="${c?esc(c.titulo):''}" placeholder="ex: Vícios do consentimento, Nexo de causalidade…"></div>
   <div class="form-group">
     <label class="form-label">Doutrinas &amp; Capítulos</label>
+    <div style="font-size:.7rem;color:var(--text-l);margin-bottom:8px">Toque no ícone de status para ciclar: ⚫ → 🟡 → 🟢 → 🔵 → ⚫</div>
     <div id="refs-container">${refsHTML}</div>
     <div class="ref-add-row">
       <input class="form-input" id="ref-nova-doutrina" placeholder="Nome da doutrina / livro…" onkeydown="if(event.key==='Enter'){event.preventDefault();addRef()}">
       <button class="cap-add-btn" onclick="addRef()">+ Doutrina</button>
     </div>
   </div>
-  <div class="form-group"><label class="form-label">Status</label>
+  <div class="form-group"><label class="form-label">Status do conteúdo ${autoHint}</label>
   <div style="display:flex;gap:8px;flex-wrap:wrap" id="statusPicker">
     ${[0,1,2,3].map(s=>{
       const bgs=['var(--s0-bg)','var(--s1-bg)','var(--s2-bg)','var(--s3-bg)'][s];
       const fgs=['var(--s0-fg)','var(--s1-fg)','var(--s2-fg)','var(--s3-fg)'][s];
-      return `<button onclick="pickStatus(${s})" id="sp-${s}" class="cat-option${(!c&&s===0)||(c&&c.status===s)?' selected':''}" style="background:${bgs};color:${fgs};border-color:${(!c&&s===0)||(c&&c.status===s)?'var(--brown)':'transparent'}">${STATUS_ICON[s]} ${STATUS_LABEL[s]}</button>`;
+      const sel = (!c&&s===0)||(c&&c.status===s);
+      return `<button onclick="pickStatus(${s})" id="sp-${s}" class="cat-option${sel?' selected':''}" style="background:${bgs};color:${fgs};border-color:${sel?'var(--brown)':'transparent'}">${STATUS_ICON[s]} ${STATUS_LABEL[s]}</button>`;
     }).join('')}
   </div></div>
   <button class="btn-primary" onclick="saveConteudo()">Salvar</button>
   ${c?`<button class="btn-danger" onclick="deleteConteudo('${c.id}')">🗑 Excluir conteúdo</button>`:''}`;
+}
+
+// Cicla o status de um capítulo: 0→1→2→3→0
+function cycleCapStatus(refId, capId) {
+  const ref = _modalRefs.find(r=>r.id===refId); if(!ref) return;
+  const cap = ref.capitulos.find(c=>c.id===capId); if(!cap) return;
+  cap.status = ((cap.status??0)+1) % 4;
+  // atualizar só o item (sem re-renderizar tudo)
+  const el = document.getElementById('cap-item-'+capId);
+  if(el) el.outerHTML = capItemHTML(refId, cap);
+  // atualizar barra de progresso do ref-block
+  const progEl = document.querySelector(`#ref-block-${refId} .ref-block-prog-fill`);
+  if(progEl) {
+    const done = ref.capitulos.filter(c=>(c.status??0)>=2).length;
+    progEl.style.width = ref.capitulos.length ? Math.round(done/ref.capitulos.length*100)+'%' : '0%';
+  }
+  // atualizar hint de status automático
+  syncAutoStatusHint();
+}
+
+function syncAutoStatusHint() {
+  const allCaps = _modalRefs.flatMap(r=>r.capitulos);
+  if(!allCaps.length) return;
+  const counts = [0,1,2,3].map(s=>allCaps.filter(c=>(c.status??0)===s).length);
+  const total = allCaps.length;
+  let auto;
+  if(counts[3]===total) auto=3;
+  else if(counts[2]+counts[3]===total) auto=2;
+  else if(counts[0]===total) auto=0;
+  else auto=1;
+  const hint = document.querySelector('.status-auto-badge');
+  if(hint) hint.textContent = `(calculado dos caps: ${STATUS_ICON[auto]})`;
+  // aplicar automaticamente ao picker principal
+  pickStatus(auto);
 }
 
 function addRef() {
@@ -2220,57 +2446,56 @@ function addCap(refId) {
   const inp = document.getElementById('cap-input-'+refId);
   const numero = inp.value.trim(); if(!numero) return;
   const ref = _modalRefs.find(r=>r.id===refId); if(!ref) return;
-  ref.capitulos.push({id:uid(), numero});
+  ref.capitulos.push({id:uid(), numero, status:0});
   inp.value='';
   reRenderCaps(refId);
+  syncAutoStatusHint();
 }
 
 function deleteCap(refId, capId) {
   const ref = _modalRefs.find(r=>r.id===refId); if(!ref) return;
   ref.capitulos = ref.capitulos.filter(c=>c.id!==capId);
   reRenderCaps(refId);
+  syncAutoStatusHint();
 }
 
 function reRenderRefs() {
-  // Salva o status picker atual antes de re-renderizar
   const statusSel=[...document.querySelectorAll('#statusPicker button.selected')][0];
   const curStatus=statusSel?parseInt(statusSel.id.replace('sp-','')):null;
   const titulo=document.getElementById('cf-titulo')?.value||'';
 
   const cont = document.getElementById('refs-container');
   if(!cont) return;
-  cont.innerHTML = _modalRefs.map((r)=>`
+  cont.innerHTML = _modalRefs.map(r=>`
     <div class="ref-block" id="ref-block-${r.id}">
       <div class="ref-block-header">
         <span class="ref-block-name">📖 ${esc(r.doutrina)}</span>
-        <button class="ref-block-del" onclick="deleteRef('${r.id}')">🗑 Excluir doutrina</button>
+        <button class="ref-block-del" onclick="deleteRef('${r.id}')">🗑 Excluir</button>
       </div>
+      ${refProgressHTML(r.capitulos)}
       <div class="cap-list" id="caps-${r.id}">
-        ${sortCaps(r.capitulos).map(cap=>`
-          <div class="cap-item" id="cap-item-${cap.id}">
-            <span class="cap-num">Cap. ${esc(cap.numero)}</span>
-            <button class="cap-del" onclick="deleteCap('${r.id}','${cap.id}')" title="Remover capítulo">✕</button>
-          </div>`).join('')}
+        ${sortCaps(r.capitulos).map(cap=>capItemHTML(r.id, cap)).join('')}
       </div>
       <div class="cap-add-row">
         <input class="form-input" id="cap-input-${r.id}" placeholder="ex: 7 / 7.1 / 7.1.1" onkeydown="if(event.key==='Enter'){event.preventDefault();addCap('${r.id}')}">
         <button class="cap-add-btn" onclick="addCap('${r.id}')">+ Cap.</button>
       </div>
     </div>`).join('');
-  // Restaura o título caso o form já tivesse algo
   if(document.getElementById('cf-titulo')) document.getElementById('cf-titulo').value=titulo;
-  // Restaura status
   if(curStatus!==null) pickStatus(curStatus);
+  syncAutoStatusHint();
 }
 
 function reRenderCaps(refId) {
   const ref=_modalRefs.find(r=>r.id===refId); if(!ref) return;
   const el=document.getElementById('caps-'+refId); if(!el) return;
-  el.innerHTML=sortCaps(ref.capitulos).map(cap=>`
-    <div class="cap-item" id="cap-item-${cap.id}">
-      <span class="cap-num">Cap. ${esc(cap.numero)}</span>
-      <button class="cap-del" onclick="deleteCap('${refId}','${cap.id}')" title="Remover capítulo">✕</button>
-    </div>`).join('');
+  el.innerHTML=sortCaps(ref.capitulos).map(cap=>capItemHTML(refId, cap)).join('');
+  // atualizar barra de progresso
+  const progEl = document.querySelector(`#ref-block-${refId} .ref-block-prog-fill`);
+  if(progEl) {
+    const done = ref.capitulos.filter(c=>(c.status??0)>=2).length;
+    progEl.style.width = ref.capitulos.length ? Math.round(done/ref.capitulos.length*100)+'%' : '0%';
+  }
 }
 
 function pickStatus(s) {
@@ -2294,12 +2519,7 @@ function deleteConteudo(id) { conteudos=conteudos.filter(c=>c.id!==id); save(SK.
 // ── DETAIL MODALS ──
 function openTask(id)        { openModal('view-task',id); }
 function openMarco(id)       { openModal('view-marco',id); }
-function openRotinaBlock(id) {
-  editingId = id;
-  const r = rotina.find(x=>x.id===id); if(!r) return;
-  document.getElementById('modalContent').innerHTML = rotinaForm(r, null);
-  document.getElementById('modalOverlay').classList.add('open');
-}
+function openRotinaBlock(id) { openModal('view-rotina',id); }
 
 function taskDetail(t) {
   if(!t) return '';
@@ -2320,14 +2540,24 @@ function marcoDetail(m) {
   if(!m) return '';
   const diff=diffDays(m.date);
   const dt=diff<0?`${Math.abs(diff)} dias atrás`:diff===0?'Hoje!':diff===1?'Amanhã':`Em ${diff} dias`;
+  const IMP_LABEL={low:'Baixa',mid:'Média',high:'Alta'};
+  const IMP_CLASS={low:'imp-low',mid:'imp-mid',high:'imp-high'};
+  const IMP_ICON ={low:'🟢',mid:'🟡',high:'🔴'};
+  const ALERT_LABEL={none:'Sem aviso',day:'Dia anterior',week:'Na semana',always:'A partir de hoje'};
+  const imp=m.imp||'mid';
   return `<div class="detail-card">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
-      <span class="task-tag cat-${m.cat}">${CAT_ICON[m.cat]} ${CAT_LABEL[m.cat]}</span>
+      <div style="display:flex;gap:6px;align-items:center">
+        <span class="task-tag cat-${m.cat}">${CAT_ICON[m.cat]} ${CAT_LABEL[m.cat]}</span>
+        <span class="event-alert-imp ${IMP_CLASS[imp]}">${IMP_ICON[imp]} ${IMP_LABEL[imp]}</span>
+      </div>
       <button style="background:none;border:none;font-size:.78rem;color:var(--text-l);cursor:pointer" onclick="openModal('edit-marco','${m.id}')">✏️ Editar</button>
     </div>
     <div class="detail-title" style="margin-top:10px">${m.icon||'📍'} ${esc(m.title)}</div>
     <div class="detail-row"><div class="detail-icon">📅</div><div class="detail-val">${formatDatePT(m.date)} <span style="color:var(--brown);font-weight:600">(${dt})</span></div></div>
-    ${m.notes?`<div class="detail-row"><div class="detail-icon">📍</div><div class="detail-val">${esc(m.notes)}</div></div>`:''}
+    ${m.time?`<div class="detail-row"><div class="detail-icon">🕐</div><div class="detail-val">${m.time}</div></div>`:''}
+    ${m.alertWindow&&m.alertWindow!=='none'?`<div class="detail-row"><div class="detail-icon">🔔</div><div class="detail-val">${ALERT_LABEL[m.alertWindow]}</div></div>`:''}
+    ${m.notes?`<div class="detail-row"><div class="detail-icon">📝</div><div class="detail-val">${esc(m.notes)}</div></div>`:''}
   </div>`;
 }
 function rotinaDetail(r) {
