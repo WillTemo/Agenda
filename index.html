@@ -393,6 +393,47 @@ body { background:var(--cream); color:var(--text); font-family:'Inter',sans-seri
 .conteudo-ref-caps { color:var(--text-l); }
 
 @media (prefers-reduced-motion:reduce) { *,*::before,*::after { transition-duration:.01ms !important; } }
+
+/* ── AVISOS DE EVENTOS ── */
+.event-alerts { display:flex; flex-direction:column; gap:8px; margin-bottom:16px; }
+.event-alert { border-radius:var(--radius-sm); padding:11px 14px; display:flex; align-items:center; gap:10px; box-shadow:var(--shadow); border-left:4px solid transparent; cursor:pointer; }
+.event-alert-icon { font-size:1.1rem; flex-shrink:0; }
+.event-alert-body { flex:1; min-width:0; }
+.event-alert-title { font-size:.83rem; font-weight:600; line-height:1.2; }
+.event-alert-sub { font-size:.7rem; margin-top:2px; opacity:.8; }
+.event-alert-badge { font-size:.68rem; font-weight:700; padding:3px 8px; border-radius:20px; flex-shrink:0; }
+.alert-far   { background:#EAF6EC; border-left-color:#52B788; color:#1A5C34; }
+.alert-far   .event-alert-badge { background:#52B78822; color:#1A5C34; }
+.alert-week  { background:#FFF5E6; border-left-color:#E8973A; color:#7A4010; }
+.alert-week  .event-alert-badge { background:#E8973A22; color:#7A4010; }
+.alert-day   { background:#FEE9E9; border-left-color:#D94040; color:#7A1010; }
+.alert-day   .event-alert-badge { background:#D9404022; color:#7A1010; }
+.alert-today { background:#D94040; border-left-color:#A01010; color:white; }
+.alert-today .event-alert-badge { background:rgba(255,255,255,.25); color:white; }
+
+/* ── ESQUECIDO ── */
+.task-card.forgotten { border-left:3px solid #E8973A !important; opacity:.85; }
+.task-card.forgotten .task-title { color:var(--text-m); }
+.forgotten-badge { font-size:.6rem; font-weight:700; background:#FFF5E6; color:#7A4010; border:1px solid #E8973A44; padding:2px 7px; border-radius:20px; }
+.recur-badge { font-size:.6rem; font-weight:600; background:var(--cream2); color:var(--text-l); padding:2px 6px; border-radius:10px; }
+
+/* ── BOTÃO AJUSTE DIA (rotina card) ── */
+.rot-day-btn { background:none; border:1.5px solid var(--beige); border-radius:20px; font-size:.65rem; color:var(--text-l); cursor:pointer; padding:2px 8px; margin-left:auto; flex-shrink:0; white-space:nowrap; }
+.rot-day-btn:hover { border-color:var(--tan); color:var(--brown); }
+
+/* ── CONFLITO MODAL ── */
+.conflict-modal { position:fixed; inset:0; background:rgba(30,15,5,.6); z-index:500; display:flex; align-items:flex-end; justify-content:center; opacity:0; pointer-events:none; transition:opacity .25s; }
+.conflict-modal.open { opacity:1; pointer-events:all; }
+.conflict-box { background:var(--cream); border-radius:var(--radius) var(--radius) 0 0; width:100%; max-width:430px; padding:20px; transform:translateY(100%); transition:transform .3s cubic-bezier(.4,0,.2,1); max-height:85vh; overflow-y:auto; }
+.conflict-modal.open .conflict-box { transform:translateY(0); }
+.conflict-title { font-family:'Playfair Display',serif; font-size:1.1rem; font-weight:700; color:#C84040; margin-bottom:6px; }
+.conflict-sub { font-size:.8rem; color:var(--text-m); margin-bottom:16px; line-height:1.5; }
+.conflict-item { background:white; border-radius:var(--radius-sm); padding:11px 14px; margin-bottom:8px; border-left:4px solid var(--tan); }
+.conflict-item-title { font-size:.85rem; font-weight:600; color:var(--text); }
+.conflict-item-time { font-size:.72rem; color:var(--text-l); margin-top:3px; }
+.conflict-actions { display:flex; flex-direction:column; gap:8px; margin-top:14px; }
+.conflict-btn-primary { background:#C84040; color:white; border:none; border-radius:var(--radius-sm); padding:12px; font-family:'Inter',sans-serif; font-size:.88rem; font-weight:600; cursor:pointer; }
+.conflict-btn-secondary { background:var(--cream2); color:var(--text-m); border:none; border-radius:var(--radius-sm); padding:11px; font-family:'Inter',sans-serif; font-size:.85rem; font-weight:500; cursor:pointer; }
 </style>
 </head>
 <body>
@@ -425,6 +466,8 @@ body { background:var(--cream); color:var(--text); font-family:'Inter',sans-seri
     <!-- ─── VIEW: HOJE ─── -->
     <div class="view active" id="view-hoje">
       <div class="today-card" id="todayCard"></div>
+      <!-- Avisos de eventos próximos -->
+      <div id="eventAlerts"></div>
       <div class="sec-header">
         <span class="sec-title">Tarefas de hoje</span>
         <span class="sec-link" onclick="switchToAll()">Ver tudo</span>
@@ -580,6 +623,14 @@ body { background:var(--cream); color:var(--text); font-family:'Inter',sans-seri
   <div class="modal">
     <div class="modal-handle"></div>
     <div id="modalContent"></div>
+  </div>
+</div>
+
+<!-- CONFLICT MODAL -->
+<div class="conflict-modal" id="conflictModal">
+  <div class="conflict-box">
+    <div class="modal-handle"></div>
+    <div id="conflictContent"></div>
   </div>
 </div>
 
@@ -963,60 +1014,98 @@ function renderToday() {
     </div>`;
   const filtered = dt.filter(t=>activeFilter==='all'||t.cat===activeFilter);
   renderTodayFull('todayTasks', filtered, td, d.getDay());
+  renderEventAlerts();
 }
 
 function renderTodayFull(cid, taskList, td, weekday) {
   const el = document.getElementById(cid);
+  const isPast = td < today();
+  const isFuture = td > today();
 
   // ── Bloco 1: Tarefas ──
   let html = '';
   if(taskList.length) {
     const sorted = [...taskList].sort((a,b)=>(a.time||'99:99').localeCompare(b.time||'99:99'));
-    html += `<div class="timeblock"><div class="timeblock-label">📋 Tarefas</div>${sorted.map(taskCardHTML).join('')}</div>`;
+    html += `<div class="timeblock"><div class="timeblock-label">📋 Tarefas</div>${sorted.map(t=>taskCardHTML(t, isPast)).join('')}</div>`;
   }
 
-  // ── Bloco 2: Rotina do dia ──
-  const rotinaHoje = rotina.filter(r=>r.days&&r.days.includes(weekday))
-    .map(r => {
-      // aplicar override de dia se existir
-      const overrideKey = 'rotOverride_'+r.id+'_'+td;
-      const stored = localStorage.getItem(overrideKey);
-      return stored ? {...r, ...JSON.parse(stored), _origId: r.id} : r;
-    })
-    .sort((a,b)=>(a.time||'').localeCompare(b.time||''));
-  // aulas do semestre ativo vinculadas ao dia de hoje
-  const aulasHoje = getAulasHoje(weekday);
-  const todosBlocos = [...rotinaHoje.map(r=>({...r,_tipo:'rotina'})), ...aulasHoje.map(a=>({...a,_tipo:'aula'}))];
-  todosBlocos.sort((a,b)=>(a.time||'').localeCompare(b.time||''));
+  // ── Bloco 2: Rotina do dia (passado: mostrar; futuro: não mostrar) ──
+  if (!isFuture) {
+    const rotinaHoje = rotina.filter(r=>r.days&&r.days.includes(weekday))
+      .map(r => {
+        const overrideKey = 'rotOverride_'+r.id+'_'+td;
+        const stored = localStorage.getItem(overrideKey);
+        return stored ? {...r, ...JSON.parse(stored), _origId: r.id} : r;
+      })
+      .sort((a,b)=>(a.time||'').localeCompare(b.time||''));
+    const aulasHoje = getAulasHoje(weekday, td);
+    const todosBlocos = [...rotinaHoje.map(r=>({...r,_tipo:'rotina'})), ...aulasHoje.map(a=>({...a,_tipo:'aula'}))];
+    todosBlocos.sort((a,b)=>(a.time||'').localeCompare(b.time||''));
 
-  if(todosBlocos.length) {
-    html += `<div class="timeblock"><div class="timeblock-label">🔁 Rotina</div>`;
-    html += todosBlocos.map(b => {
-      const concKey = `rot_${td}_${b.id}`;
-      const conc = localStorage.getItem(concKey)==='1';
-      if(b._tipo==='aula') {
-        return `<div class="task-card${conc?' done':''}">
-          <div class="task-stripe stripe-estudo"></div>
-          <div class="task-check${conc?' checked':''}" onclick="toggleRotinaConc('${concKey}','${cid}','${td}',${weekday})"></div>
+    if(todosBlocos.length) {
+      html += `<div class="timeblock"><div class="timeblock-label">🔁 Rotina</div>`;
+      html += todosBlocos.map(b => {
+        const concKey = `rot_${td}_${b.id}`;
+        const conc = localStorage.getItem(concKey)==='1';
+        const isForgotten = isPast && !conc;
+        if(b._tipo==='aula') {
+          const timeLabel = b.time ? (b.timeEnd ? `${b.time}–${b.timeEnd}` : b.time) : '';
+          return `<div class="task-card${conc?' done':''}${isForgotten?' forgotten':''}">
+            <div class="task-stripe stripe-estudo"></div>
+            <div class="task-check${conc?' checked':''}" onclick="toggleRotinaConc('${concKey}','${cid}','${td}',${weekday})"></div>
+            <div class="task-body">
+              <div class="task-title">📚 ${esc(b.title)} ${isForgotten?'<span class="forgotten-badge">esquecido</span>':''}</div>
+              <div class="task-meta">
+                ${timeLabel?`<span class="task-time">🕐 ${timeLabel}</span>`:''}
+                <span class="task-tag cat-estudo">Aula</span>
+                ${b.ramo?`<span style="font-size:.68rem;color:var(--text-l)">${esc(b.ramo)}</span>`:''}
+              </div>
+            </div>
+          </div>`;
+        }
+        const rStripe = b.cor ? `style="background:${b.cor}"` : `class="task-stripe stripe-${b.cat}"`;
+        const timeRange = b.time ? (b.timeEnd ? `${b.time}–${b.timeEnd}` : b.time) : '';
+        // Botão "ajustar este dia" só aparece no dia de hoje
+        const ajusteBtn = !isPast && !isFuture && b._tipo==='rotina'
+          ? `<button class="rot-day-btn" onclick="event.stopPropagation();openRotinaOverride('${b._origId||b.id}','${td}')">📅 Só hoje</button>`
+          : '';
+        return `<div class="task-card${conc?' done':''}${isForgotten?' forgotten':''}" onclick="openRotinaBlock('${b._origId||b.id}')">
+          <div class="task-stripe" ${rStripe}></div>
+          <div class="task-check${conc?' checked':''}" onclick="event.stopPropagation();toggleRotinaConc('${concKey}','${cid}','${td}',${weekday})"></div>
           <div class="task-body">
-            <div class="task-title">📚 ${esc(b.title)}</div>
-            <div class="task-meta">
-              ${b.time?`<span class="task-time">🕐 ${b.time}</span>`:''}
-              <span class="task-tag cat-estudo">Aula</span>
-              ${b.ramo?`<span style="font-size:.68rem;color:var(--text-l)">${esc(b.ramo)}</span>`:''}
+            <div class="task-title">${esc(b.title)} ${isForgotten?'<span class="forgotten-badge">esquecido</span>':''}</div>
+            <div class="task-meta" style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+              ${timeRange?`<span class="task-time">🕐 ${timeRange}</span>`:''}
+              <span class="task-tag cat-${b.cat}">${CAT_LABEL[b.cat]||b.cat}</span>
+              ${ajusteBtn}
             </div>
           </div>
         </div>`;
-      }
-      const rStripe = b.cor ? `style="background:${b.cor}"` : `class="task-stripe stripe-${b.cat}"`;
-      return `<div class="task-card${conc?' done':''}">
-        <div class="task-stripe" ${rStripe}></div>
-        <div class="task-check${conc?' checked':''}" onclick="toggleRotinaConc('${concKey}','${cid}','${td}',${weekday})"></div>
-        <div class="task-body">
-          <div class="task-title">${esc(b.title)}</div>
+      }).join('');
+      html += `</div>`;
+    }
+  }
+
+  // ── Bloco 3: Eventos do dia (marcos) ──
+  // Em dias futuros: mostrar apenas eventos. Em passado/hoje: mostrar tudo
+  const eventosHoje = marcos.filter(m=>m.date===td);
+  if(eventosHoje.length) {
+    html += `<div class="timeblock"><div class="timeblock-label">📍 Eventos${isFuture?' do dia':' de hoje'}</div>`;
+    html += eventosHoje.map(m=>{
+      const concKey = `ev_${td}_${m.id}`;
+      const conc = localStorage.getItem(concKey)==='1';
+      const isForgotten = isPast && !conc;
+      const cor = m.cor||'#C8C0D8';
+      const timeLabel = m.time ? (m.timeEnd ? `${m.time}–${m.timeEnd}` : m.time) : '';
+      return `<div class="task-card${conc?' done':''}${isForgotten?' forgotten':''}">
+        <div class="task-stripe" style="background:${cor}"></div>
+        <div class="task-check${conc?' checked':''}" onclick="toggleEvento('${concKey}','${cid}','${td}',${weekday})"></div>
+        <div class="task-body" onclick="openMarco('${m.id}')">
+          <div class="task-title">${m.icon||'📍'} ${esc(m.title)} ${isForgotten?'<span class="forgotten-badge">não realizado</span>':''}</div>
           <div class="task-meta">
-            ${b.time?`<span class="task-time">🕐 ${b.time}</span>`:''}
-            <span class="task-tag cat-${b.cat}">${CAT_LABEL[b.cat]||b.cat}</span>
+            ${timeLabel?`<span class="task-time">🕐 ${timeLabel}</span>`:''}
+            <span class="task-tag" style="background:${cor}33;color:var(--text-m)">${CAT_LABEL[m.cat]||m.cat}</span>
+            ${m.notes?`<span style="font-size:.68rem;color:var(--text-l)">${esc(m.notes)}</span>`:''}
           </div>
         </div>
       </div>`;
@@ -1024,39 +1113,25 @@ function renderTodayFull(cid, taskList, td, weekday) {
     html += `</div>`;
   }
 
-  // ── Bloco 3: Eventos do dia (marcos) ──
-  const eventosHoje = marcos.filter(m=>m.date===td);
-  if(eventosHoje.length) {
-    html += `<div class="timeblock"><div class="timeblock-label">📍 Eventos de hoje</div>`;
-    html += eventosHoje.map(m=>{
-      const concKey = `ev_${td}_${m.id}`;
-      const conc = localStorage.getItem(concKey)==='1';
-      const cor = m.cor||'#C8C0D8';
-      return `<div class="task-card${conc?' done':''}">
-        <div class="task-stripe" style="background:${cor}"></div>
-        <div class="task-check${conc?' checked':''}" onclick="toggleEvento('${concKey}','${cid}','${td}',${weekday})"></div>
-        <div class="task-body" onclick="openMarco('${m.id}')">
-          <div class="task-title">${m.icon||'📍'} ${esc(m.title)}</div>
-          <div class="task-meta"><span class="task-tag" style="background:${cor}33;color:var(--text-m)">${CAT_LABEL[m.cat]||m.cat}</span>${m.notes?`<span style="font-size:.68rem;color:var(--text-l)">${esc(m.notes)}</span>`:''}</div>
-        </div>
-      </div>`;
-    }).join('');
-    html += `</div>`;
+  // Se futuro sem eventos, mensagem especial
+  if(isFuture && !eventosHoje.length) {
+    html += `<div class="empty"><div class="empty-icon">📅</div><div class="empty-title">Dia livre</div><div class="empty-sub">Nenhum evento agendado</div></div>`;
+  } else if(!html) {
+    html = `<div class="empty"><div class="empty-icon">✨</div><div class="empty-title">Dia livre</div><div class="empty-sub">Nenhuma tarefa, rotina ou evento hoje</div></div>`;
   }
-
-  if(!html) html = `<div class="empty"><div class="empty-icon">✨</div><div class="empty-title">Dia livre</div><div class="empty-sub">Nenhuma tarefa, rotina ou evento hoje</div></div>`;
   el.innerHTML = html;
 }
 
 // Aulas da semana vigente vindas das matérias do semestre ativo
-function getAulasHoje(weekday) {
-  const td = today();
+function getAulasHoje(weekday, forDate) {
+  const td = forDate || today();
+  // Não mostrar aulas depois do fim do semestre
   if(!semestre.id || (semestre.fim && td > semestre.fim)) return [];
   const aulas = [];
   materias.filter(m=>m.semestre===semestre.id).forEach(m=>{
     const ramo = ramos.find(r=>r.id===m.ramoId);
     (m.aulas||[]).filter(a=>a.dia===weekday).forEach(a=>{
-      aulas.push({id:`aula_${m.id}_${a.dia}_${a.hora}`, title:m.nome, time:a.hora, ramo:ramo?.nome||'', cat:'estudo'});
+      aulas.push({id:`aula_${m.id}_${a.dia}_${a.hora}`, title:m.nome, time:a.hora, timeEnd:a.horaFim||'', ramo:ramo?.nome||'', cat:'estudo'});
     });
   });
   return aulas;
@@ -1094,13 +1169,17 @@ function renderTaskList(cid, list) {
   el.innerHTML=defs.map(b=>blocks[b.k].length?`<div class="timeblock"><div class="timeblock-label">${b.l}</div>${blocks[b.k].map(taskCardHTML).join('')}</div>`:'').join('');
 }
 
-function taskCardHTML(t) {
+function taskCardHTML(t, isPast) {
   const sAttr = t.cor ? `style="background:${t.cor}"` : `class="task-stripe stripe-${t.cat}"`;
-  return `<div class="task-card${t.done?' done':''}" onclick="openTask('${t.id}')">
+  const isForgotten = isPast && !t.done;
+  const recurLabel = t.recur && t.recur !== 'none'
+    ? `<span class="recur-badge">${{daily:'Diário',weekly:'Semanal',monthly:'Mensal'}[t.recur]||''}</span>`
+    : '';
+  return `<div class="task-card${t.done?' done':''}${isForgotten?' forgotten':''}" onclick="openTask('${t.id}')">
     <div class="task-stripe" ${sAttr}></div>
     <div class="task-check${t.done?' checked':''}" onclick="toggleTask(event,'${t.id}')"></div>
     <div class="task-body">
-      <div class="task-title">${esc(t.title)}</div>
+      <div class="task-title">${esc(t.title)} ${isForgotten?'<span class="forgotten-badge">esquecida</span>':''} ${recurLabel}</div>
       <div class="task-meta">
         ${t.time?`<span class="task-time">🕐 ${t.time}</span>`:''}
         <span class="task-tag cat-${t.cat}">${CAT_LABEL[t.cat]||t.cat}</span>
@@ -1128,11 +1207,13 @@ function renderWeek() {
     const ds=fmtDate(d);
     const wd=d.getDay();
     const hasTask=tasks.some(t=>t.date===ds);
-    const hasRot=rotina.some(r=>r.days&&r.days.includes(wd))||materias.some(m=>m.semestre===semestre.id&&(m.aulas||[]).some(a=>a.dia===wd));
+    const hasRot=ds<=today()&&(rotina.some(r=>r.days&&r.days.includes(wd))||materias.some(m=>m.semestre===semestre.id&&(m.aulas||[]).some(a=>a.dia===wd)));
     const hasMarco=marcos.some(m=>m.date===ds);
     const hasDot=hasTask||hasRot||hasMarco;
     const sel=ds===selectedWeekDay;
-    html+=`<button class="week-day-btn${sel?' selected':''}" onclick="selectWeekDay('${ds}')">
+    const isPast=ds<today(), isFut=ds>today();
+    const dayStyle=isFut?'opacity:.7':'';
+    html+=`<button class="week-day-btn${sel?' selected':''}" onclick="selectWeekDay('${ds}')" style="${dayStyle}">
       <span class="week-day-name">${DAYS_PT[d.getDay()]}</span>
       <span class="week-day-num">${d.getDate()}</span>
       <span class="week-day-dot${hasDot?'':' hidden'}"></span>
@@ -1237,14 +1318,16 @@ function renderRotina() {
   const sorted=[...rotina].sort((a,b)=>(a.time||'').localeCompare(b.time||''));
   el.innerHTML=sorted.map(r=>{
     const sAttr = r.cor ? `style="background:${r.cor}"` : `class="task-stripe stripe-${r.cat}"`;
+    const timeLabel = r.time ? (r.timeEnd ? `🕐 ${r.time}–${r.timeEnd}` : `🕐 ${r.time}`) : '';
     return `<div class="task-card" onclick="openRotinaBlock('${r.id}')">
     <div class="task-stripe" ${sAttr}></div>
     <div class="task-body" style="padding:2px 0">
       <div class="task-title">${esc(r.title)}</div>
       <div class="task-meta">
-        ${r.time?`<span class="task-time">🕐 ${r.time}</span>`:''}
+        ${timeLabel?`<span class="task-time">${timeLabel}</span>`:''}
         <span class="task-tag cat-${r.cat}">${CAT_LABEL[r.cat]}</span>
         <span style="font-size:.68rem;color:var(--text-l)">${r.days.map(d=>DAYS_PT[d]).join(' · ')}</span>
+        ${r.modifiedFrom?`<span style="font-size:.6rem;color:var(--text-l);background:var(--cream2);padding:1px 6px;border-radius:10px">✏️ desde ${formatDateShort(r.modifiedFrom)}</span>`:''}
       </div>
     </div>
   </div>`;
@@ -1586,13 +1669,27 @@ function buildModal(mode,id) {
 
 // ── TASK FORM ──
 function taskForm(t) {
-  const corAtual = t?.cor || PALETTE[4]; // azul-pastel por padrão
+  const corAtual = t?.cor || PALETTE[4];
+  const TASK_RECUR = [
+    {v:'none',    l:'Não repetir'},
+    {v:'daily',   l:'Todo dia'},
+    {v:'weekly',  l:'Todo dia da semana (mesmo dia)'},
+    {v:'monthly', l:'Todo mês (mesmo dia do mês)'},
+  ];
   return `<div class="modal-title">${t?'Editar tarefa':'Nova tarefa'}</div>
   <div class="form-group"><label class="form-label">Título</label>
   <input class="form-input" id="f-title" value="${t?esc(t.title):''}" placeholder="O que você precisa fazer?"></div>
   <div class="modal-row">
     <div class="form-group"><label class="form-label">Data</label><input class="form-input" type="date" id="f-date" value="${t?t.date:today()}"></div>
     <div class="form-group"><label class="form-label">Horário</label><input class="form-input" type="time" id="f-time" value="${t?t.time:''}"></div>
+  </div>
+  <div class="form-group"><label class="form-label">🔁 Repetir</label>
+  <select class="form-select" id="f-recur">
+    ${TASK_RECUR.map(o=>`<option value="${o.v}"${(t?.recur||'none')===o.v?' selected':''}>${o.l}</option>`).join('')}
+  </select></div>
+  <div class="form-group" id="f-recur-end-wrap" style="${t?.recur&&t.recur!=='none'?'':'display:none'}">
+    <label class="form-label">Repetir até (opcional)</label>
+    <input class="form-input" type="date" id="f-recur-end" value="${t?.recurEnd||''}">
   </div>
   <div class="form-group"><label class="form-label">Categoria</label>
   <div class="cat-picker" id="catPicker">
@@ -1605,18 +1702,56 @@ function taskForm(t) {
   <div class="form-group"><label class="form-label">Notas</label>
   <textarea class="form-textarea" id="f-notes" placeholder="Detalhes…">${t?esc(t.notes||''):''}</textarea></div>
   <button class="btn-primary" onclick="saveTask()">Salvar</button>
-  ${t?`<button class="btn-danger" onclick="deleteTask('${t.id}')">🗑 Excluir tarefa</button>`:''}`;
+  ${t?`<button class="btn-danger" onclick="deleteTask('${t.id}')">🗑 Excluir tarefa</button>`:''}
+  <script>document.getElementById('f-recur').addEventListener('change',function(){document.getElementById('f-recur-end-wrap').style.display=this.value==='none'?'none':'';});<\/script>`;
 }
 function pickCat(cat) { document.querySelectorAll('.cat-option').forEach(b=>b.classList.toggle('selected',b.dataset.cat===cat)); }
 function saveTask() {
   const title=document.getElementById('f-title').value.trim(); if(!title) return;
   const cor=document.getElementById('_selectedColor')?.value||PALETTE[4];
-  const obj={id:editingId||uid(),title,date:document.getElementById('f-date').value||today(),time:document.getElementById('f-time').value,cat:document.querySelector('.cat-option.selected')?.dataset.cat||'pessoal',done:false,notes:document.getElementById('f-notes').value,cor};
-  if(editingId){const i=tasks.findIndex(t=>t.id===editingId);if(i>-1){obj.done=tasks[i].done;tasks[i]=obj;}}else tasks.push(obj);
+  const recur=document.getElementById('f-recur')?.value||'none';
+  const recurEnd=document.getElementById('f-recur-end')?.value||null;
+  const baseDate=document.getElementById('f-date').value||today();
+  const base={
+    id:editingId||uid(),title,date:baseDate,
+    time:document.getElementById('f-time').value,
+    cat:document.querySelector('.cat-option.selected')?.dataset.cat||'pessoal',
+    done:false,notes:document.getElementById('f-notes').value,cor,
+    recur, recurEnd:recur!=='none'?recurEnd:null, _baseId:editingId||null
+  };
+  // Se editando, remover instâncias anteriores da série
+  if(editingId) tasks=tasks.filter(t=>t.id!==editingId&&t._baseId!==editingId);
+
+  const novos=[base];
+  if(recur!=='none') {
+    const endLimit=recurEnd?recurEnd:'2099-12-31';
+    let cur=new Date(baseDate+'T12:00:00');
+    const baseId=base.id;
+    for(let i=0;i<365;i++){
+      if(recur==='daily')   cur.setDate(cur.getDate()+1);
+      else if(recur==='weekly')  cur.setDate(cur.getDate()+7);
+      else if(recur==='monthly') cur.setMonth(cur.getMonth()+1);
+      const ds=fmtDate(cur);
+      if(ds>endLimit) break;
+      novos.push({...base,id:uid(),date:ds,_baseId:baseId,_isRecur:true});
+    }
+  }
+  novos.forEach(n=>{const i=tasks.findIndex(t=>t.id===n.id);if(i>-1)tasks[i]=n;else tasks.push(n);});
   save(SK.tasks,tasks); closeModal();
   if(activeView==='hoje') renderToday(); else if(activeView==='semana') renderWeek();
 }
-function deleteTask(id) { tasks=tasks.filter(t=>t.id!==id); save(SK.tasks,tasks); closeModal(); if(activeView==='hoje') renderToday(); else renderWeek(); }
+function deleteTask(id) {
+  const t=tasks.find(x=>x.id===id);
+  if(t?._baseId||t?.recur!=='none') {
+    if(!confirm('Excluir somente esta tarefa ou toda a série?')) return;
+    const baseId=t._baseId||t.id;
+    tasks=tasks.filter(x=>x.id!==baseId&&x._baseId!==baseId);
+  } else {
+    tasks=tasks.filter(x=>x.id!==id);
+  }
+  save(SK.tasks,tasks); closeModal();
+  if(activeView==='hoje') renderToday(); else renderWeek();
+}
 
 // ── MARCO FORM ──
 function marcoForm(m, forceMateriaId) {
@@ -1640,7 +1775,19 @@ function marcoForm(m, forceMateriaId) {
     <div class="form-group"><label class="form-label">Ícone</label>
     <select class="form-select" id="mf-icon">${['📍','📝','🩺','💼','🎂','✈️','🎓','💊','🏆','🎯','🔔','⚡','🌟','🎉'].map(ic=>`<option value="${ic}"${m&&m.icon===ic?' selected':''}>${ic}</option>`).join('')}</select></div>
   </div>
-
+  <div class="modal-row">
+    <div class="form-group"><label class="form-label">Hora início (opcional)</label><input class="form-input" type="time" id="mf-time" value="${m?m.time||'':''}"></div>
+    <div class="form-group"><label class="form-label">Hora fim (opcional)</label><input class="form-input" type="time" id="mf-timeEnd" value="${m?m.timeEnd||'':''}"></div>
+  </div>
+  <div class="form-group">
+    <label class="form-label">🔔 Aviso antecipado</label>
+    <select class="form-select" id="mf-alert">
+      <option value="none"${(m?.alertMode||'none')==='none'?' selected':''}>Sem aviso</option>
+      <option value="day"${m?.alertMode==='day'?' selected':''}>No dia anterior</option>
+      <option value="week"${m?.alertMode==='week'?' selected':''}>Na semana do evento</option>
+      <option value="month"${m?.alertMode==='month'?' selected':''}>No mês do evento</option>
+    </select>
+  </div>
   <div class="form-group">
     <label class="form-label">Cor do evento</label>
     <div class="color-palette">${colorSwatchHTML(corAtual)}</div>
@@ -1682,10 +1829,16 @@ function saveMarco() {
   const recur=document.getElementById('mf-recur')?.value||'none';
   const recurEnd=document.getElementById('mf-recur-end')?.value||null;
   const baseDate=document.getElementById('mf-date').value||today();
+  const mfTime=document.getElementById('mf-time')?.value||'';
+  const mfTimeEnd=document.getElementById('mf-timeEnd')?.value||'';
+  const alertMode=document.getElementById('mf-alert')?.value||'none';
 
   const base={
     id:editingId||uid(), title,
     date:baseDate,
+    time:mfTime||undefined,
+    timeEnd:mfTimeEnd||undefined,
+    alertMode,
     icon:document.getElementById('mf-icon').value,
     cat:document.querySelector('.cat-option.selected')?.dataset.cat||'pessoal',
     notes:document.getElementById('mf-notes').value,
@@ -1694,13 +1847,11 @@ function saveMarco() {
     _baseId: editingId||null,
   };
 
-  // Remover instâncias anteriores desta recorrência se editando
   if(editingId) {
     marcos=marcos.filter(m=>m.id!==editingId && m._baseId!==editingId);
   }
 
   const novos=[base];
-  // Gerar instâncias futuras de recorrência
   if(recur!=='none') {
     const endLimit=recurEnd?recurEnd:'2099-12-31';
     let cur=new Date(baseDate+'T12:00:00');
@@ -1725,6 +1876,9 @@ function saveMarco() {
   document.getElementById('marcoBadge').textContent=marcos.filter(m=>m.date>=today()).length;
   if(materiaId && activeView==='materia') renderMateriaDetail();
   _pendingMateriaId=null;
+
+  // Verificar conflito com rotina se tiver horário
+  if(mfTime) checkConflict(base);
 }
 
 function deleteMarco(id) {
@@ -1762,7 +1916,10 @@ function rotinaForm(r, overrideDate) {
   ${overrideInfo}
   <div class="form-group"><label class="form-label">Atividade</label>
   <input class="form-input" id="rf-title" value="${r?esc(r.title):''}" placeholder="Academia, estudo…"></div>
-  <div class="form-group"><label class="form-label">Horário</label><input class="form-input" type="time" id="rf-time" value="${r?r.time:'07:00'}"></div>
+  <div class="modal-row">
+    <div class="form-group"><label class="form-label">Início</label><input class="form-input" type="time" id="rf-time" value="${r?r.time:'07:00'}"></div>
+    <div class="form-group"><label class="form-label">Fim (opcional)</label><input class="form-input" type="time" id="rf-timeEnd" value="${r?r.timeEnd||'':''}"></div>
+  </div>
   ${!overrideDate ? `<div class="form-group"><label class="form-label">Dias da semana</label>
   <div style="display:flex;gap:6px;flex-wrap:wrap">
     ${DAYS_PT.map((d,i)=>`<button class="cat-option${days.includes(i)?' selected':''}" style="padding:6px 10px;font-size:.73rem" id="rd-${i}" onclick="toggleRDay(${i})">${d}</button>`).join('')}
@@ -1800,21 +1957,32 @@ function saveRotina() {
   const cor=document.getElementById('_selectedColor')?.value||PALETTE[14];
   const cat=document.querySelector('.cat-option.selected')?.dataset.cat||'pessoal';
   const time=document.getElementById('rf-time').value;
+  const timeEnd=document.getElementById('rf-timeEnd')?.value||'';
   const notes=document.getElementById('rf-notes').value;
 
   if(_rotinaOverrideDate) {
-    // Salva override apenas para este dia no localStorage
     const key='rotOverride_'+editingId+'_'+_rotinaOverrideDate;
-    localStorage.setItem(key, JSON.stringify({title,time,cat,cor,notes}));
+    localStorage.setItem(key, JSON.stringify({title,time,timeEnd,cat,cor,notes}));
     closeModal();
     if(activeView==='hoje') renderToday(); else if(activeView==='semana') renderWeek(); else renderRotina();
     return;
   }
 
   const days=[...document.querySelectorAll('[id^="rd-"].selected')].map(b=>parseInt(b.id.replace('rd-','')));
-  const obj={id:editingId||uid(),title,time,days:days.length?days:[1,2,3,4,5],cat,cor,notes};
-  if(editingId){const i=rotina.findIndex(r=>r.id===editingId);if(i>-1)rotina[i]=obj;}else rotina.push(obj);
+  const obj={id:editingId||uid(),title,time,timeEnd,days:days.length?days:[1,2,3,4,5],cat,cor,notes};
+
+  // Edição permanente: gravar data de início da modificação para lógica "a partir de hoje"
+  if(editingId) {
+    const existing = rotina.find(r=>r.id===editingId);
+    obj.modifiedFrom = today(); // registra quando foi modificado
+    obj.prevState = existing ? {title:existing.title,time:existing.time,timeEnd:existing.timeEnd,cat:existing.cat,cor:existing.cor,notes:existing.notes} : null;
+    const i=rotina.findIndex(r=>r.id===editingId);
+    if(i>-1)rotina[i]=obj;
+  } else {
+    rotina.push(obj);
+  }
   save(SK.rotina,rotina); closeModal(); renderRotina();
+  if(activeView==='hoje') renderToday(); else if(activeView==='semana') renderWeek();
 }
 
 function clearRotinaOverride(id, date) {
@@ -1970,7 +2138,7 @@ function materiaForm(m, ramoIdOverride) {
     <div style="font-size:.73rem;font-weight:700;color:var(--text-m);margin-bottom:10px;text-transform:uppercase;letter-spacing:.05em">🏫 Dias e Horários das Aulas</div>
     <div style="font-size:.72rem;color:var(--text-l);margin-bottom:10px">Sem aulas definidas → matéria não será vinculada ao semestre.</div>
     <div id="aulasContainer">
-      ${(m&&m.aulas&&m.aulas.length?m.aulas:[{dia:1,hora:'08:00'}]).map((a,i)=>`
+      ${(m&&m.aulas&&m.aulas.length?m.aulas:[{dia:1,hora:'08:00',horaFim:''}]).map((a,i)=>`
       <div class="modal-row aula-row" style="margin-bottom:8px;align-items:center" id="aula-row-${i}">
         <div class="form-group" style="margin-bottom:0;flex:2">
           <select class="form-select aula-dia">
@@ -1978,7 +2146,10 @@ function materiaForm(m, ramoIdOverride) {
           </select>
         </div>
         <div class="form-group" style="margin-bottom:0;flex:1">
-          <input class="form-input aula-hora" type="time" value="${a.hora||'08:00'}">
+          <input class="form-input aula-hora" type="time" value="${a.hora||'08:00'}" placeholder="Início">
+        </div>
+        <div class="form-group" style="margin-bottom:0;flex:1">
+          <input class="form-input aula-hora-fim" type="time" value="${a.horaFim||''}" placeholder="Fim">
         </div>
         <button onclick="removeAulaRow(this)" style="background:none;border:none;font-size:1rem;cursor:pointer;color:#e57373;padding:0 4px;flex-shrink:0">✕</button>
       </div>`).join('')}
@@ -2102,7 +2273,10 @@ function addAulaRow() {
       </select>
     </div>
     <div class="form-group" style="margin-bottom:0;flex:1">
-      <input class="form-input aula-hora" type="time" value="08:00">
+      <input class="form-input aula-hora" type="time" value="08:00" placeholder="Início">
+    </div>
+    <div class="form-group" style="margin-bottom:0;flex:1">
+      <input class="form-input aula-hora-fim" type="time" value="" placeholder="Fim">
     </div>
     <button onclick="removeAulaRow(this)" style="background:none;border:none;font-size:1rem;cursor:pointer;color:#e57373;padding:0 4px;flex-shrink:0">✕</button>`;
   container.appendChild(div);
@@ -2116,7 +2290,8 @@ function coletarAulas() {
   rows.forEach(row => {
     const dia = parseInt(row.querySelector('.aula-dia').value);
     const hora = row.querySelector('.aula-hora').value;
-    if(hora) aulas.push({dia, hora});
+    const horaFim = row.querySelector('.aula-hora-fim')?.value || '';
+    if(hora) aulas.push({dia, hora, horaFim});
   });
   return aulas;
 }
@@ -2301,6 +2476,16 @@ function openRotinaBlock(id) {
   document.getElementById('modalOverlay').classList.add('open');
 }
 
+function openRotinaOverride(id, date) {
+  editingId = id;
+  const r = rotina.find(x=>x.id===id); if(!r) return;
+  const stored = localStorage.getItem('rotOverride_'+id+'_'+date);
+  const base = stored ? {...r, ...JSON.parse(stored)} : r;
+  _rotinaOverrideDate = date;
+  document.getElementById('modalContent').innerHTML = rotinaForm(base, date);
+  document.getElementById('modalOverlay').classList.add('open');
+}
+
 function taskDetail(t) {
   if(!t) return '';
   return `<div class="detail-card">
@@ -2376,6 +2561,7 @@ function doSearch(q) {
 
 // ── HELPERS ──
 function formatDatePT(ds) { if(!ds) return ''; const d=parseDate(ds); return `${DAYS_PT[d.getDay()]}, ${d.getDate()} de ${MONTHS_PT[d.getMonth()]} de ${d.getFullYear()}`; }
+function formatDateShort(ds) { if(!ds) return ''; const d=parseDate(ds); return `${d.getDate()}/${d.getMonth()+1}`; }
 function formatDateShort(ds) { if(!ds) return ''; const d=parseDate(ds); return `${d.getDate()}/${d.getMonth()+1}`; }
 
 // ════════════════════════════════════════════════
@@ -2518,12 +2704,95 @@ function savePes() {
 function deletePes(id) { pessoalItens=pessoalItens.filter(x=>x.id!==id); save(SK.pessoal,pessoalItens); closeModal(); renderPessoal(); renderAreas(); }
 
 // ════════════════════════════════════════════════
+//  AVISOS DE EVENTOS
+// ════════════════════════════════════════════════
+function renderEventAlerts() {
+  const el = document.getElementById('eventAlerts');
+  if (!el) return;
+  const td = today();
+  const alertMarcos = marcos.filter(m => m.alertMode && m.alertMode !== 'none' && m.date >= td);
+  const visible = alertMarcos.filter(m => {
+    const diff = diffDays(m.date);
+    if (m.alertMode === 'day')   return diff <= 1;
+    if (m.alertMode === 'week')  return diff <= 7;
+    if (m.alertMode === 'month') return diff <= 31;
+    return false;
+  }).sort((a,b) => a.date.localeCompare(b.date));
+  if (!visible.length) { el.innerHTML = ''; return; }
+  const html = `<div class="event-alerts">${visible.map(m => {
+    const diff = diffDays(m.date);
+    let cls, badge, sub;
+    if (diff === 0)      { cls='alert-today'; badge='Hoje!'; sub='Este evento é hoje'; }
+    else if (diff === 1) { cls='alert-day';   badge='Amanhã'; sub=`${m.icon||'📍'} ${esc(m.title)} é amanhã`; }
+    else if (diff <= 7)  { cls='alert-week';  badge=`em ${diff}d`; sub=`Esta semana · ${formatDatePT(m.date)}`; }
+    else                 { cls='alert-far';   badge=`em ${diff}d`; sub=`Este mês · ${formatDatePT(m.date)}`; }
+    return `<div class="event-alert ${cls}" onclick="openMarco('${m.id}')">
+      <div class="event-alert-icon">${m.icon||'📍'}</div>
+      <div class="event-alert-body"><div class="event-alert-title">${esc(m.title)}</div><div class="event-alert-sub">${sub}</div></div>
+      <div class="event-alert-badge">${badge}</div>
+    </div>`;
+  }).join('')}</div>`;
+  el.innerHTML = html;
+}
+
+// ════════════════════════════════════════════════
+//  CONFLITO DE AGENDA
+// ════════════════════════════════════════════════
+function timeToMin(t) { if(!t) return null; const [h,m]=t.split(':').map(Number); return h*60+m; }
+function timesOverlap(aStart,aEnd,bStart,bEnd) {
+  const as=timeToMin(aStart),ae=aEnd?timeToMin(aEnd):(as!==null?as+60:null);
+  const bs=timeToMin(bStart),be=bEnd?timeToMin(bEnd):(bs!==null?bs+60:null);
+  if(as===null||bs===null) return false;
+  return as<be&&ae>bs;
+}
+function checkConflict(evento) {
+  if(!evento.time) return;
+  const evDate=new Date(evento.date+'T12:00:00');
+  const weekday=evDate.getDay();
+  const conflicts=rotina.filter(r=>{
+    if(!r.days||!r.days.includes(weekday)) return false;
+    if(!r.time) return false;
+    return timesOverlap(evento.time,evento.timeEnd,r.time,r.timeEnd);
+  });
+  if(!conflicts.length) return;
+  const html=`
+    <div class="conflict-title">⚠️ Conflito de Agenda</div>
+    <div class="conflict-sub">O evento "<strong>${esc(evento.title)}</strong>" (${evento.time}${evento.timeEnd?'–'+evento.timeEnd:''}) conflita com sua rotina em ${DAYS_FULL[weekday]}:</div>
+    ${conflicts.map(r=>`<div class="conflict-item">
+      <div class="conflict-item-title">${esc(r.title)}</div>
+      <div class="conflict-item-time">🕐 ${r.time}${r.timeEnd?'–'+r.timeEnd:''} · ${r.days.map(d=>DAYS_PT[d]).join(', ')}</div>
+    </div>`).join('')}
+    <div class="conflict-actions">
+      <button class="conflict-btn-primary" onclick="adjustRotineForEvent('${evento.id}','${evento.date}',${weekday})">🔄 Ajustar minha rotina neste dia</button>
+      <button class="conflict-btn-secondary" onclick="closeConflict()">Manter rotina assim mesmo</button>
+    </div>`;
+  document.getElementById('conflictContent').innerHTML=html;
+  document.getElementById('conflictModal').classList.add('open');
+}
+function closeConflict() { document.getElementById('conflictModal').classList.remove('open'); }
+function adjustRotineForEvent(eventoId,date,weekday) {
+  closeConflict();
+  const evento=marcos.find(m=>m.id===eventoId); if(!evento) return;
+  const wd=new Date(date+'T12:00:00').getDay();
+  const conflicts=rotina.filter(r=>r.days&&r.days.includes(wd)&&r.time&&timesOverlap(evento.time,evento.timeEnd,r.time,r.timeEnd));
+  if(!conflicts.length) return;
+  const r=conflicts[0];
+  editingId=r.id;
+  const stored=localStorage.getItem('rotOverride_'+r.id+'_'+date);
+  const base=stored?{...r,...JSON.parse(stored)}:r;
+  _rotinaOverrideDate=date;
+  document.getElementById('modalContent').innerHTML=rotinaForm(base,date);
+  document.getElementById('modalOverlay').classList.add('open');
+}
+
+// ════════════════════════════════════════════════
 //  INIT
 // ════════════════════════════════════════════════
 verificarFimSemestre();
 renderHeaderDate();
 renderToday();
 document.getElementById('marcoBadge').textContent=marcos.filter(m=>m.date>=today()).length;
+document.getElementById('conflictModal').addEventListener('click', e => { if(e.target===document.getElementById('conflictModal')) closeConflict(); });
 </script>
 <script>
 // ── PWA: Manifest dinâmico via Blob (funciona no GitHub Pages sem arquivos extras) ──
