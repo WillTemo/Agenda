@@ -2913,6 +2913,7 @@ let finAno = new Date().getFullYear();
 let finActiveTab = 'extrato';
 let _editingFinId = null;
 let _editingInvestId = null;
+let _currentInvestId = null;
 let _currentCartaoId = null;
 
 const FIN_TIPOS = {
@@ -2923,13 +2924,15 @@ const FIN_TIPOS = {
 const FIN_CAT_INCOME  = ['Salário','Pensão','Freelance','Presente','Reembolso','Outro'];
 const FIN_CAT_EXPENSE = ['Alimentação','Moradia','Transporte','Saúde','Educação','Lazer','Assinaturas','Roupas','Outro'];
 const FIN_CAT_INVEST  = ['Renda Fixa','Ações','FIIs','Criptomoedas','Tesouro Direto','Poupança','Previdência','Outro'];
+const FIN_INVEST_TIPOS = ['Renda Fixa','Ações','FIIs','Criptomoedas','Tesouro Direto','Poupança','Previdência','Outro'];
+const FIN_INVEST_ICONS = ['📈','💰','🏦','🪙','💎','🏠','📊','🌱'];
 const FIN_RECUR_LABEL = { none:'Única vez', monthly:'Todo mês', weekly:'Toda semana' };
 
 const fmtBRL = v => 'R$\u00a0' + Math.abs(v).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
 
 function finGetMesLancamentos(m, a) {
   const prefix = `${a}-${String(m+1).padStart(2,'0')}`;
-  return finLancamentos.filter(l => l.date.startsWith(prefix) && l.tipo !== 'cartao_item');
+  return finLancamentos.filter(l => l.date.startsWith(prefix) && l.tipo !== 'cartao_item' && l.tipo !== 'invest_mov');
 }
 
 function finCalcSaldo(m, a) {
@@ -2938,11 +2941,17 @@ function finCalcSaldo(m, a) {
   ls.forEach(l => {
     if (l.tipo === 'income')  income += l.valor;
     if (l.tipo === 'expense') expense += l.valor;
-    if (l.tipo === 'invest' && l.debitaConta !== false) invest += l.valor;
+  });
+  const prefix = `${a}-${String(m+1).padStart(2,'0')}`;
+  // Movimentações de investimento que afetam o saldo neste mês (modelo novo, similar ao cartão)
+  const movsInvestMes = finLancamentos.filter(l => l.tipo === 'invest_mov' && l.date.startsWith(prefix));
+  movsInvestMes.forEach(l => {
+    if (l.movTipo === 'entrada' && l.debitaConta !== false) invest += l.valor;       // saiu do saldo
+    if (l.movTipo === 'saida'   && l.debitaConta !== false) income += l.valor;        // voltou pro saldo (soma como entrada)
   });
   // Pagamentos de fatura que saíram do saldo neste mês (respeita debitaConta:false em pagamentos parciais)
   const pagFatura = finLancamentos
-    .filter(l => l.tipo === 'pagamento_fatura' && l.debitaConta !== false && l.date.startsWith(`${a}-${String(m+1).padStart(2,'0')}`))
+    .filter(l => l.tipo === 'pagamento_fatura' && l.debitaConta !== false && l.date.startsWith(prefix))
     .reduce((s,l)=>s+l.valor,0);
   const saldo = income - expense - invest - pagFatura;
   return { income, expense, invest, saldo };
@@ -3414,13 +3423,139 @@ function finDeleteCartaoGasto(itemId) {
 // ════════════════════════════════════════════
 //  INVESTIMENTOS
 // ════════════════════════════════════════════
-function finRenderInvestimentos() {
-  const carteira = finInvestimentos;
-  const totalAtual    = carteira.reduce((s,i)=>s+i.valorAtual,0);
-  const totalAportado = carteira.reduce((s,i)=>s+i.totalAportado,0);
-  const totalRetirado = carteira.reduce((s,i)=>s+(i.totalRetirado||0),0);
-  const rentab = totalAportado > 0 ? ((totalAtual - totalAportado + totalRetirado) / totalAportado * 100) : 0;
+// ════════════════════════════════════════════
+//  INVESTIMENTOS (modelo similar ao cartão de crédito)
+// ════════════════════════════════════════════
+// finInvestimentos: [{id, nome, tipo, icon}]                — só a configuração do ativo
+// finLancamentos com tipo:'invest_mov':
+//   { id, tipo:'invest_mov', investId, movTipo:'entrada'|'saida'|'atualizacao',
+//     valor, date, debitaConta, titulo }
 
+function finGetMovsInvest(investId) {
+  return finLancamentos.filter(l => l.tipo==='invest_mov' && l.investId===investId);
+}
+
+// Valor atual do investimento = última atualização registrada (ou, se não houver
+// nenhuma atualização ainda, soma de entradas menos saídas)
+function finValorAtualInvest(investId) {
+  const movs = finGetMovsInvest(investId).slice().sort((a,b)=>a.date.localeCompare(b.date)||a.id.localeCompare(b.id));
+  const atualizacoes = movs.filter(m=>m.movTipo==='atualizacao');
+  if (atualizacoes.length) {
+    return atualizacoes[atualizacoes.length-1].valor;
+  }
+  // Sem atualização: valor atual é a soma líquida de entradas/saídas
+  return movs.reduce((s,m)=>{
+    if (m.movTipo==='entrada') return s+m.valor;
+    if (m.movTipo==='saida')   return s-m.valor;
+    return s;
+  }, 0);
+}
+
+function finTotalEntradasInvest(investId) {
+  return finGetMovsInvest(investId).filter(m=>m.movTipo==='entrada').reduce((s,m)=>s+m.valor,0);
+}
+function finTotalSaidasInvest(investId) {
+  return finGetMovsInvest(investId).filter(m=>m.movTipo==='saida').reduce((s,m)=>s+m.valor,0);
+}
+
+// Rendimento total = valor atual - entradas + saídas (rendimento puro, sem contar movimentos de capital)
+function finRendimentoTotalInvest(investId) {
+  const valorAtual = finValorAtualInvest(investId);
+  const entradas = finTotalEntradasInvest(investId);
+  const saidas   = finTotalSaidasInvest(investId);
+  const rendimento = valorAtual - entradas + saidas;
+  const pct = entradas > 0 ? (rendimento/entradas*100) : 0;
+  return { valor: rendimento, pct };
+}
+
+// Rendimento do mês: calculado com base nas atualizações de valor feitas DENTRO do mês atual.
+// Pega a última atualização anterior ao mês (ou a primeira disponível) como base,
+// remove o efeito de entradas/saídas feitas no mês, e o que resta é o rendimento puro do mês.
+function finRendimentoMesInvest(investId, mes, ano) {
+  const prefixMes = `${ano}-${String(mes+1).padStart(2,'0')}`;
+  const inicioMes = `${prefixMes}-01`;
+  const movs = finGetMovsInvest(investId).slice().sort((a,b)=>a.date.localeCompare(b.date)||a.id.localeCompare(b.id));
+
+  const antesDoMes = movs.filter(m => m.date < inicioMes);
+  const noMes      = movs.filter(m => m.date >= inicioMes && m.date < proximoMesPrefix(prefixMes));
+
+  const atualizAntes = antesDoMes.filter(m=>m.movTipo==='atualizacao');
+  const atualizNoMes = noMes.filter(m=>m.movTipo==='atualizacao');
+
+  const entradasMes = noMes.filter(m=>m.movTipo==='entrada').reduce((s,m)=>s+m.valor,0);
+  const saidasMes   = noMes.filter(m=>m.movTipo==='saida').reduce((s,m)=>s+m.valor,0);
+
+  let valorBase;
+  if (atualizAntes.length) {
+    valorBase = atualizAntes[atualizAntes.length-1].valor;
+  } else if (atualizNoMes.length) {
+    valorBase = atualizNoMes[0].valor;
+  } else {
+    valorBase = null; // sem nenhuma atualização ainda
+  }
+
+  let valorFinal;
+  if (atualizNoMes.length) {
+    valorFinal = atualizNoMes[atualizNoMes.length-1].valor;
+  } else {
+    valorFinal = finValorAtualInvest(investId);
+  }
+
+  if (valorBase == null) {
+    // Sem histórico de atualização: não há como isolar rendimento — considera zero
+    return { valor: 0, pct: 0 };
+  }
+
+  const rendimento = valorFinal - valorBase - entradasMes + saidasMes;
+  const pct = valorBase > 0 ? (rendimento/valorBase*100) : 0;
+  return { valor: rendimento, pct };
+}
+
+function proximoMesPrefix(prefixMes) {
+  const [a,m] = prefixMes.split('-').map(Number);
+  const d = new Date(a, m, 1); // já é o próximo mês (m é 1-based aqui pois somamos 1 no padStart)
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-01`;
+}
+
+// ── Render: lista geral da carteira ──
+function finRenderInvestimentos() {
+  if (!finInvestimentos.length) {
+    return `<div class="cc-setup" onclick="finNovoInvest()">
+      <div class="cc-setup-icon">📈</div>
+      <div class="cc-setup-text">Adicionar investimento</div>
+      <div style="font-size:.72rem;color:var(--text-l);margin-top:6px">Acompanhe seus ativos e rendimentos</div>
+    </div>`;
+  }
+
+  let totalAtual = 0, totalEntradas = 0, totalRendimento = 0;
+  const cardsHTML = finInvestimentos.map(inv => {
+    const valorAtual = finValorAtualInvest(inv.id);
+    const entradas    = finTotalEntradasInvest(inv.id);
+    const { valor: rendTotal, pct: rendTotalPct } = finRendimentoTotalInvest(inv.id);
+    const { valor: rendMes } = finRendimentoMesInvest(inv.id, finMes, finAno);
+    totalAtual += valorAtual; totalEntradas += entradas; totalRendimento += rendTotal;
+
+    const corRendTotal = rendTotal >= 0 ? 'var(--fin-green)' : 'var(--fin-red)';
+    const corRendMes   = rendMes   >= 0 ? 'var(--fin-green)' : 'var(--fin-red)';
+
+    return `<div class="cc-card" style="background:linear-gradient(135deg,#1A3A2C 0%,#2D5A45 100%)" onclick="finAbreInvest('${inv.id}')">
+      <div class="cc-card-header">
+        <div>
+          <div class="cc-card-name">${esc(inv.nome)}</div>
+          <div style="font-size:.65rem;opacity:.6;margin-top:2px">${esc(inv.tipo)}</div>
+        </div>
+        <div class="cc-card-flag">${inv.icon||'📈'}</div>
+      </div>
+      <div class="cc-card-limit-label">Valor atual</div>
+      <div class="cc-card-fatura-val">${fmtBRL(valorAtual)}</div>
+      <div class="cc-card-footer">
+        <div class="cc-card-info" style="color:${corRendMes}">${rendMes>=0?'+':'−'} ${fmtBRL(rendMes)} no mês</div>
+        <span class="cc-card-badge" style="background:rgba(255,255,255,.18);color:${corRendTotal==='var(--fin-green)'?'#9FE8C0':'#FFB3A8'}">${rendTotal>=0?'+':''}${rendTotalPct.toFixed(1).replace('.',',')}%</span>
+      </div>
+    </div>`;
+  }).join('');
+
+  const rentTotalPct = totalEntradas > 0 ? (totalRendimento/totalEntradas*100) : 0;
   const resumo = `<div class="fin-chart" style="margin-bottom:14px">
     <div class="fin-chart-title" style="margin-bottom:12px">Carteira de Investimentos</div>
     <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;text-align:center">
@@ -3430,179 +3565,278 @@ function finRenderInvestimentos() {
       </div>
       <div style="background:var(--cream);border-radius:var(--radius-sm);padding:10px">
         <div style="font-size:.6rem;color:var(--text-l);margin-bottom:4px">APORTADO</div>
-        <div style="font-size:.88rem;font-weight:700;color:var(--text)">${fmtBRL(totalAportado)}</div>
+        <div style="font-size:.88rem;font-weight:700;color:var(--text)">${fmtBRL(totalEntradas)}</div>
       </div>
       <div style="background:var(--cream);border-radius:var(--radius-sm);padding:10px">
         <div style="font-size:.6rem;color:var(--text-l);margin-bottom:4px">RENTAB.</div>
-        <div style="font-size:.88rem;font-weight:700;color:${rentab>=0?'var(--fin-green)':'var(--fin-red)'}">${rentab>=0?'+':''}${rentab.toFixed(2).replace('.',',')}%</div>
+        <div style="font-size:.88rem;font-weight:700;color:${rentTotalPct>=0?'var(--fin-green)':'var(--fin-red)'}">${rentTotalPct>=0?'+':''}${rentTotalPct.toFixed(2).replace('.',',')}%</div>
       </div>
     </div>
   </div>`;
 
-  if (!carteira.length) {
-    return resumo + `<div class="fin-empty"><div class="fin-empty-icon">📈</div><div class="fin-empty-text">Nenhum ativo cadastrado.<br>Toque em <strong>＋</strong> e escolha Investimento.</div></div>`;
-  }
-
-  const itens = carteira.map(inv => {
-    const rent = inv.totalAportado > 0
-      ? ((inv.valorAtual - inv.totalAportado + (inv.totalRetirado||0)) / inv.totalAportado * 100)
-      : 0;
-    const rentColor = rent >= 0 ? 'var(--fin-green)' : 'var(--fin-red)';
-    const pct = totalAtual > 0 ? (inv.valorAtual/totalAtual*100) : 0;
-    return `<div class="fin-item invest" onclick="finOpenInvest('${inv.id}')">
-      <div class="fin-item-icon">${inv.icon||'📈'}</div>
-      <div class="fin-item-body">
-        <div class="fin-item-title">${esc(inv.nome)}</div>
-        <div class="fin-item-meta">
-          <span class="fin-tag">${esc(inv.categoria)}</span>
-          <span style="color:${rentColor};font-size:.7rem;font-weight:600">${rent>=0?'+':''}${rent.toFixed(2).replace('.',',')}%</span>
-        </div>
-        <div style="margin-top:6px;height:3px;background:var(--beige);border-radius:3px">
-          <div style="height:3px;border-radius:3px;width:${pct.toFixed(1)}%;background:#2055A8"></div>
-        </div>
-        <div style="font-size:.62rem;color:var(--text-l);margin-top:3px">${pct.toFixed(1)}% da carteira</div>
-      </div>
-      <div class="fin-item-value" style="color:#2055A8;font-size:.88rem">${fmtBRL(inv.valorAtual)}</div>
-    </div>`;
-  }).join('');
-
-  return resumo + `<div class="fin-list">${itens}</div>`;
+  return resumo + cardsHTML + `<button class="btn-secondary" style="margin-top:4px" onclick="finNovoInvest()">＋ Adicionar investimento</button>`;
 }
 
-function finOpenInvest(id) {
-  _editingInvestId = id;
-  const inv = finInvestimentos.find(i=>i.id===id); if(!inv) return;
-  document.getElementById('modalContent').innerHTML = finInvestForm(inv);
+// ── Configurar novo investimento (nome + tipo, igual ao cartão) ──
+function finNovoInvest() {
+  document.getElementById('modalContent').innerHTML = `
+    <div class="modal-title">Novo investimento</div>
+    <div class="form-group"><label class="form-label">Nome</label>
+    <input class="form-input" id="fi-nome" placeholder="Ex: Cofrinho Banco do Brasil, CDB liquidez diária"></div>
+    <div class="form-group"><label class="form-label">Tipo</label>
+    <select class="form-select" id="fi-tipo">
+      ${FIN_INVEST_TIPOS.map(t=>`<option value="${t}">${t}</option>`).join('')}
+    </select></div>
+    <div class="form-group"><label class="form-label">Ícone</label>
+    <div style="display:flex;flex-wrap:wrap;gap:6px">${FIN_INVEST_ICONS.map(ic=>`<button style="font-size:1.3rem;background:${ic==='📈'?'var(--cream2)':'none'};border:1.5px solid ${ic==='📈'?'var(--tan)':'transparent'};border-radius:8px;padding:4px;cursor:pointer;width:38px;height:38px" onclick="finPickInvestIcon('${ic}',this)">${ic}</button>`).join('')}</div>
+    <input type="hidden" id="fi-icon" value="📈"></div>
+    <button class="btn-primary" onclick="finSalvarNovoInvest()">Criar investimento</button>`;
   document.getElementById('modalOverlay').classList.add('open');
 }
 
-function finInvestForm(inv) {
-  const aportes = (inv.aportes||[]).slice().reverse();
-  const rent = inv.totalAportado > 0
-    ? ((inv.valorAtual - inv.totalAportado + (inv.totalRetirado||0)) / inv.totalAportado * 100)
-    : 0;
-  const rentColor = rent >= 0 ? 'var(--fin-green)' : 'var(--fin-red)';
-  const rendimento = inv.valorAtual - inv.totalAportado + (inv.totalRetirado||0);
-
-  return `<div class="modal-title">${inv.icon||'📈'} ${esc(inv.nome)}</div>
-  <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px">
-    <div style="text-align:center;background:var(--cream2);border-radius:var(--radius-sm);padding:12px">
-      <div style="font-size:.6rem;color:var(--text-l);margin-bottom:4px">VALOR ATUAL</div>
-      <div style="font-size:1rem;font-weight:700;color:#2055A8">${fmtBRL(inv.valorAtual)}</div>
-    </div>
-    <div style="text-align:center;background:var(--cream2);border-radius:var(--radius-sm);padding:12px">
-      <div style="font-size:.6rem;color:var(--text-l);margin-bottom:4px">RENTABILIDADE</div>
-      <div style="font-size:1rem;font-weight:700;color:${rentColor}">${rent>=0?'+':''}${rent.toFixed(2).replace('.',',')}%</div>
-    </div>
-    <div style="text-align:center;background:var(--cream2);border-radius:var(--radius-sm);padding:12px">
-      <div style="font-size:.6rem;color:var(--text-l);margin-bottom:4px">TOTAL APORTADO</div>
-      <div style="font-size:.9rem;font-weight:600;color:var(--text)">${fmtBRL(inv.totalAportado)}</div>
-    </div>
-    <div style="text-align:center;background:var(--cream2);border-radius:var(--radius-sm);padding:12px">
-      <div style="font-size:.6rem;color:var(--text-l);margin-bottom:4px">RENDIMENTO</div>
-      <div style="font-size:.9rem;font-weight:600;color:${rendimento>=0?'var(--fin-green)':'var(--fin-red)'}">${rendimento>=0?'+ ':'− '}${fmtBRL(rendimento)}</div>
-    </div>
-  </div>
-
-  <div style="font-size:.78rem;font-weight:600;color:var(--text-m);margin-bottom:6px">➕ Adicionar valor</div>
-  <div class="modal-row" style="margin-bottom:4px">
-    <div class="form-group"><input class="form-input" type="number" id="fi-aporte" placeholder="Valor do aporte" step="0.01" min="0"></div>
-    <div class="form-group">
-      <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:.78rem;color:var(--text-m)">
-        <input type="checkbox" id="fi-aporte-debita" checked style="width:14px;height:14px"> Sai do saldo
-      </label>
-    </div>
-  </div>
-  <button class="btn-primary" style="margin-bottom:20px;width:100%" onclick="finAdicionarAporte('${inv.id}')">Adicionar ao investimento</button>
-
-  <div style="font-size:.78rem;font-weight:600;color:var(--text-m);margin-bottom:6px">📊 Atualizar valor atual</div>
-  <div class="modal-row" style="margin-bottom:4px">
-    <div class="form-group"><input class="form-input" type="number" id="fi-valorAtual" value="${inv.valorAtual}" placeholder="Valor atual" step="0.01"></div>
-    <div class="form-group"><button class="btn-primary" style="padding:10px 14px;font-size:.82rem" onclick="finAtualizarValor('${inv.id}')">Atualizar</button></div>
-  </div>
-  <div style="font-size:.68rem;color:var(--text-l);margin-bottom:16px">Informe o saldo atual do ativo — o rendimento é recalculado automaticamente</div>
-
-  <div style="font-size:.78rem;font-weight:600;color:var(--text-m);margin-bottom:6px">💸 Registrar retirada</div>
-  <div class="modal-row">
-    <div class="form-group"><input class="form-input" type="number" id="fi-retirada" placeholder="Valor" step="0.01" min="0"></div>
-    <div class="form-group">
-      <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:.78rem;color:var(--text-m)">
-        <input type="checkbox" id="fi-retorna-conta" checked style="width:14px;height:14px"> Retorna ao saldo
-      </label>
-    </div>
-  </div>
-  <button class="btn-secondary" style="margin-bottom:20px;width:100%" onclick="finRegistrarRetirada('${inv.id}')">Registrar retirada</button>
-
-  <div style="font-size:.78rem;font-weight:600;color:var(--text-m);margin-bottom:8px">Histórico de movimentações</div>
-  <div class="fin-list">
-    ${aportes.length ? aportes.map(a=>`
-      <div class="fin-item ${a.tipo==='retirada'?'expense':'invest'}" style="cursor:default">
-        <div class="fin-item-icon">${a.tipo==='retirada'?'💸':'📥'}</div>
-        <div class="fin-item-body">
-          <div class="fin-item-title">${a.tipo==='retirada'?'Retirada':'Aporte'}</div>
-          <div class="fin-item-meta"><span>${a.data}</span>${a.retornaConta?'<span class="fin-tag">↩ voltou ao saldo</span>':''}</div>
-        </div>
-        <div class="fin-item-value">${a.tipo==='retirada'?'− ':'+ '}${fmtBRL(a.valor)}</div>
-      </div>`).join('')
-    : `<div style="font-size:.8rem;color:var(--text-l);text-align:center;padding:16px">Nenhuma movimentação ainda</div>`}
-  </div>
-  <button class="btn-danger" style="margin-top:16px" onclick="finDeleteInvest('${inv.id}')">🗑 Remover ativo</button>`;
+function finPickInvestIcon(ic, btn) {
+  btn.parentElement.querySelectorAll('button').forEach(b=>{ b.style.background='none'; b.style.borderColor='transparent'; });
+  btn.style.background='var(--cream2)'; btn.style.borderColor='var(--tan)';
+  document.getElementById('fi-icon').value = ic;
 }
 
-function finAdicionarAporte(id) {
-  const inv = finInvestimentos.find(i=>i.id===id); if(!inv) return;
-  const val = parseFloat(document.getElementById('fi-aporte').value);
-  if (!val||val<=0) return;
-  const debita = document.getElementById('fi-aporte-debita')?.checked !== false;
-  inv.totalAportado += val;
-  inv.valorAtual    += val;
-  inv.aportes = inv.aportes||[];
-  inv.aportes.push({ id:uid(), data:today(), valor:val, tipo:'aporte', debitaConta: debita });
-  if (debita) {
-    finLancamentos.push({ id:uid(), tipo:'invest', titulo:`Aporte — ${inv.nome}`, valor:val, date:today(), categoria:inv.categoria, icon:inv.icon||'📈', recur:'none', debitaConta:true, investId:inv.id });
-    save(SK.fin, finLancamentos);
-  }
-  save(SK.finInvest, finInvestimentos);
-  document.getElementById('modalContent').innerHTML = finInvestForm(inv);
-  renderFinanceiro();
-}
-
-function finAtualizarValor(id) {
-  const inv = finInvestimentos.find(i=>i.id===id); if(!inv) return;
-  const novoVal = parseFloat(document.getElementById('fi-valorAtual').value);
-  if (isNaN(novoVal)||novoVal<0) return;
-  inv.valorAtual = novoVal;
-  inv.aportes = inv.aportes||[];
-  inv.aportes.push({ id:uid(), data:today(), valor:novoVal, tipo:'atualizacao' });
-  save(SK.finInvest, finInvestimentos);
-  document.getElementById('modalContent').innerHTML = finInvestForm(inv);
-  renderFinanceiro();
-}
-
-function finRegistrarRetirada(id) {
-  const inv = finInvestimentos.find(i=>i.id===id); if(!inv) return;
-  const val = parseFloat(document.getElementById('fi-retirada').value);
-  if (!val||val<=0) return;
-  const retornaConta = document.getElementById('fi-retorna-conta')?.checked;
-  inv.totalRetirado = (inv.totalRetirado||0) + val;
-  inv.valorAtual    = Math.max(0, inv.valorAtual - val);
-  inv.aportes = inv.aportes||[];
-  inv.aportes.push({ id:uid(), data:today(), valor:val, tipo:'retirada', retornaConta });
-  if (retornaConta) {
-    finLancamentos.push({ id:uid(), tipo:'income', titulo:`Retirada — ${inv.nome}`, valor:val, date:today(), categoria:'Reembolso', icon:'💸', recur:'none' });
-    save(SK.fin, finLancamentos);
-  }
-  save(SK.finInvest, finInvestimentos);
-  document.getElementById('modalContent').innerHTML = finInvestForm(inv);
-  renderFinanceiro();
-}
-
-function finDeleteInvest(id) {
-  if (!confirm('Remover este ativo da carteira?')) return;
-  finInvestimentos = finInvestimentos.filter(i=>i.id!==id);
+function finSalvarNovoInvest() {
+  const nome = document.getElementById('fi-nome').value.trim(); if(!nome) return;
+  const tipo = document.getElementById('fi-tipo').value;
+  const icon = document.getElementById('fi-icon').value;
+  finInvestimentos.push({ id:uid(), nome, tipo, icon });
   save(SK.finInvest, finInvestimentos);
   closeModal(); renderFinanceiro();
 }
+
+function finEditInvestConfig(investId) {
+  const inv = finInvestimentos.find(i=>i.id===investId); if(!inv) return;
+  document.getElementById('modalContent').innerHTML = `
+    <div class="modal-title">Editar investimento</div>
+    <div class="form-group"><label class="form-label">Nome</label>
+    <input class="form-input" id="fi-nome" value="${esc(inv.nome)}"></div>
+    <div class="form-group"><label class="form-label">Tipo</label>
+    <select class="form-select" id="fi-tipo">
+      ${FIN_INVEST_TIPOS.map(t=>`<option value="${t}"${inv.tipo===t?' selected':''}>${t}</option>`).join('')}
+    </select></div>
+    <div class="form-group"><label class="form-label">Ícone</label>
+    <div style="display:flex;flex-wrap:wrap;gap:6px">${FIN_INVEST_ICONS.map(ic=>`<button style="font-size:1.3rem;background:${inv.icon===ic?'var(--cream2)':'none'};border:1.5px solid ${inv.icon===ic?'var(--tan)':'transparent'};border-radius:8px;padding:4px;cursor:pointer;width:38px;height:38px" onclick="finPickInvestIcon('${ic}',this)">${ic}</button>`).join('')}</div>
+    <input type="hidden" id="fi-icon" value="${inv.icon||'📈'}"></div>
+    <button class="btn-primary" onclick="finSalvarEditInvest('${investId}')">Salvar</button>`;
+  document.getElementById('modalOverlay').classList.add('open');
+}
+
+function finSalvarEditInvest(investId) {
+  const inv = finInvestimentos.find(i=>i.id===investId); if(!inv) return;
+  inv.nome = document.getElementById('fi-nome').value.trim()||inv.nome;
+  inv.tipo = document.getElementById('fi-tipo').value;
+  inv.icon = document.getElementById('fi-icon').value;
+  save(SK.finInvest, finInvestimentos);
+  closeModal(); renderFinanceiro();
+}
+
+function finDeleteInvest(investId) {
+  if (!confirm('Remover este investimento? O histórico de movimentações será mantido nos seus lançamentos.')) return;
+  finInvestimentos = finInvestimentos.filter(i=>i.id!==investId);
+  save(SK.finInvest, finInvestimentos);
+  closeModal(); renderFinanceiro();
+}
+
+// ── Abrir detalhe do investimento: valor total, gráfico, rendimento do mês, histórico ──
+function finAbreInvest(investId) {
+  _currentInvestId = investId;
+  const inv = finInvestimentos.find(i=>i.id===investId); if(!inv) return;
+
+  const valorAtual = finValorAtualInvest(investId);
+  const entradas    = finTotalEntradasInvest(investId);
+  const saidas      = finTotalSaidasInvest(investId);
+  const { valor: rendTotal, pct: rendTotalPct } = finRendimentoTotalInvest(investId);
+  const { valor: rendMes, pct: rendMesPct } = finRendimentoMesInvest(investId, finMes, finAno);
+  const corRendTotal = rendTotal >= 0 ? 'var(--fin-green)' : 'var(--fin-red)';
+  const corRendMes   = rendMes   >= 0 ? 'var(--fin-green)' : 'var(--fin-red)';
+
+  const movs = finGetMovsInvest(investId).slice().sort((a,b)=>b.date.localeCompare(a.date)||b.id.localeCompare(a.id));
+
+  const histHTML = movs.length ? movs.map(m=>{
+    const icon = m.movTipo==='entrada' ? '📥' : m.movTipo==='saida' ? '💸' : '📊';
+    const label = m.titulo ? esc(m.titulo) : (m.movTipo==='entrada'?'Entrada':m.movTipo==='saida'?'Saída':'Atualização de valor');
+    const sinal = m.movTipo==='entrada' ? '+ ' : m.movTipo==='saida' ? '− ' : '';
+    const cls = m.movTipo==='saida' ? 'expense' : 'invest';
+    const debitTag = m.movTipo!=='atualizacao' ? (m.debitaConta===false ? '<span class="fin-tag">Sem débito</span>' : '<span class="fin-tag">Saldo</span>') : '';
+    return `<div class="fin-item ${cls}" onclick="finOpenMovInvest('${m.id}')">
+      <div class="fin-item-icon">${icon}</div>
+      <div class="fin-item-body">
+        <div class="fin-item-title">${label}</div>
+        <div class="fin-item-meta"><span>${parseDate(m.date).getDate()}/${parseDate(m.date).getMonth()+1}/${parseDate(m.date).getFullYear()}</span>${debitTag}</div>
+      </div>
+      <div class="fin-item-value">${sinal}${fmtBRL(m.valor)}</div>
+    </div>`;
+  }).join('') : `<div style="font-size:.8rem;color:var(--text-l);text-align:center;padding:20px">Nenhuma movimentação ainda</div>`;
+
+  const chartHTML = finRenderInvestChart(investId);
+
+  document.getElementById('modalContent').innerHTML = `
+    <div class="modal-title">${inv.icon||'📈'} ${esc(inv.nome)}</div>
+    <div class="fatura-header" style="margin-bottom:10px;background:linear-gradient(135deg,#1A3A2C,#2D5A45)">
+      <div style="font-size:.7rem;opacity:.7;margin-bottom:4px">${esc(inv.tipo)} · valor atual</div>
+      <div class="fatura-total">${fmtBRL(valorAtual)}</div>
+      <div class="fatura-meta">Aportado: ${fmtBRL(entradas)}${saidas?` · Retirado: ${fmtBRL(saidas)}`:''}</div>
+      <div class="fatura-actions">
+        <button class="fatura-btn fatura-btn-add" onclick="finAddMovInvest('${investId}','entrada')">＋ Entrada</button>
+        <button class="fatura-btn fatura-btn-add" onclick="finAddMovInvest('${investId}','saida')">－ Saída</button>
+        <button class="fatura-btn fatura-btn-add" style="flex:.6;background:rgba(255,255,255,.1)" onclick="finEditInvestConfig('${investId}')">⚙️</button>
+      </div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px">
+      <div style="text-align:center;background:var(--cream2);border-radius:var(--radius-sm);padding:12px">
+        <div style="font-size:.6rem;color:var(--text-l);margin-bottom:4px">RENDIMENTO TOTAL</div>
+        <div style="font-size:.95rem;font-weight:700;color:${corRendTotal}">${rendTotal>=0?'+ ':'− '}${fmtBRL(rendTotal)}</div>
+        <div style="font-size:.65rem;color:${corRendTotal}">${rendTotalPct>=0?'+':''}${rendTotalPct.toFixed(2).replace('.',',')}%</div>
+      </div>
+      <div style="text-align:center;background:var(--cream2);border-radius:var(--radius-sm);padding:12px">
+        <div style="font-size:.6rem;color:var(--text-l);margin-bottom:4px">RENDIMENTO DO MÊS</div>
+        <div style="font-size:.95rem;font-weight:700;color:${corRendMes}">${rendMes>=0?'+ ':'− '}${fmtBRL(rendMes)}</div>
+        <div style="font-size:.65rem;color:${corRendMes}">${rendMesPct>=0?'+':''}${rendMesPct.toFixed(2).replace('.',',')}% · ${MONTHS_PT[finMes]}</div>
+      </div>
+    </div>
+
+    <div style="font-size:.78rem;font-weight:600;color:var(--text-m);margin-bottom:6px">📊 Atualizar valor atual</div>
+    <div class="modal-row" style="margin-bottom:16px">
+      <div class="form-group"><input class="form-input" type="number" id="fi-novo-valor" value="${valorAtual.toFixed(2)}" placeholder="Valor atual" step="0.01"></div>
+      <div class="form-group"><button class="btn-primary" style="padding:10px 14px;font-size:.82rem" onclick="finAtualizarValorInvest('${investId}')">Atualizar</button></div>
+    </div>
+
+    ${chartHTML}
+
+    <div style="font-size:.78rem;font-weight:600;color:var(--text-m);margin:14px 0 8px">Histórico</div>
+    <div class="fin-list" style="margin-bottom:16px">${histHTML}</div>
+    <button class="btn-danger" onclick="finDeleteInvest('${investId}')">🗑 Remover investimento</button>`;
+  document.getElementById('modalOverlay').classList.add('open');
+}
+
+// ── Gráfico de evolução do valor (linha simulada com barras) ──
+function finRenderInvestChart(investId) {
+  const movs = finGetMovsInvest(investId).slice().sort((a,b)=>a.date.localeCompare(b.date)||a.id.localeCompare(b.id));
+  if (movs.length < 1) return '';
+
+  // Reconstrói a série de valores ao longo do tempo (snapshot após cada movimento)
+  let saldo = 0;
+  const pontos = [];
+  movs.forEach(m => {
+    if (m.movTipo==='entrada') saldo += m.valor;
+    else if (m.movTipo==='saida') saldo -= m.valor;
+    else if (m.movTipo==='atualizacao') saldo = m.valor;
+    pontos.push({ date:m.date, valor:saldo });
+  });
+
+  // Pega até 12 pontos mais recentes para não poluir o gráfico
+  const ultimos = pontos.slice(-12);
+  const maxVal = Math.max(...ultimos.map(p=>p.valor), 1);
+  const minVal = Math.min(...ultimos.map(p=>p.valor), 0);
+  const range = (maxVal - minVal) || 1;
+
+  const bars = ultimos.map(p => {
+    const h = Math.max(3, Math.round(((p.valor - minVal) / range) * 72));
+    const d = parseDate(p.date);
+    return `<div class="fin-bar-wrap">
+      <div style="display:flex;align-items:flex-end;height:72px">
+        <div class="fin-bar" style="height:${h}px;width:14px;background:#2D5A45"></div>
+      </div>
+      <div class="fin-bar-label">${d.getDate()}/${d.getMonth()+1}</div>
+    </div>`;
+  }).join('');
+
+  return `<div class="fin-chart" style="margin-bottom:14px">
+    <div class="fin-chart-title">Evolução do valor</div>
+    <div class="fin-bars">${bars}</div>
+  </div>`;
+}
+
+// ── Formulário de movimentação (entrada/saída) — espelha o registro comum ──
+function finAddMovInvest(investId, movTipo) {
+  document.getElementById('modalContent').innerHTML = finMovInvestForm(investId, movTipo, null);
+  document.getElementById('modalOverlay').classList.add('open');
+}
+
+function finOpenMovInvest(movId) {
+  const m = finLancamentos.find(x=>x.id===movId); if(!m) return;
+  if (m.movTipo === 'atualizacao') {
+    // Atualizações de valor não são editáveis pelo form de movimentação — apenas removíveis
+    if (!confirm('Remover este registro de atualização de valor?')) return;
+    finLancamentos = finLancamentos.filter(x=>x.id!==movId);
+    save(SK.fin, finLancamentos);
+    finAbreInvest(m.investId);
+    renderFinanceiro();
+    return;
+  }
+  document.getElementById('modalContent').innerHTML = finMovInvestForm(m.investId, m.movTipo, m);
+  document.getElementById('modalOverlay').classList.add('open');
+}
+
+function finMovInvestForm(investId, movTipo, m) {
+  const inv = finInvestimentos.find(i=>i.id===investId);
+  const isEdit = !!m;
+  const label = movTipo==='entrada' ? 'Entrada' : 'Saída';
+  const icon  = movTipo==='entrada' ? '📥' : '💸';
+
+  return `<div class="modal-title">${icon} ${label} — ${inv?esc(inv.nome):''}</div>
+  <div class="form-group"><label class="form-label">Descrição (opcional)</label>
+  <input class="form-input" id="fmi-titulo" value="${m?esc(m.titulo||''):''}" placeholder="Ex: Aporte mensal, Resgate parcial"></div>
+  <div class="modal-row">
+    <div class="form-group"><label class="form-label">Valor (R$)</label>
+    <input class="form-input" type="number" id="fmi-valor" value="${m?m.valor:''}" placeholder="0,00" min="0" step="0.01"></div>
+    <div class="form-group"><label class="form-label">Data</label>
+    <input class="form-input" type="date" id="fmi-date" value="${m?m.date:today()}"></div>
+  </div>
+  <div class="form-group">
+    <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:.84rem">
+      <input type="checkbox" id="fmi-debita" ${m?.debitaConta!==false?'checked':''} style="width:16px;height:16px">
+      ${movTipo==='entrada' ? 'Descontar do saldo livre' : 'Devolver para o saldo livre'}
+    </label>
+  </div>
+  <button class="btn-primary" onclick="finSalvarMovInvest('${investId}','${movTipo}','${m?m.id:''}')">Salvar</button>
+  ${isEdit?`<button class="btn-danger" onclick="finDeleteMovInvest('${m.id}')">🗑 Excluir</button>`:''}`;
+}
+
+function finSalvarMovInvest(investId, movTipo, editId) {
+  const titulo = document.getElementById('fmi-titulo').value.trim();
+  const valor  = parseFloat(document.getElementById('fmi-valor').value);
+  if (!valor || valor <= 0) return; // valor zero ou inválido: não registra nada
+  const date   = document.getElementById('fmi-date').value || today();
+  const debita = document.getElementById('fmi-debita')?.checked !== false;
+  const inv = finInvestimentos.find(i=>i.id===investId);
+
+  if (editId) {
+    const m = finLancamentos.find(x=>x.id===editId);
+    if (m) { m.titulo=titulo; m.valor=valor; m.date=date; m.debitaConta=debita; }
+  } else {
+    finLancamentos.push({ id:uid(), tipo:'invest_mov', investId, movTipo, valor, date, debitaConta:debita, titulo, icon: inv?.icon||'📈' });
+  }
+  save(SK.fin, finLancamentos);
+  finAbreInvest(investId);
+  renderFinanceiro();
+}
+
+function finDeleteMovInvest(movId) {
+  const m = finLancamentos.find(x=>x.id===movId); if(!m) return;
+  const investId = m.investId;
+  finLancamentos = finLancamentos.filter(x=>x.id!==movId);
+  save(SK.fin, finLancamentos);
+  finAbreInvest(investId);
+  renderFinanceiro();
+}
+
+// ── Atualizar valor atual diretamente na tela do investimento ──
+function finAtualizarValorInvest(investId) {
+  const novoVal = parseFloat(document.getElementById('fi-novo-valor').value);
+  if (isNaN(novoVal) || novoVal < 0) return;
+  finLancamentos.push({ id:uid(), tipo:'invest_mov', investId, movTipo:'atualizacao', valor:novoVal, date:today() });
+  save(SK.fin, finLancamentos);
+  finAbreInvest(investId);
+  renderFinanceiro();
+}
+
 
 // ── Forms: entradas/gastos/investimentos ──
 function finOpenForm(tipo) {
@@ -3612,27 +3846,27 @@ function finOpenForm(tipo) {
 }
 
 function finOpenEdit(id) {
-  _editingFinId = id;
   const l = finLancamentos.find(x=>x.id===id); if(!l) return;
+  if (l.tipo === 'invest') return; // lançamento de investimento legado — editável apenas pela tela de Investimentos
+  _editingFinId = id;
   document.getElementById('modalContent').innerHTML = finForm(l.tipo, l);
   document.getElementById('modalOverlay').classList.add('open');
 }
 
 function finForm(tipo, l) {
   const isEdit = !!l;
-  const cats = tipo==='income' ? FIN_CAT_INCOME : tipo==='expense' ? FIN_CAT_EXPENSE : FIN_CAT_INVEST;
-  const ICONS = {income:'📥',expense:'📤',invest:'📈'};
-  const ICON_LIST = ['💰','💳','🏠','🚗','🍔','📚','💊','✈️','🎉','💼','📥','📤','📈','🏦','🪙','💎','🎓','🛒','👗','🎮'];
+  const cats = tipo==='income' ? FIN_CAT_INCOME : FIN_CAT_EXPENSE;
+  const ICONS = {income:'📥',expense:'📤'};
+  const ICON_LIST = ['💰','💳','🏠','🚗','🍔','📚','💊','✈️','🎉','💼','📥','📤','🏦','🪙','💎','🎓','🛒','👗','🎮'];
 
   return `<div class="modal-title">${isEdit?'Editar':'Novo'} lançamento</div>
   <div class="fin-type-row">
     <button class="fin-type-btn${tipo==='income'?' sel-income':''}"  onclick="finSwitchTipo('income')">📥 Entrada</button>
     <button class="fin-type-btn${tipo==='expense'?' sel-expense':''}" onclick="finSwitchTipo('expense')">📤 Gasto</button>
-    <button class="fin-type-btn${tipo==='invest'?' sel-invest':''}"   onclick="finSwitchTipo('invest')">📈 Invest.</button>
   </div>
   <input type="hidden" id="ff-tipo" value="${tipo}">
   <div class="form-group"><label class="form-label">Descrição</label>
-  <input class="form-input" id="ff-titulo" value="${l?esc(l.titulo):''}" placeholder="${tipo==='income'?'Ex: Salário de Junho':tipo==='expense'?'Ex: Mercado':'Ex: CDB Banco Inter'}"></div>
+  <input class="form-input" id="ff-titulo" value="${l?esc(l.titulo):''}" placeholder="${tipo==='income'?'Ex: Salário de Junho':'Ex: Mercado'}"></div>
   <div class="modal-row">
     <div class="form-group"><label class="form-label">Valor (R$)</label>
     <input class="form-input" type="number" id="ff-valor" value="${l?l.valor:''}" placeholder="0,00" min="0" step="0.01"></div>
@@ -3643,35 +3877,17 @@ function finForm(tipo, l) {
   <select class="form-select" id="ff-cat">
     ${cats.map(c=>`<option value="${c}"${l?.categoria===c?' selected':''}>${c}</option>`).join('')}
   </select></div>
-  ${tipo==='invest' ? `
-  <div class="form-group"><label class="form-label">Vincular à carteira</label>
-  <select class="form-select" id="ff-invest-link">
-    <option value="">— Lançamento avulso —</option>
-    ${finInvestimentos.map(i=>`<option value="${i.id}"${l?.investId===i.id?' selected':''}>${esc(i.nome)}</option>`).join('')}
-    <option value="__new__">➕ Criar novo ativo…</option>
-  </select></div>
-  <div class="form-group" id="ff-invest-new-wrap" style="display:none">
-    <input class="form-input" id="ff-invest-new-nome" placeholder="Nome do novo ativo">
-  </div>
-  <div class="form-group">
-    <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:.84rem">
-      <input type="checkbox" id="ff-debita" ${l?.debitaConta!==false?'checked':''} style="width:16px;height:16px">
-      Debitar da conta (reduz saldo disponível)
-    </label>
-  </div>` : ''}
-  ${tipo!=='invest' ? `
   <div class="form-group"><label class="form-label">🔁 Repetição</label>
   <select class="form-select" id="ff-recur">
     <option value="none"${(l?.recur||'none')==='none'?' selected':''}>Única vez</option>
     <option value="monthly"${l?.recur==='monthly'?' selected':''}>Todo mês</option>
     <option value="weekly"${l?.recur==='weekly'?' selected':''}>Toda semana</option>
-  </select></div>` : ''}
+  </select></div>
   <div class="form-group"><label class="form-label">Ícone</label>
   <div style="display:flex;flex-wrap:wrap;gap:5px">${ICON_LIST.map(ic=>`<button style="font-size:1.2rem;background:${(l?.icon||ICONS[tipo])===ic?'var(--cream2)':'none'};border:1.5px solid ${(l?.icon||ICONS[tipo])===ic?'var(--tan)':'transparent'};border-radius:8px;padding:3px;cursor:pointer;width:36px;height:36px" onclick="finPickIcon('${ic}',this)">${ic}</button>`).join('')}</div>
   <input type="hidden" id="ff-icon" value="${l?.icon||ICONS[tipo]}"></div>
   <button class="btn-primary" onclick="finSave()">Salvar</button>
-  ${isEdit?`<button class="btn-danger" onclick="finDelete('${l.id}')">🗑 Excluir</button>`:''}
-  <script>document.getElementById('ff-invest-link')?.addEventListener('change',function(){document.getElementById('ff-invest-new-wrap').style.display=this.value==='__new__'?'':'none';});<\/script>`;
+  ${isEdit?`<button class="btn-danger" onclick="finDelete('${l.id}')">🗑 Excluir</button>`:''}`;
 }
 
 function finSwitchTipo(tipo) {
@@ -3695,33 +3911,8 @@ function finSave() {
   const cat    = document.getElementById('ff-cat').value;
   const icon   = document.getElementById('ff-icon').value;
   const recur  = document.getElementById('ff-recur')?.value||'none';
-  const debitaConta = tipo==='invest' ? (document.getElementById('ff-debita')?.checked !== false) : undefined;
 
-  let investId = undefined;
-  if (tipo==='invest') {
-    const link = document.getElementById('ff-invest-link')?.value;
-    if (link==='__new__') {
-      const nome = document.getElementById('ff-invest-new-nome')?.value.trim();
-      if (nome) {
-        const novoAtivo = { id:uid(), nome, categoria:cat, icon, valorAtual:valor, totalAportado:valor, totalRetirado:0, aportes:[{id:uid(),data:date,valor,tipo:'aporte'}] };
-        finInvestimentos.push(novoAtivo);
-        save(SK.finInvest, finInvestimentos);
-        investId = novoAtivo.id;
-      }
-    } else if (link) {
-      investId = link;
-      const ativo = finInvestimentos.find(i=>i.id===link);
-      if (ativo) {
-        ativo.totalAportado += valor;
-        ativo.valorAtual    += valor;
-        ativo.aportes = ativo.aportes||[];
-        ativo.aportes.push({ id:uid(), data:date, valor, tipo:'aporte' });
-        save(SK.finInvest, finInvestimentos);
-      }
-    }
-  }
-
-  const base = { id:_editingFinId||uid(), tipo, titulo, valor, date, categoria:cat, icon, recur, debitaConta, investId, _baseId:_editingFinId||null };
+  const base = { id:_editingFinId||uid(), tipo, titulo, valor, date, categoria:cat, icon, recur, _baseId:_editingFinId||null };
   if (_editingFinId) finLancamentos = finLancamentos.filter(l=>l.id!==_editingFinId && l._baseId!==_editingFinId);
 
   const novos = [base];
@@ -3756,8 +3947,8 @@ function finOpenForm_menu() {
     <div style="display:flex;flex-direction:column;gap:10px;padding-top:4px">
       <button class="fin-type-btn sel-income" style="padding:14px;font-size:.95rem;text-align:left" onclick="finOpenForm('income')">📥 Entrada — salário, pensão, outros</button>
       <button class="fin-type-btn sel-expense" style="padding:14px;font-size:.95rem;text-align:left" onclick="finOpenForm('expense')">📤 Gasto — despesas do mês</button>
-      <button class="fin-type-btn sel-invest" style="padding:14px;font-size:.95rem;text-align:left" onclick="finOpenForm('invest')">📈 Investimento — aporte</button>
-      <button class="fin-type-btn" style="padding:14px;font-size:.95rem;text-align:left;background:var(--cream2);color:var(--text-m)" onclick="finTab('cartao',document.querySelector('.fin-tab:nth-child(4)'));closeModal();document.querySelector('.cc-setup')?.click()">💳 Cartão de crédito</button>
+      <button class="fin-type-btn" style="padding:14px;font-size:.95rem;text-align:left;background:var(--cream2);color:var(--text-m)" onclick="closeModal();finTab('investimentos',document.querySelector('.fin-tab:nth-child(5)'))">📈 Investimento — ver carteira</button>
+      <button class="fin-type-btn" style="padding:14px;font-size:.95rem;text-align:left;background:var(--cream2);color:var(--text-m)" onclick="closeModal();finTab('cartao',document.querySelector('.fin-tab:nth-child(4)'))">💳 Cartão de crédito</button>
     </div>`;
   document.getElementById('modalOverlay').classList.add('open');
 }
