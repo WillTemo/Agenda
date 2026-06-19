@@ -394,6 +394,136 @@ body { background:var(--cream); color:var(--text); font-family:'Inter',sans-seri
 
 @media (prefers-reduced-motion:reduce) { *,*::before,*::after { transition-duration:.01ms !important; } }
 
+/* ══════════════════════════════════
+   FINANCEIRO
+══════════════════════════════════ */
+:root {
+  --fin-green:  #2D7A4F;
+  --fin-green-l:#E8F7EF;
+  --fin-red:    #C0392B;
+  --fin-red-l:  #FDECEA;
+  --fin-blue:   #2055A8;
+  --fin-blue-l: #EAF0FB;
+  --fin-gold:   #A07800;
+  --fin-gold-l: #FFF8E1;
+  --fin-brown:  #5C3D1E;
+  --fin-brown2: #7A5230;
+}
+
+/* ── Resumo hero ── */
+.fin-hero { background:linear-gradient(135deg,#3B2008 0%,#6B3D18 60%,#8B5230 100%); border-radius:var(--radius); padding:22px 20px 18px; color:white; margin-bottom:20px; box-shadow:var(--shadow); }
+.fin-hero-label { font-size:.68rem; font-weight:500; text-transform:uppercase; letter-spacing:.1em; opacity:.7; }
+.fin-hero-value { font-family:'Playfair Display',serif; font-size:2.2rem; font-weight:700; margin-top:4px; letter-spacing:-.02em; }
+.fin-hero-sub { font-size:.72rem; opacity:.7; margin-top:6px; }
+.fin-hero-row { display:flex; gap:12px; margin-top:16px; }
+.fin-hero-pill { flex:1; background:rgba(255,255,255,.12); border-radius:10px; padding:10px 12px; }
+.fin-hero-pill-label { font-size:.62rem; opacity:.75; text-transform:uppercase; letter-spacing:.06em; }
+.fin-hero-pill-val { font-size:1rem; font-weight:700; margin-top:2px; }
+.fin-hero-pill.negative .fin-hero-pill-val { color:#FF9B9B; }
+.fin-hero-pill.invested .fin-hero-pill-val { color:#F0C890; }
+
+/* ── Abas internas ── */
+.fin-tabs { display:flex; background:var(--cream2); border-radius:var(--radius-sm); padding:3px; gap:3px; margin-bottom:18px; }
+.fin-tab { flex:1; padding:8px 4px; background:none; border:none; border-radius:6px; font-family:'Inter',sans-serif; font-size:.78rem; font-weight:500; color:var(--text-m); cursor:pointer; transition:all .2s; }
+.fin-tab.active { background:white; color:var(--brown); font-weight:600; box-shadow:0 1px 6px rgba(90,50,20,.1); }
+
+/* ── Cards de linha ── */
+.fin-list { display:flex; flex-direction:column; gap:8px; }
+.fin-item { background:white; border-radius:var(--radius-sm); padding:13px 14px; display:flex; align-items:center; gap:12px; box-shadow:var(--shadow); position:relative; overflow:hidden; }
+.fin-item::before { content:''; position:absolute; left:0; top:0; bottom:0; width:4px; }
+.fin-item.income::before  { background:var(--fin-green); }
+.fin-item.expense::before { background:var(--fin-red); }
+.fin-item.invest::before  { background:var(--fin-blue); }
+.fin-item-icon { font-size:1.3rem; flex-shrink:0; }
+.fin-item-body { flex:1; min-width:0; }
+.fin-item-title { font-size:.85rem; font-weight:600; color:var(--text); }
+.fin-item-meta  { font-size:.7rem; color:var(--text-l); margin-top:2px; display:flex; gap:6px; flex-wrap:wrap; align-items:center; }
+.fin-item-value { font-size:.95rem; font-weight:700; flex-shrink:0; }
+.fin-item.income  .fin-item-value { color:var(--fin-green); }
+.fin-item.expense .fin-item-value { color:var(--fin-red); }
+.fin-item.invest  .fin-item-value { color:var(--fin-blue); }
+.fin-tag { font-size:.62rem; background:var(--cream2); color:var(--text-m); padding:2px 7px; border-radius:10px; font-weight:500; }
+.fin-tag.recur { background:#EAF0FB; color:var(--fin-blue); }
+
+/* ── Gráfico de barras mensal ── */
+.fin-chart { background:white; border-radius:var(--radius); padding:16px; box-shadow:var(--shadow); margin-bottom:16px; }
+.fin-chart-title { font-size:.78rem; font-weight:600; color:var(--text-m); margin-bottom:14px; }
+.fin-bars { display:flex; align-items:flex-end; gap:6px; height:90px; }
+.fin-bar-wrap { flex:1; display:flex; flex-direction:column; align-items:center; gap:3px; height:100%; justify-content:flex-end; }
+.fin-bar { width:100%; border-radius:4px 4px 0 0; min-height:3px; transition:height .4s; }
+.fin-bar.income-bar  { background:var(--fin-green); opacity:.8; }
+.fin-bar.expense-bar { background:var(--fin-red);   opacity:.7; }
+.fin-bar-label { font-size:.6rem; color:var(--text-l); white-space:nowrap; }
+
+/* ── Resumo por categoria ── */
+.fin-cat-row { display:flex; align-items:center; gap:10px; padding:10px 0; border-bottom:1px solid var(--cream2); }
+.fin-cat-row:last-child { border:none; }
+.fin-cat-dot { width:10px; height:10px; border-radius:50%; flex-shrink:0; }
+.fin-cat-name { font-size:.8rem; color:var(--text); flex:1; }
+.fin-cat-val { font-size:.82rem; font-weight:600; color:var(--text-m); }
+.fin-cat-pct { font-size:.68rem; color:var(--text-l); width:32px; text-align:right; }
+
+/* ── Progress ring ── */
+.fin-ring-wrap { display:flex; gap:16px; align-items:center; }
+.fin-ring-labels { flex:1; display:flex; flex-direction:column; gap:6px; }
+.fin-ring-label-row { display:flex; justify-content:space-between; align-items:center; font-size:.78rem; }
+.fin-ring-dot { width:8px; height:8px; border-radius:50%; display:inline-block; margin-right:5px; }
+
+/* ── Mês selector ── */
+.fin-month-nav { display:flex; align-items:center; justify-content:space-between; margin-bottom:16px; }
+.fin-month-btn { background:none; border:1.5px solid var(--beige); border-radius:20px; padding:5px 14px; font-size:.78rem; color:var(--text-m); cursor:pointer; }
+.fin-month-btn:hover { border-color:var(--tan); }
+.fin-month-label { font-family:'Playfair Display',serif; font-size:1rem; font-weight:600; color:var(--text); }
+
+/* ── FAB de entrada ── */
+.fin-fab { position:fixed; bottom:90px; right:20px; width:52px; height:52px; background:var(--fin-brown); color:white; border:none; border-radius:50%; font-size:1.5rem; cursor:pointer; box-shadow:0 4px 16px rgba(92,61,30,.4); z-index:90; display:none; align-items:center; justify-content:center; transition:transform .2s; }
+.fin-fab:active { transform:scale(.92); }
+
+/* ── Cartão de crédito ── */
+.cc-card { background:linear-gradient(135deg,#2C1A0E 0%,#4A2C12 100%); border-radius:var(--radius); padding:18px 20px; color:white; margin-bottom:14px; box-shadow:var(--shadow); cursor:pointer; }
+.cc-card-header { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:14px; }
+.cc-card-name { font-size:.85rem; font-weight:600; opacity:.9; }
+.cc-card-flag { font-size:1.4rem; }
+.cc-card-limit-label { font-size:.6rem; opacity:.6; text-transform:uppercase; letter-spacing:.08em; }
+.cc-card-fatura-val { font-family:'Playfair Display',serif; font-size:1.6rem; font-weight:700; }
+.cc-card-footer { display:flex; justify-content:space-between; align-items:center; margin-top:12px; }
+.cc-card-info { font-size:.68rem; opacity:.7; }
+.cc-card-badge { font-size:.65rem; font-weight:700; padding:4px 10px; border-radius:20px; }
+.cc-badge-open   { background:rgba(255,255,255,.18); color:white; }
+.cc-badge-closed { background:#E8973A; color:white; }
+.cc-badge-paid   { background:#52B788; color:white; }
+
+/* ── Fatura detalhe ── */
+.fatura-header { background:linear-gradient(135deg,#2C1A0E,#5C3D1E); border-radius:var(--radius); padding:16px 18px; color:white; margin-bottom:14px; }
+.fatura-total { font-family:'Playfair Display',serif; font-size:1.4rem; font-weight:700; }
+.fatura-meta { font-size:.7rem; opacity:.7; margin-top:4px; }
+.fatura-actions { display:flex; gap:8px; margin-top:12px; }
+.fatura-btn { flex:1; padding:8px; border:none; border-radius:var(--radius-sm); font-family:'Inter',sans-serif; font-size:.78rem; font-weight:600; cursor:pointer; }
+.fatura-btn-pagar { background:white; color:#2C1A0E; }
+.fatura-btn-add   { background:rgba(255,255,255,.2); color:white; }
+
+/* ── Cartão criação ── */
+.cc-setup { background:var(--cream2); border:2px dashed var(--beige); border-radius:var(--radius); padding:30px; text-align:center; cursor:pointer; }
+.cc-setup-icon { font-size:2rem; margin-bottom:8px; }
+.cc-setup-text { font-size:.85rem; color:var(--text-m); font-weight:500; }
+
+/* ── Forms financeiros ── */
+.fin-type-row { display:flex; gap:8px; margin-bottom:16px; }
+.fin-type-btn { flex:1; padding:10px 6px; border:2px solid var(--beige); border-radius:var(--radius-sm); background:white; font-family:'Inter',sans-serif; font-size:.78rem; font-weight:600; cursor:pointer; transition:all .2s; text-align:center; }
+.fin-type-btn.sel-income  { border-color:var(--fin-green); background:var(--fin-green-l); color:var(--fin-green); }
+.fin-type-btn.sel-expense { border-color:var(--fin-red);   background:var(--fin-red-l);   color:var(--fin-red); }
+.fin-type-btn.sel-invest  { border-color:var(--fin-blue);  background:var(--fin-blue-l);  color:var(--fin-blue); }
+
+/* ── Empty state financeiro ── */
+.fin-empty { text-align:center; padding:40px 20px; color:var(--text-l); }
+.fin-empty-icon { font-size:2.5rem; margin-bottom:10px; }
+.fin-empty-text { font-size:.85rem; line-height:1.5; }
+
+/* ── Saldo projetado (linha) ── */
+.fin-forecast { background:var(--fin-gold-l); border:1px solid #E8C84022; border-radius:var(--radius-sm); padding:12px 14px; display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; }
+.fin-forecast-label { font-size:.78rem; color:var(--fin-gold); font-weight:600; }
+.fin-forecast-val { font-size:.9rem; font-weight:700; color:var(--fin-gold); }
+
 /* ── AVISOS DE EVENTOS ── */
 .event-alerts { display:flex; flex-direction:column; gap:8px; margin-bottom:16px; }
 .event-alert { border-radius:var(--radius-sm); padding:11px 14px; display:flex; align-items:center; gap:10px; box-shadow:var(--shadow); border-left:4px solid transparent; cursor:pointer; }
@@ -533,10 +663,10 @@ body { background:var(--cream); color:var(--text); font-family:'Inter',sans-seri
           <div class="area-name">Pessoal</div>
           <div class="area-sub" id="areaPessoalSub">—</div>
         </div>
-        <div class="area-card coming" style="opacity:.3">
-          <div class="area-icon">＋</div>
-          <div class="area-name">Adicionar</div>
-          <div class="area-sub">Em breve</div>
+        <div class="area-card" onclick="enterArea('financeiro')">
+          <div class="area-icon">💰</div>
+          <div class="area-name">Finanças</div>
+          <div class="area-sub" id="areaFinanceiroSub">—</div>
         </div>
       </div>
     </div>
@@ -571,10 +701,57 @@ body { background:var(--cream); color:var(--text); font-family:'Inter',sans-seri
       <div id="pessoalContent"></div>
     </div>
 
+    <!-- ─── VIEW: FINANCEIRO ─── -->
+    <div class="view" id="view-financeiro">
+
+      <!-- Resumo hero -->
+      <div class="fin-hero" id="finHero">
+        <div class="fin-hero-label">Saldo disponível</div>
+        <div class="fin-hero-value" id="finSaldo">R$ 0,00</div>
+        <div class="fin-hero-sub" id="finPeriodo">Carregando...</div>
+        <div class="fin-hero-row">
+          <div class="fin-hero-pill">
+            <div class="fin-hero-pill-label">Entradas</div>
+            <div class="fin-hero-pill-val" id="finTotalIn">R$ 0</div>
+          </div>
+          <div class="fin-hero-pill negative">
+            <div class="fin-hero-pill-label">Gastos</div>
+            <div class="fin-hero-pill-val" id="finTotalOut">R$ 0</div>
+          </div>
+          <div class="fin-hero-pill invested">
+            <div class="fin-hero-pill-label">Investido</div>
+            <div class="fin-hero-pill-val" id="finTotalInv">R$ 0</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Navegação de mês -->
+      <div class="fin-month-nav">
+        <button class="fin-month-btn" onclick="finChangeMes(-1)">‹ Ant.</button>
+        <span class="fin-month-label" id="finMesLabel"></span>
+        <button class="fin-month-btn" onclick="finChangeMes(1)">Próx. ›</button>
+      </div>
+
+      <!-- Abas internas -->
+      <div class="fin-tabs">
+        <button class="fin-tab active" onclick="finTab('extrato',this)">Extrato</button>
+        <button class="fin-tab" onclick="finTab('entradas',this)">Entradas</button>
+        <button class="fin-tab" onclick="finTab('gastos',this)">Gastos</button>
+        <button class="fin-tab" onclick="finTab('cartao',this)">💳 Cartão</button>
+        <button class="fin-tab" onclick="finTab('investimentos',this)">Invest.</button>
+      </div>
+
+      <!-- Conteúdo das abas -->
+      <div id="finTabContent"></div>
+
+    </div>
+
   </main>
 
   <!-- FAB dinâmico -->
   <button class="fab" id="fabBtn" onclick="openAddTray()">＋</button>
+  <!-- FAB Financeiro -->
+  <button class="fin-fab" id="finFab" onclick="finOpenForm_menu()">＋</button>
 
   <!-- BOTTOM NAV -->
   <nav class="bottom-nav">
@@ -642,9 +819,13 @@ const SK = {
   tasks:'rotina_tasks', marcos:'rotina_marcos', rotina:'rotina_blocks',
   ramos:'est_ramos', materias:'est_materias', conteudos:'est_conteudos',
   semestre:'est_semestre',
-  semestres:'est_semestres',          // lista completa de semestres
-  trabalho:'area_trabalho',           // projetos da área Trabalho
-  pessoal:'area_pessoal',             // itens da área Pessoal
+  semestres:'est_semestres',
+  trabalho:'area_trabalho',
+  pessoal:'area_pessoal',
+  fin:'fin_lancamentos',        // todos os lançamentos financeiros
+  finInvest:'fin_investimentos', // carteira de investimentos
+  finCartoes:'fin_cartoes',      // cartões de crédito configurados
+  finFaturas:'fin_faturas',      // histórico de faturas fechadas
 };
 const load = k => { try { return JSON.parse(localStorage.getItem(k)) || []; } catch { return []; } };
 const loadObj = k => { try { return JSON.parse(localStorage.getItem(k)) || {}; } catch { return {}; } };
@@ -660,6 +841,10 @@ let semestres = load(SK.semestres);   // lista de todos os semestres
 let semestre  = loadObj(SK.semestre); // semestre ativo (objeto)
 let trabalhoItens = load(SK.trabalho);
 let pessoalItens  = load(SK.pessoal);
+let finLancamentos   = load(SK.fin);
+let finInvestimentos = load(SK.finInvest);
+let finCartoes       = load(SK.finCartoes);  // [{id, nome, limite, fechamento (dia 1-28), cor}]
+let finFaturas       = load(SK.finFaturas);  // faturas fechadas archivadas
 
 // ════════════════════════════════════════════════
 //  UTILS
@@ -694,13 +879,13 @@ const PALETTE = [
 ];
 
 function colorSwatchHTML(selected) {
-  return PALETTE.map(c=>`<div class="color-swatch${selected===c?' selected':''}" style="background:${c}" onclick="pickColor('${c}')" title="${c}"></div>`).join('');
+  return PALETTE.map(c=>`<div class="color-swatch${selected===c?' selected':''}" style="background:${c}" data-color="${c}" onclick="pickColor('${c}')" title="${c}"></div>`).join('');
 }
 function pickColor(c) {
-  document.querySelectorAll('.color-swatch').forEach(s=>s.classList.toggle('selected',s.style.background===c||s.style.background===hexToRgb(c)));
-  document.getElementById('_selectedColor').value=c;
+  document.querySelectorAll('.color-swatch').forEach(s => s.classList.toggle('selected', s.dataset.color === c));
+  const inp = document.getElementById('_selectedColor');
+  if (inp) inp.value = c;
 }
-function hexToRgb(hex){try{const r=parseInt(hex.slice(1,3),16),g=parseInt(hex.slice(3,5),16),b=parseInt(hex.slice(5,7),16);return `rgb(${r}, ${g}, ${b})`;}catch{return hex;}}
 const STATUS_LABEL = ['Não estudado','Iniciado','Finalizado','Resumido'];
 const STATUS_ICON  = ['⚫','🟡','🟢','🔵'];
 const RAMO_COLORS  = ['#8090C8','#6EB898','#C88090','#B8A84A','#9080C8','#C8905A','#70AAC0','#C0C870'];
@@ -856,14 +1041,14 @@ function calcMencao(notas) {
 // ════════════════════════════════════════════════
 const VIEW_TABS   = {hoje:0,semana:1,marcos:2,rotina:3};
 const VIEW_BN     = ['hoje','semana','marcos','rotina','areas'];
-const isSubview   = v => ['estudos','materia','trabalho','pessoal'].includes(v);
+const isSubview   = v => ['estudos','materia','trabalho','pessoal','financeiro'].includes(v);
 
 function switchView(v, tabBtn, fromBottom=false) {
   activeView = v;
   document.querySelectorAll('.view').forEach(el => el.classList.toggle('active', el.id==='view-'+v));
 
   // top nav visibility
-  const showTopNav = !isSubview(v) && v!=='areas';
+  const showTopNav = !isSubview(v) && v!=='areas' && v!=='financeiro';
   document.getElementById('topNav').style.display = showTopNav ? '' : 'none';
 
   // top nav active
@@ -876,7 +1061,7 @@ function switchView(v, tabBtn, fromBottom=false) {
   // bottom nav
   document.querySelectorAll('.bn-btn').forEach(b=>b.classList.remove('active'));
   document.getElementById('bn-'+v)?.classList.add('active');
-  if (['estudos','materia','trabalho','pessoal'].includes(v)) document.getElementById('bn-areas')?.classList.add('active');
+  if (['estudos','materia','trabalho','pessoal','financeiro'].includes(v)) document.getElementById('bn-areas')?.classList.add('active');
   if (['hoje','semana','marcos','rotina'].includes(v)) document.getElementById('bn-hoje')?.classList.add('active');
 
   // header
@@ -885,14 +1070,15 @@ function switchView(v, tabBtn, fromBottom=false) {
   updateFab(v);
 
   // render
-  if (v==='hoje')     renderToday();
-  if (v==='semana')   renderWeek();
-  if (v==='marcos')   renderMarcos();
-  if (v==='rotina')   renderRotina();
-  if (v==='areas')    renderAreas();
-  if (v==='estudos')  renderEstudos();
-  if (v==='trabalho') renderTrabalho();
-  if (v==='pessoal')  renderPessoal();
+  if (v==='hoje')        renderToday();
+  if (v==='semana')      renderWeek();
+  if (v==='marcos')      renderMarcos();
+  if (v==='rotina')      renderRotina();
+  if (v==='areas')       renderAreas();
+  if (v==='estudos')     renderEstudos();
+  if (v==='trabalho')    renderTrabalho();
+  if (v==='pessoal')     renderPessoal();
+  if (v==='financeiro')  renderFinanceiro();
 }
 
 function updateHeader(v) {
@@ -947,13 +1133,23 @@ function updateHeader(v) {
     back.className='header-back'; back.id='headerBackBtn'; back.textContent='‹';
     back.onclick=()=>switchView('estudos');
     left.insertBefore(back, left.firstChild);
+  } else if (v==='financeiro') {
+    title.textContent = 'Finanças';
+    sub.textContent = '';
+    acts.innerHTML = '';
+    const back = document.createElement('button');
+    back.className='header-back'; back.id='headerBackBtn'; back.textContent='‹';
+    back.onclick=()=>switchView('areas');
+    left.insertBefore(back, left.firstChild);
   }
 }
 
 function updateFab(v) {
-  const fab = document.getElementById('fabBtn');
-  const hidden = ['areas','estudos','materia','trabalho','pessoal'].includes(v);
+  const fab    = document.getElementById('fabBtn');
+  const finFab = document.getElementById('finFab');
+  const hidden = ['areas','estudos','materia','trabalho','pessoal','financeiro'].includes(v);
   fab.classList.toggle('hidden', hidden);
+  finFab.style.display = v==='financeiro' ? 'flex' : 'none';
 }
 
 function headerDateStr() {
@@ -969,6 +1165,7 @@ function enterArea(a)  {
   if(a==='estudos') switchView('estudos');
   else if(a==='trabalho') switchView('trabalho');
   else if(a==='pessoal') switchView('pessoal');
+  else if(a==='financeiro') switchView('financeiro');
 }
 
 // ════════════════════════════════════════════════
@@ -1350,6 +1547,10 @@ function renderAreas() {
   const pp=pessoalItens.length;
   const ppDone=pessoalItens.filter(i=>i.done).length;
   document.getElementById('areaPessoalSub').textContent=pp?`${ppDone}/${pp} concluídos`:'Adicione itens';
+
+  const { saldo } = finCalcSaldo(new Date().getMonth(), new Date().getFullYear());
+  const subEl = document.getElementById('areaFinanceiroSub');
+  if(subEl) { subEl.textContent = fmtBRL(saldo); subEl.style.color = saldo < 0 ? '#C84040' : ''; }
 }
 
 // ════════════════════════════════════════════════
@@ -1469,7 +1670,7 @@ function moveMateria(id, dir) {
 }
 
 function toggleRamo(id) {
-  currentRamoOpen[id] = currentRamoOpen[id]===false ? true : false;
+  currentRamoOpen[id] = currentRamoOpen[id] === false; // false→true, anything-else→false means toggle
   renderRamos();
 }
 
@@ -1986,7 +2187,7 @@ function saveRotina() {
 }
 
 function clearRotinaOverride(id, date) {
-  localStorage.removeItem('rotOverride_'+id+'_'+date);
+  try { localStorage.removeItem(`rotOverride_${id}_${date}`); } catch { /* ignore */ }
   closeModal();
   if(activeView==='hoje') renderToday(); else if(activeView==='semana') renderWeek(); else renderRotina();
 }
@@ -2702,6 +2903,800 @@ function savePes() {
   save(SK.pessoal,pessoalItens); closeModal(); renderPessoal(); renderAreas();
 }
 function deletePes(id) { pessoalItens=pessoalItens.filter(x=>x.id!==id); save(SK.pessoal,pessoalItens); closeModal(); renderPessoal(); renderAreas(); }
+
+
+// ════════════════════════════════════════════════
+//  FINANCEIRO
+// ════════════════════════════════════════════════
+let finMes = new Date().getMonth();
+let finAno = new Date().getFullYear();
+let finActiveTab = 'extrato';
+let _editingFinId = null;
+let _editingInvestId = null;
+let _currentCartaoId = null;
+
+const FIN_TIPOS = {
+  income:  { label:'Entrada',     icon:'📥', cls:'income' },
+  expense: { label:'Gasto',       icon:'📤', cls:'expense' },
+  invest:  { label:'Investimento',icon:'📈', cls:'invest' },
+};
+const FIN_CAT_INCOME  = ['Salário','Pensão','Freelance','Presente','Reembolso','Outro'];
+const FIN_CAT_EXPENSE = ['Alimentação','Moradia','Transporte','Saúde','Educação','Lazer','Assinaturas','Roupas','Outro'];
+const FIN_CAT_INVEST  = ['Renda Fixa','Ações','FIIs','Criptomoedas','Tesouro Direto','Poupança','Previdência','Outro'];
+const FIN_RECUR_LABEL = { none:'Única vez', monthly:'Todo mês', weekly:'Toda semana' };
+
+const fmtBRL = v => 'R$\u00a0' + Math.abs(v).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
+
+function finGetMesLancamentos(m, a) {
+  const prefix = `${a}-${String(m+1).padStart(2,'0')}`;
+  return finLancamentos.filter(l => l.date.startsWith(prefix) && l.tipo !== 'cartao_item');
+}
+
+function finCalcSaldo(m, a) {
+  const ls = finGetMesLancamentos(m, a);
+  let income = 0, expense = 0, invest = 0;
+  ls.forEach(l => {
+    if (l.tipo === 'income')  income += l.valor;
+    if (l.tipo === 'expense') expense += l.valor;
+    if (l.tipo === 'invest' && l.debitaConta !== false) invest += l.valor;
+  });
+  // Pagamentos de fatura que saíram do saldo neste mês
+  const pagFatura = finLancamentos.filter(l => l.tipo === 'pagamento_fatura' && l.date.startsWith(`${a}-${String(m+1).padStart(2,'0')}`)).reduce((s,l)=>s+l.valor,0);
+  const saldo = income - expense - invest - pagFatura;
+  return { income, expense, invest, saldo };
+}
+
+// ── Cartões: helpers ──
+function finGetFaturaAberta(cartaoId) {
+  // Fatura aberta = lançamentos do cartão ainda não fechados
+  return finLancamentos.filter(l => l.tipo==='cartao_item' && l.cartaoId===cartaoId && !l.faturaId);
+}
+function finGetFaturaAtual(cartaoId) {
+  const c = finCartoes.find(x=>x.id===cartaoId); if(!c) return null;
+  const hoje = new Date();
+  const diaFecha = c.fechamento;
+  // Se hoje >= dia de fechamento, a fatura em aberto vai fechar neste mês
+  // e os novos gastos são da fatura do próximo mês
+  let ano = hoje.getFullYear(), mes = hoje.getMonth();
+  if (hoje.getDate() >= diaFecha) { mes++; if(mes>11){mes=0;ano++;} }
+  return { mes, ano, label: `${MONTHS_PT[mes]} ${ano}` };
+}
+function finFechaFatura(cartaoId) {
+  const c = finCartoes.find(x=>x.id===cartaoId); if(!c) return;
+  const itens = finGetFaturaAberta(cartaoId);
+  if (!itens.length) return;
+  const total = itens.reduce((s,l)=>s+l.valor,0);
+  const fatId = uid();
+  const hoje = today();
+  // Marcar itens como pertencentes a esta fatura
+  itens.forEach(l => { l.faturaId = fatId; });
+  // Registrar fatura fechada
+  finFaturas.push({ id:fatId, cartaoId, total, fechamento:hoje, status:'aberta', itens:itens.map(l=>l.id) });
+  save(SK.fin, finLancamentos);
+  save(SK.finFaturas, finFaturas);
+}
+
+// ── Render principal ──
+function renderFinanceiro() {
+  // Checar fechamento automático de faturas
+  finCartoes.forEach(c => {
+    const hoje = new Date();
+    if (hoje.getDate() === c.fechamento) {
+      const jaFechou = finFaturas.some(f => f.cartaoId===c.id && f.fechamento===today());
+      if (!jaFechou && finGetFaturaAberta(c.id).length) finFechaFatura(c.id);
+    }
+  });
+
+  const { income, expense, invest, saldo } = finCalcSaldo(finMes, finAno);
+  document.getElementById('finSaldo').textContent = fmtBRL(saldo);
+  document.getElementById('finSaldo').style.color = saldo < 0 ? '#FF9B9B' : 'white';
+  document.getElementById('finTotalIn').textContent  = fmtBRL(income);
+  document.getElementById('finTotalOut').textContent = fmtBRL(expense);
+  document.getElementById('finTotalInv').textContent = fmtBRL(invest);
+  document.getElementById('finPeriodo').textContent  = `${MONTHS_PT[finMes]} ${finAno}`;
+  document.getElementById('finMesLabel').textContent = `${MONTHS_PT[finMes]} ${finAno}`;
+  finRenderTab();
+}
+
+function finChangeMes(delta) {
+  finMes += delta;
+  if (finMes < 0) { finMes = 11; finAno--; }
+  if (finMes > 11){ finMes = 0;  finAno++; }
+  renderFinanceiro();
+}
+
+function finTab(tab, btn) {
+  finActiveTab = tab;
+  document.querySelectorAll('.fin-tab').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  finRenderTab();
+}
+
+function finRenderTab() {
+  const el = document.getElementById('finTabContent');
+  if (finActiveTab === 'extrato')         el.innerHTML = finRenderExtrato();
+  else if (finActiveTab === 'entradas')   el.innerHTML = finRenderLista('income');
+  else if (finActiveTab === 'gastos')     el.innerHTML = finRenderLista('expense');
+  else if (finActiveTab === 'cartao')     el.innerHTML = finRenderCartoes();
+  else if (finActiveTab === 'investimentos') el.innerHTML = finRenderInvestimentos();
+}
+
+// ── Extrato ──
+function finRenderExtrato() {
+  const ls = finGetMesLancamentos(finMes, finAno)
+    .sort((a,b) => b.date.localeCompare(a.date));
+  // Pagamentos de fatura do mês
+  const pagamentos = finLancamentos.filter(l => l.tipo==='pagamento_fatura' && l.date.startsWith(`${finAno}-${String(finMes+1).padStart(2,'0')}`));
+
+  const chartHTML = finRenderMiniChart();
+  const catBreak  = finRenderCatBreakdown();
+
+  let prevDate = '', listHTML = '';
+  const todos = [...ls, ...pagamentos].sort((a,b)=>b.date.localeCompare(a.date));
+  todos.forEach(l => {
+    if (l.date !== prevDate) {
+      const d = parseDate(l.date);
+      listHTML += `<div style="font-size:.72rem;font-weight:600;color:var(--text-l);margin:14px 0 6px;text-transform:uppercase;letter-spacing:.04em">${DAYS_PT[d.getDay()]}, ${d.getDate()} de ${MONTHS_SHORT[d.getMonth()]}</div>`;
+      prevDate = l.date;
+    }
+    if (l.tipo==='pagamento_fatura') {
+      const c = finCartoes.find(x=>x.id===l.cartaoId);
+      listHTML += `<div class="fin-item expense">
+        <div class="fin-item-icon">💳</div>
+        <div class="fin-item-body"><div class="fin-item-title">Pagamento fatura — ${c?esc(c.nome):'cartão'}</div><div class="fin-item-meta"><span class="fin-tag">Cartão</span></div></div>
+        <div class="fin-item-value">− ${fmtBRL(l.valor)}</div>
+      </div>`;
+    } else {
+      listHTML += finItemHTML(l);
+    }
+  });
+
+  if (!todos.length) return `<div class="fin-empty"><div class="fin-empty-icon">💸</div><div class="fin-empty-text">Nenhum lançamento em ${MONTHS_PT[finMes]}.<br>Toque em <strong>＋</strong> para registrar.</div></div>`;
+  return chartHTML + catBreak + `<div class="fin-list">${listHTML}</div>`;
+}
+
+function finRenderLista(tipo) {
+  const ls = finGetMesLancamentos(finMes, finAno)
+    .filter(l => l.tipo === tipo)
+    .sort((a,b) => b.date.localeCompare(a.date));
+  if (!ls.length) return `<div class="fin-empty"><div class="fin-empty-icon">${FIN_TIPOS[tipo].icon}</div><div class="fin-empty-text">Nenhum lançamento aqui ainda.</div></div>`;
+  return `<div class="fin-list">${ls.map(finItemHTML).join('')}</div>`;
+}
+
+function finItemHTML(l) {
+  const t = FIN_TIPOS[l.tipo] || FIN_TIPOS.expense;
+  const sinal = l.tipo === 'income' ? '+' : '−';
+  const recLabel = l.recur && l.recur !== 'none' ? `<span class="fin-tag recur">🔁 ${FIN_RECUR_LABEL[l.recur]||l.recur}</span>` : '';
+  const debitaLabel = l.tipo==='invest' && l.debitaConta===false ? `<span class="fin-tag">Sem débito</span>` : '';
+  const d = parseDate(l.date);
+  return `<div class="fin-item ${t.cls}" onclick="finOpenEdit('${l.id}')">
+    <div class="fin-item-icon">${l.icon||t.icon}</div>
+    <div class="fin-item-body">
+      <div class="fin-item-title">${esc(l.titulo)}</div>
+      <div class="fin-item-meta">
+        <span class="fin-tag">${esc(l.categoria||'')}</span>
+        ${recLabel}${debitaLabel}
+        <span>${d.getDate()}/${d.getMonth()+1}</span>
+      </div>
+    </div>
+    <div class="fin-item-value">${sinal} ${fmtBRL(l.valor)}</div>
+  </div>`;
+}
+
+function finRenderMiniChart() {
+  const meses = [];
+  for (let i=5; i>=0; i--) {
+    let m = finMes - i, a = finAno;
+    if (m < 0) { m += 12; a--; }
+    const { income, expense } = finCalcSaldo(m, a);
+    meses.push({ label: MONTHS_SHORT[m], income, expense });
+  }
+  const maxVal = Math.max(...meses.map(x => Math.max(x.income, x.expense)), 1);
+  const bars = meses.map(x => {
+    const hi = Math.round((x.income / maxVal) * 72);
+    const he = Math.round((x.expense / maxVal) * 72);
+    return `<div class="fin-bar-wrap">
+      <div style="display:flex;gap:2px;align-items:flex-end;height:72px">
+        <div class="fin-bar income-bar" style="height:${hi||2}px;width:12px"></div>
+        <div class="fin-bar expense-bar" style="height:${he||2}px;width:12px"></div>
+      </div>
+      <div class="fin-bar-label">${x.label}</div>
+    </div>`;
+  }).join('');
+  return `<div class="fin-chart">
+    <div class="fin-chart-title">Entradas vs Gastos — 6 meses
+      <span style="float:right;font-size:.65rem;font-weight:400">
+        <span style="display:inline-block;width:8px;height:8px;background:var(--fin-green);border-radius:2px;margin-right:3px"></span>Entrada
+        <span style="display:inline-block;width:8px;height:8px;background:var(--fin-red);border-radius:2px;margin:0 3px 0 8px"></span>Gasto
+      </span>
+    </div>
+    <div class="fin-bars">${bars}</div>
+  </div>`;
+}
+
+function finRenderCatBreakdown() {
+  const ls = finGetMesLancamentos(finMes, finAno).filter(l=>l.tipo==='expense');
+  if (!ls.length) return '';
+  const cats = {};
+  let total = 0;
+  ls.forEach(l => { cats[l.categoria] = (cats[l.categoria]||0) + l.valor; total += l.valor; });
+  const COLORS = ['#E8973A','#D94040','#6A8FD9','#52B788','#C87AD9','#D9C44A','#D97A6A','#6ACDD9'];
+  const sorted = Object.entries(cats).sort((a,b)=>b[1]-a[1]);
+  const rows = sorted.map(([cat, val], i) => {
+    const pct = total ? Math.round(val/total*100) : 0;
+    const w   = total ? Math.round(val/total*100) : 0;
+    return `<div class="fin-cat-row">
+      <div class="fin-cat-dot" style="background:${COLORS[i%COLORS.length]}"></div>
+      <div class="fin-cat-name">${esc(cat)}</div>
+      <div style="flex:1;margin:0 8px"><div style="height:4px;border-radius:4px;background:var(--beige)"><div style="height:4px;border-radius:4px;width:${w}%;background:${COLORS[i%COLORS.length]}"></div></div></div>
+      <div class="fin-cat-val">${fmtBRL(val)}</div>
+      <div class="fin-cat-pct">${pct}%</div>
+    </div>`;
+  }).join('');
+  return `<div class="fin-chart" style="margin-bottom:16px">
+    <div class="fin-chart-title">Gastos por categoria</div>${rows}
+  </div>`;
+}
+
+// ════════════════════════════════════════════
+//  CARTÃO DE CRÉDITO
+// ════════════════════════════════════════════
+function finRenderCartoes() {
+  if (!finCartoes.length) {
+    return `<div class="cc-setup" onclick="finNovoCartao()">
+      <div class="cc-setup-icon">💳</div>
+      <div class="cc-setup-text">Adicionar cartão de crédito</div>
+      <div style="font-size:.72rem;color:var(--text-l);margin-top:6px">Controle sua fatura de forma inteligente</div>
+    </div>`;
+  }
+  const cardsHTML = finCartoes.map(c => {
+    const itensAbertos = finGetFaturaAberta(c.id);
+    const totalAberto  = itensAbertos.reduce((s,l)=>s+l.valor,0);
+    const fatAtual     = finGetFaturaAtual(c.id);
+    // Fatura pendente de pagamento (fechada, não paga)
+    const fatPendente  = finFaturas.filter(f=>f.cartaoId===c.id && f.status==='aberta');
+    const totalPendente= fatPendente.reduce((s,f)=>s+f.total,0);
+    return `<div class="cc-card" onclick="finAbreCartao('${c.id}')">
+      <div class="cc-card-header">
+        <div>
+          <div class="cc-card-name">${esc(c.nome)}</div>
+          <div style="font-size:.65rem;opacity:.6;margin-top:2px">Fecha dia ${c.fechamento}</div>
+        </div>
+        <div class="cc-card-flag">💳</div>
+      </div>
+      <div class="cc-card-limit-label">Fatura em aberto (${fatAtual?.label||''})</div>
+      <div class="cc-card-fatura-val">${fmtBRL(totalAberto)}</div>
+      <div class="cc-card-footer">
+        <div class="cc-card-info">${itensAbertos.length} lançamento${itensAbertos.length!==1?'s':''}</div>
+        ${totalPendente > 0 ? `<span class="cc-card-badge cc-badge-closed">Fatura pendente: ${fmtBRL(totalPendente)}</span>` : `<span class="cc-card-badge cc-badge-open">Em aberto</span>`}
+      </div>
+    </div>`;
+  }).join('');
+
+  return cardsHTML + `<button class="btn-secondary" style="margin-top:4px" onclick="finNovoCartao()">＋ Adicionar cartão</button>`;
+}
+
+function finAbreCartao(cartaoId) {
+  _currentCartaoId = cartaoId;
+  const c = finCartoes.find(x=>x.id===cartaoId); if(!c) return;
+  const itensAbertos = finGetFaturaAberta(cartaoId);
+  const totalAberto  = itensAbertos.reduce((s,l)=>s+l.valor,0);
+  const fatAtual     = finGetFaturaAtual(cartaoId);
+  const fatPendentes = finFaturas.filter(f=>f.cartaoId===cartaoId && f.status==='aberta');
+  const historico    = finFaturas.filter(f=>f.cartaoId===cartaoId && f.status==='paga');
+
+  // Seção fatura aberta
+  const itensHTML = itensAbertos.length
+    ? itensAbertos.sort((a,b)=>b.date.localeCompare(a.date)).map(l=>`
+      <div class="fin-item expense" style="cursor:pointer" onclick="finOpenCartaoItem('${l.id}')">
+        <div class="fin-item-icon">${l.icon||'📤'}</div>
+        <div class="fin-item-body">
+          <div class="fin-item-title">${esc(l.titulo)}</div>
+          <div class="fin-item-meta"><span class="fin-tag">${esc(l.categoria||'')}</span><span>${parseDate(l.date).getDate()}/${parseDate(l.date).getMonth()+1}</span></div>
+        </div>
+        <div class="fin-item-value">− ${fmtBRL(l.valor)}</div>
+      </div>`).join('')
+    : `<div style="font-size:.8rem;color:var(--text-l);text-align:center;padding:20px">Nenhum gasto nesta fatura ainda</div>`;
+
+  // Faturas pendentes de pagamento
+  const pendentesHTML = fatPendentes.map(f=>{
+    const itensFatura = finLancamentos.filter(l=>f.itens&&f.itens.includes(l.id));
+    return `<div class="fatura-header" style="margin-bottom:10px">
+      <div style="font-size:.7rem;opacity:.7;margin-bottom:6px">Fatura fechada em ${f.fechamento}</div>
+      <div class="fatura-total">${fmtBRL(f.total)}</div>
+      <div class="fatura-meta">${itensFatura.length} lançamentos</div>
+      <div class="fatura-actions">
+        <button class="fatura-btn fatura-btn-pagar" onclick="finPagarFatura('${f.id}')">✓ Pagar fatura</button>
+        <button class="fatura-btn fatura-btn-add" style="flex:.5" onclick="finVerFatura('${f.id}')">Ver detalhes</button>
+      </div>
+    </div>`;
+  }).join('');
+
+  // Histórico de faturas pagas
+  const histHTML = historico.length ? historico.slice(-6).reverse().map(f=>
+    `<div class="fin-item" style="cursor:pointer;opacity:.7" onclick="finVerFatura('${f.id}')">
+      <div class="fin-item-icon">✅</div>
+      <div class="fin-item-body"><div class="fin-item-title">Fatura paga em ${f.pagamento||f.fechamento}</div></div>
+      <div class="fin-item-value" style="color:var(--fin-green)">− ${fmtBRL(f.total)}</div>
+    </div>`).join('') : '';
+
+  document.getElementById('modalContent').innerHTML = `
+    <div class="modal-title">💳 ${esc(c.nome)}</div>
+    ${pendentesHTML}
+    <div class="fatura-header" style="margin-bottom:10px">
+      <div style="font-size:.7rem;opacity:.7;margin-bottom:4px">Fatura em aberto — ${fatAtual?.label||''}</div>
+      <div class="fatura-total">${fmtBRL(totalAberto)}</div>
+      <div class="fatura-meta">${itensAbertos.length} lançamento${itensAbertos.length!==1?'s':''} · fecha dia ${c.fechamento}</div>
+      <div class="fatura-actions">
+        <button class="fatura-btn fatura-btn-add" onclick="finAddCartaoGasto('${cartaoId}')">＋ Adicionar gasto</button>
+        <button class="fatura-btn fatura-btn-add" style="flex:.5;background:rgba(255,255,255,.1)" onclick="finEditCartao('${cartaoId}')">⚙️</button>
+      </div>
+    </div>
+    <div class="fin-list" style="margin-bottom:16px">${itensHTML}</div>
+    ${histHTML ? `<div style="font-size:.78rem;font-weight:600;color:var(--text-m);margin-bottom:8px">Histórico</div><div class="fin-list">${histHTML}</div>` : ''}
+    <button class="btn-danger" style="margin-top:16px" onclick="finDeleteCartao('${cartaoId}')">🗑 Remover cartão</button>`;
+  document.getElementById('modalOverlay').classList.add('open');
+}
+
+function finPagarFatura(fatId) {
+  const f = finFaturas.find(x=>x.id===fatId); if(!f) return;
+  f.status = 'paga';
+  f.pagamento = today();
+  // Lança saída do saldo
+  finLancamentos.push({ id:uid(), tipo:'pagamento_fatura', titulo:`Pagamento fatura`, valor:f.total, date:today(), cartaoId:f.cartaoId });
+  save(SK.fin, finLancamentos);
+  save(SK.finFaturas, finFaturas);
+  closeModal(); renderFinanceiro();
+}
+
+function finVerFatura(fatId) {
+  const f = finFaturas.find(x=>x.id===fatId); if(!f) return;
+  const c = finCartoes.find(x=>x.id===f.cartaoId);
+  const itens = finLancamentos.filter(l=>f.itens&&f.itens.includes(l.id));
+  document.getElementById('modalContent').innerHTML = `
+    <div class="modal-title">${c?esc(c.nome):'Cartão'} — ${f.status==='paga'?'Paga':'Pendente'}</div>
+    <div style="background:var(--cream2);border-radius:var(--radius-sm);padding:12px 14px;margin-bottom:14px">
+      <div style="font-size:.7rem;color:var(--text-l)">Total da fatura</div>
+      <div style="font-size:1.2rem;font-weight:700;color:var(--brown)">${fmtBRL(f.total)}</div>
+      <div style="font-size:.68rem;color:var(--text-l);margin-top:4px">Fechou em ${f.fechamento}${f.pagamento?' · Paga em '+f.pagamento:''}</div>
+    </div>
+    <div class="fin-list">${itens.sort((a,b)=>b.date.localeCompare(a.date)).map(l=>`
+      <div class="fin-item expense" style="cursor:default">
+        <div class="fin-item-icon">${l.icon||'📤'}</div>
+        <div class="fin-item-body">
+          <div class="fin-item-title">${esc(l.titulo)}</div>
+          <div class="fin-item-meta"><span class="fin-tag">${esc(l.categoria||'')}</span><span>${parseDate(l.date).getDate()}/${parseDate(l.date).getMonth()+1}</span></div>
+        </div>
+        <div class="fin-item-value">− ${fmtBRL(l.valor)}</div>
+      </div>`).join('')}</div>
+    <button class="btn-secondary" style="margin-top:16px" onclick="closeModal();finAbreCartao('${f.cartaoId}')">‹ Voltar</button>`;
+}
+
+function finNovoCartao() {
+  document.getElementById('modalContent').innerHTML = `
+    <div class="modal-title">Novo cartão de crédito</div>
+    <div class="form-group"><label class="form-label">Nome do cartão</label>
+    <input class="form-input" id="fc-nome" placeholder="Ex: Nubank, Inter, Visa Bradesco"></div>
+    <div class="form-group"><label class="form-label">Dia de fechamento da fatura</label>
+    <input class="form-input" type="number" id="fc-fecha" min="1" max="28" value="10" placeholder="Ex: 10"></div>
+    <button class="btn-primary" onclick="finSalvarCartao()">Salvar</button>`;
+  document.getElementById('modalOverlay').classList.add('open');
+}
+
+function finSalvarCartao() {
+  const nome = document.getElementById('fc-nome').value.trim(); if(!nome) return;
+  const fecha= parseInt(document.getElementById('fc-fecha').value)||10;
+  finCartoes.push({ id:uid(), nome, fechamento:Math.min(28,Math.max(1,fecha)) });
+  save(SK.finCartoes, finCartoes);
+  closeModal(); finTab('cartao', document.querySelector('.fin-tab:nth-child(4)'));
+  renderFinanceiro();
+}
+
+function finEditCartao(cartaoId) {
+  const c = finCartoes.find(x=>x.id===cartaoId); if(!c) return;
+  document.getElementById('modalContent').innerHTML = `
+    <div class="modal-title">Editar cartão</div>
+    <div class="form-group"><label class="form-label">Nome</label>
+    <input class="form-input" id="fc-nome" value="${esc(c.nome)}"></div>
+    <div class="form-group"><label class="form-label">Dia de fechamento</label>
+    <input class="form-input" type="number" id="fc-fecha" min="1" max="28" value="${c.fechamento}"></div>
+    <button class="btn-primary" onclick="finSalvarEditCartao('${cartaoId}')">Salvar</button>`;
+  document.getElementById('modalOverlay').classList.add('open');
+}
+
+function finSalvarEditCartao(cartaoId) {
+  const c = finCartoes.find(x=>x.id===cartaoId); if(!c) return;
+  c.nome = document.getElementById('fc-nome').value.trim()||c.nome;
+  c.fechamento = parseInt(document.getElementById('fc-fecha').value)||c.fechamento;
+  save(SK.finCartoes, finCartoes);
+  closeModal(); renderFinanceiro();
+}
+
+function finDeleteCartao(cartaoId) {
+  if(!confirm('Remover este cartão? Os lançamentos serão mantidos.')) return;
+  finCartoes = finCartoes.filter(x=>x.id!==cartaoId);
+  save(SK.finCartoes, finCartoes);
+  closeModal(); renderFinanceiro();
+}
+
+function finAddCartaoGasto(cartaoId) {
+  _currentCartaoId = cartaoId;
+  document.getElementById('modalContent').innerHTML = finCartaoGastoForm(cartaoId, null);
+  document.getElementById('modalOverlay').classList.add('open');
+}
+
+function finOpenCartaoItem(itemId) {
+  const l = finLancamentos.find(x=>x.id===itemId); if(!l) return;
+  document.getElementById('modalContent').innerHTML = finCartaoGastoForm(l.cartaoId, l);
+  document.getElementById('modalOverlay').classList.add('open');
+}
+
+function finCartaoGastoForm(cartaoId, l) {
+  const c = finCartoes.find(x=>x.id===cartaoId);
+  const ICON_LIST = ['🛒','🍔','🚗','🍕','☕','🎮','👗','💊','🎉','✈️','🛍️','🍺','📦','🏠','⚡'];
+  return `<div class="modal-title">💳 Gasto no ${c?esc(c.nome):'Cartão'}</div>
+  <div class="form-group"><label class="form-label">Descrição</label>
+  <input class="form-input" id="fcc-titulo" value="${l?esc(l.titulo):''}" placeholder="Ex: iFood, Uber, Mercado"></div>
+  <div class="modal-row">
+    <div class="form-group"><label class="form-label">Valor (R$)</label>
+    <input class="form-input" type="number" id="fcc-valor" value="${l?l.valor:''}" placeholder="0,00" min="0" step="0.01"></div>
+    <div class="form-group"><label class="form-label">Data</label>
+    <input class="form-input" type="date" id="fcc-date" value="${l?l.date:today()}"></div>
+  </div>
+  <div class="form-group"><label class="form-label">Categoria</label>
+  <select class="form-select" id="fcc-cat">
+    ${FIN_CAT_EXPENSE.map(cat=>`<option value="${cat}"${l?.categoria===cat?' selected':''}>${cat}</option>`).join('')}
+  </select></div>
+  <div class="form-group"><label class="form-label">Ícone</label>
+  <div style="display:flex;flex-wrap:wrap;gap:6px">${ICON_LIST.map(ic=>`<button style="font-size:1.2rem;background:${(l?.icon||'🛒')===ic?'var(--cream2)':'none'};border:1.5px solid ${(l?.icon||'🛒')===ic?'var(--tan)':'transparent'};border-radius:8px;padding:4px;cursor:pointer;width:36px;height:36px" onclick="finPickIcon('${ic}',this)">${ic}</button>`).join('')}</div>
+  <input type="hidden" id="ff-icon" value="${l?.icon||'🛒'}"></div>
+  <button class="btn-primary" onclick="finSalvarCartaoGasto('${cartaoId}','${l?l.id:''}')">Salvar</button>
+  ${l?`<button class="btn-danger" onclick="finDeleteCartaoGasto('${l.id}')">🗑 Excluir</button>`:''}`;
+}
+
+function finSalvarCartaoGasto(cartaoId, editId) {
+  const titulo = document.getElementById('fcc-titulo').value.trim(); if(!titulo) return;
+  const valor  = parseFloat(document.getElementById('fcc-valor').value); if(!valor||valor<=0) return;
+  const date   = document.getElementById('fcc-date').value||today();
+  const cat    = document.getElementById('fcc-cat').value;
+  const icon   = document.getElementById('ff-icon').value;
+  if (editId) {
+    const l = finLancamentos.find(x=>x.id===editId);
+    if(l) { l.titulo=titulo; l.valor=valor; l.date=date; l.categoria=cat; l.icon=icon; }
+  } else {
+    finLancamentos.push({ id:uid(), tipo:'cartao_item', cartaoId, titulo, valor, date, categoria:cat, icon });
+  }
+  save(SK.fin, finLancamentos);
+  closeModal(); renderFinanceiro();
+}
+
+function finDeleteCartaoGasto(itemId) {
+  finLancamentos = finLancamentos.filter(x=>x.id!==itemId);
+  save(SK.fin, finLancamentos);
+  closeModal(); renderFinanceiro();
+}
+
+// ════════════════════════════════════════════
+//  INVESTIMENTOS
+// ════════════════════════════════════════════
+function finRenderInvestimentos() {
+  const carteira = finInvestimentos;
+  const totalAtual    = carteira.reduce((s,i)=>s+i.valorAtual,0);
+  const totalAportado = carteira.reduce((s,i)=>s+i.totalAportado,0);
+  const totalRetirado = carteira.reduce((s,i)=>s+(i.totalRetirado||0),0);
+  const rentab = totalAportado > 0 ? ((totalAtual - totalAportado + totalRetirado) / totalAportado * 100) : 0;
+
+  const resumo = `<div class="fin-chart" style="margin-bottom:14px">
+    <div class="fin-chart-title" style="margin-bottom:12px">Carteira de Investimentos</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;text-align:center">
+      <div style="background:var(--cream);border-radius:var(--radius-sm);padding:10px">
+        <div style="font-size:.6rem;color:var(--text-l);margin-bottom:4px">PATRIMÔNIO</div>
+        <div style="font-size:.88rem;font-weight:700;color:#2055A8">${fmtBRL(totalAtual)}</div>
+      </div>
+      <div style="background:var(--cream);border-radius:var(--radius-sm);padding:10px">
+        <div style="font-size:.6rem;color:var(--text-l);margin-bottom:4px">APORTADO</div>
+        <div style="font-size:.88rem;font-weight:700;color:var(--text)">${fmtBRL(totalAportado)}</div>
+      </div>
+      <div style="background:var(--cream);border-radius:var(--radius-sm);padding:10px">
+        <div style="font-size:.6rem;color:var(--text-l);margin-bottom:4px">RENTAB.</div>
+        <div style="font-size:.88rem;font-weight:700;color:${rentab>=0?'var(--fin-green)':'var(--fin-red)'}">${rentab>=0?'+':''}${rentab.toFixed(2).replace('.',',')}%</div>
+      </div>
+    </div>
+  </div>`;
+
+  if (!carteira.length) {
+    return resumo + `<div class="fin-empty"><div class="fin-empty-icon">📈</div><div class="fin-empty-text">Nenhum ativo cadastrado.<br>Toque em <strong>＋</strong> e escolha Investimento.</div></div>`;
+  }
+
+  const itens = carteira.map(inv => {
+    const rent = inv.totalAportado > 0
+      ? ((inv.valorAtual - inv.totalAportado + (inv.totalRetirado||0)) / inv.totalAportado * 100)
+      : 0;
+    const rentColor = rent >= 0 ? 'var(--fin-green)' : 'var(--fin-red)';
+    const pct = totalAtual > 0 ? (inv.valorAtual/totalAtual*100) : 0;
+    return `<div class="fin-item invest" onclick="finOpenInvest('${inv.id}')">
+      <div class="fin-item-icon">${inv.icon||'📈'}</div>
+      <div class="fin-item-body">
+        <div class="fin-item-title">${esc(inv.nome)}</div>
+        <div class="fin-item-meta">
+          <span class="fin-tag">${esc(inv.categoria)}</span>
+          <span style="color:${rentColor};font-size:.7rem;font-weight:600">${rent>=0?'+':''}${rent.toFixed(2).replace('.',',')}%</span>
+        </div>
+        <div style="margin-top:6px;height:3px;background:var(--beige);border-radius:3px">
+          <div style="height:3px;border-radius:3px;width:${pct.toFixed(1)}%;background:#2055A8"></div>
+        </div>
+        <div style="font-size:.62rem;color:var(--text-l);margin-top:3px">${pct.toFixed(1)}% da carteira</div>
+      </div>
+      <div class="fin-item-value" style="color:#2055A8;font-size:.88rem">${fmtBRL(inv.valorAtual)}</div>
+    </div>`;
+  }).join('');
+
+  return resumo + `<div class="fin-list">${itens}</div>`;
+}
+
+function finOpenInvest(id) {
+  _editingInvestId = id;
+  const inv = finInvestimentos.find(i=>i.id===id); if(!inv) return;
+  document.getElementById('modalContent').innerHTML = finInvestForm(inv);
+  document.getElementById('modalOverlay').classList.add('open');
+}
+
+function finInvestForm(inv) {
+  const aportes = (inv.aportes||[]).slice().reverse();
+  const rent = inv.totalAportado > 0
+    ? ((inv.valorAtual - inv.totalAportado + (inv.totalRetirado||0)) / inv.totalAportado * 100)
+    : 0;
+  const rentColor = rent >= 0 ? 'var(--fin-green)' : 'var(--fin-red)';
+  const rendimento = inv.valorAtual - inv.totalAportado + (inv.totalRetirado||0);
+
+  return `<div class="modal-title">${inv.icon||'📈'} ${esc(inv.nome)}</div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px">
+    <div style="text-align:center;background:var(--cream2);border-radius:var(--radius-sm);padding:12px">
+      <div style="font-size:.6rem;color:var(--text-l);margin-bottom:4px">VALOR ATUAL</div>
+      <div style="font-size:1rem;font-weight:700;color:#2055A8">${fmtBRL(inv.valorAtual)}</div>
+    </div>
+    <div style="text-align:center;background:var(--cream2);border-radius:var(--radius-sm);padding:12px">
+      <div style="font-size:.6rem;color:var(--text-l);margin-bottom:4px">RENTABILIDADE</div>
+      <div style="font-size:1rem;font-weight:700;color:${rentColor}">${rent>=0?'+':''}${rent.toFixed(2).replace('.',',')}%</div>
+    </div>
+    <div style="text-align:center;background:var(--cream2);border-radius:var(--radius-sm);padding:12px">
+      <div style="font-size:.6rem;color:var(--text-l);margin-bottom:4px">TOTAL APORTADO</div>
+      <div style="font-size:.9rem;font-weight:600;color:var(--text)">${fmtBRL(inv.totalAportado)}</div>
+    </div>
+    <div style="text-align:center;background:var(--cream2);border-radius:var(--radius-sm);padding:12px">
+      <div style="font-size:.6rem;color:var(--text-l);margin-bottom:4px">RENDIMENTO</div>
+      <div style="font-size:.9rem;font-weight:600;color:${rendimento>=0?'var(--fin-green)':'var(--fin-red)'}">${rendimento>=0?'+ ':'− '}${fmtBRL(rendimento)}</div>
+    </div>
+  </div>
+
+  <div style="font-size:.78rem;font-weight:600;color:var(--text-m);margin-bottom:6px">📊 Atualizar valor atual</div>
+  <div class="modal-row" style="margin-bottom:4px">
+    <div class="form-group"><input class="form-input" type="number" id="fi-valorAtual" value="${inv.valorAtual}" placeholder="Valor atual" step="0.01"></div>
+    <div class="form-group"><button class="btn-primary" style="padding:10px 14px;font-size:.82rem" onclick="finAtualizarValor('${inv.id}')">Atualizar</button></div>
+  </div>
+  <div style="font-size:.68rem;color:var(--text-l);margin-bottom:16px">Informe o saldo atual do ativo para calcular rentabilidade</div>
+
+  <div style="font-size:.78rem;font-weight:600;color:var(--text-m);margin-bottom:6px">💸 Registrar retirada</div>
+  <div class="modal-row">
+    <div class="form-group"><input class="form-input" type="number" id="fi-retirada" placeholder="Valor" step="0.01" min="0"></div>
+    <div class="form-group">
+      <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:.78rem;color:var(--text-m)">
+        <input type="checkbox" id="fi-retorna-conta" checked style="width:14px;height:14px"> Retorna ao saldo
+      </label>
+    </div>
+  </div>
+  <button class="btn-secondary" style="margin-bottom:20px;width:100%" onclick="finRegistrarRetirada('${inv.id}')">Registrar retirada</button>
+
+  <div style="font-size:.78rem;font-weight:600;color:var(--text-m);margin-bottom:8px">Histórico de movimentações</div>
+  <div class="fin-list">
+    ${aportes.length ? aportes.map(a=>`
+      <div class="fin-item ${a.tipo==='retirada'?'expense':'invest'}" style="cursor:default">
+        <div class="fin-item-icon">${a.tipo==='retirada'?'💸':'📥'}</div>
+        <div class="fin-item-body">
+          <div class="fin-item-title">${a.tipo==='retirada'?'Retirada':'Aporte'}</div>
+          <div class="fin-item-meta"><span>${a.data}</span>${a.retornaConta?'<span class="fin-tag">↩ voltou ao saldo</span>':''}</div>
+        </div>
+        <div class="fin-item-value">${a.tipo==='retirada'?'− ':'+ '}${fmtBRL(a.valor)}</div>
+      </div>`).join('')
+    : `<div style="font-size:.8rem;color:var(--text-l);text-align:center;padding:16px">Nenhuma movimentação ainda</div>`}
+  </div>
+  <button class="btn-danger" style="margin-top:16px" onclick="finDeleteInvest('${inv.id}')">🗑 Remover ativo</button>`;
+}
+
+function finAtualizarValor(id) {
+  const inv = finInvestimentos.find(i=>i.id===id); if(!inv) return;
+  const novoVal = parseFloat(document.getElementById('fi-valorAtual').value);
+  if (isNaN(novoVal)||novoVal<0) return;
+  inv.valorAtual = novoVal;
+  inv.aportes = inv.aportes||[];
+  inv.aportes.push({ id:uid(), data:today(), valor:novoVal, tipo:'atualizacao' });
+  save(SK.finInvest, finInvestimentos);
+  document.getElementById('modalContent').innerHTML = finInvestForm(inv);
+  renderFinanceiro();
+}
+
+function finRegistrarRetirada(id) {
+  const inv = finInvestimentos.find(i=>i.id===id); if(!inv) return;
+  const val = parseFloat(document.getElementById('fi-retirada').value);
+  if (!val||val<=0) return;
+  const retornaConta = document.getElementById('fi-retorna-conta')?.checked;
+  inv.totalRetirado = (inv.totalRetirado||0) + val;
+  inv.valorAtual    = Math.max(0, inv.valorAtual - val);
+  inv.aportes = inv.aportes||[];
+  inv.aportes.push({ id:uid(), data:today(), valor:val, tipo:'retirada', retornaConta });
+  if (retornaConta) {
+    finLancamentos.push({ id:uid(), tipo:'income', titulo:`Retirada — ${inv.nome}`, valor:val, date:today(), categoria:'Reembolso', icon:'💸', recur:'none' });
+    save(SK.fin, finLancamentos);
+  }
+  save(SK.finInvest, finInvestimentos);
+  document.getElementById('modalContent').innerHTML = finInvestForm(inv);
+  renderFinanceiro();
+}
+
+function finDeleteInvest(id) {
+  if (!confirm('Remover este ativo da carteira?')) return;
+  finInvestimentos = finInvestimentos.filter(i=>i.id!==id);
+  save(SK.finInvest, finInvestimentos);
+  closeModal(); renderFinanceiro();
+}
+
+// ── Forms: entradas/gastos/investimentos ──
+function finOpenForm(tipo) {
+  _editingFinId = null;
+  document.getElementById('modalContent').innerHTML = finForm(tipo||'income', null);
+  document.getElementById('modalOverlay').classList.add('open');
+}
+
+function finOpenEdit(id) {
+  _editingFinId = id;
+  const l = finLancamentos.find(x=>x.id===id); if(!l) return;
+  document.getElementById('modalContent').innerHTML = finForm(l.tipo, l);
+  document.getElementById('modalOverlay').classList.add('open');
+}
+
+function finForm(tipo, l) {
+  const isEdit = !!l;
+  const cats = tipo==='income' ? FIN_CAT_INCOME : tipo==='expense' ? FIN_CAT_EXPENSE : FIN_CAT_INVEST;
+  const ICONS = {income:'📥',expense:'📤',invest:'📈'};
+  const ICON_LIST = ['💰','💳','🏠','🚗','🍔','📚','💊','✈️','🎉','💼','📥','📤','📈','🏦','🪙','💎','🎓','🛒','👗','🎮'];
+
+  return `<div class="modal-title">${isEdit?'Editar':'Novo'} lançamento</div>
+  <div class="fin-type-row">
+    <button class="fin-type-btn${tipo==='income'?' sel-income':''}"  onclick="finSwitchTipo('income')">📥 Entrada</button>
+    <button class="fin-type-btn${tipo==='expense'?' sel-expense':''}" onclick="finSwitchTipo('expense')">📤 Gasto</button>
+    <button class="fin-type-btn${tipo==='invest'?' sel-invest':''}"   onclick="finSwitchTipo('invest')">📈 Invest.</button>
+  </div>
+  <input type="hidden" id="ff-tipo" value="${tipo}">
+  <div class="form-group"><label class="form-label">Descrição</label>
+  <input class="form-input" id="ff-titulo" value="${l?esc(l.titulo):''}" placeholder="${tipo==='income'?'Ex: Salário de Junho':tipo==='expense'?'Ex: Mercado':'Ex: CDB Banco Inter'}"></div>
+  <div class="modal-row">
+    <div class="form-group"><label class="form-label">Valor (R$)</label>
+    <input class="form-input" type="number" id="ff-valor" value="${l?l.valor:''}" placeholder="0,00" min="0" step="0.01"></div>
+    <div class="form-group"><label class="form-label">Data</label>
+    <input class="form-input" type="date" id="ff-date" value="${l?l.date:today()}"></div>
+  </div>
+  <div class="form-group"><label class="form-label">Categoria</label>
+  <select class="form-select" id="ff-cat">
+    ${cats.map(c=>`<option value="${c}"${l?.categoria===c?' selected':''}>${c}</option>`).join('')}
+  </select></div>
+  ${tipo==='invest' ? `
+  <div class="form-group"><label class="form-label">Vincular à carteira</label>
+  <select class="form-select" id="ff-invest-link">
+    <option value="">— Lançamento avulso —</option>
+    ${finInvestimentos.map(i=>`<option value="${i.id}"${l?.investId===i.id?' selected':''}>${esc(i.nome)}</option>`).join('')}
+    <option value="__new__">➕ Criar novo ativo…</option>
+  </select></div>
+  <div class="form-group" id="ff-invest-new-wrap" style="display:none">
+    <input class="form-input" id="ff-invest-new-nome" placeholder="Nome do novo ativo">
+  </div>
+  <div class="form-group">
+    <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:.84rem">
+      <input type="checkbox" id="ff-debita" ${l?.debitaConta!==false?'checked':''} style="width:16px;height:16px">
+      Debitar da conta (reduz saldo disponível)
+    </label>
+  </div>` : ''}
+  ${tipo!=='invest' ? `
+  <div class="form-group"><label class="form-label">🔁 Repetição</label>
+  <select class="form-select" id="ff-recur">
+    <option value="none"${(l?.recur||'none')==='none'?' selected':''}>Única vez</option>
+    <option value="monthly"${l?.recur==='monthly'?' selected':''}>Todo mês</option>
+    <option value="weekly"${l?.recur==='weekly'?' selected':''}>Toda semana</option>
+  </select></div>` : ''}
+  <div class="form-group"><label class="form-label">Ícone</label>
+  <div style="display:flex;flex-wrap:wrap;gap:5px">${ICON_LIST.map(ic=>`<button style="font-size:1.2rem;background:${(l?.icon||ICONS[tipo])===ic?'var(--cream2)':'none'};border:1.5px solid ${(l?.icon||ICONS[tipo])===ic?'var(--tan)':'transparent'};border-radius:8px;padding:3px;cursor:pointer;width:36px;height:36px" onclick="finPickIcon('${ic}',this)">${ic}</button>`).join('')}</div>
+  <input type="hidden" id="ff-icon" value="${l?.icon||ICONS[tipo]}"></div>
+  <button class="btn-primary" onclick="finSave()">Salvar</button>
+  ${isEdit?`<button class="btn-danger" onclick="finDelete('${l.id}')">🗑 Excluir</button>`:''}
+  <script>document.getElementById('ff-invest-link')?.addEventListener('change',function(){document.getElementById('ff-invest-new-wrap').style.display=this.value==='__new__'?'':'none';});<\/script>`;
+}
+
+function finSwitchTipo(tipo) {
+  document.getElementById('ff-tipo').value = tipo;
+  document.getElementById('modalContent').innerHTML = finForm(tipo, null);
+}
+
+function finPickIcon(ic, btn) {
+  document.querySelectorAll('#modalContent button[onclick^="finPickIcon"],#modalContent button[onclick^="finPickIcon"]').forEach(b=>{
+    b.style.background='none'; b.style.borderColor='transparent';
+  });
+  btn.style.background='var(--cream2)'; btn.style.borderColor='var(--tan)';
+  document.getElementById('ff-icon').value = ic;
+}
+
+function finSave() {
+  const tipo   = document.getElementById('ff-tipo').value;
+  const titulo = document.getElementById('ff-titulo').value.trim(); if(!titulo) return;
+  const valor  = parseFloat(document.getElementById('ff-valor').value); if(!valor||valor<=0) return;
+  const date   = document.getElementById('ff-date').value||today();
+  const cat    = document.getElementById('ff-cat').value;
+  const icon   = document.getElementById('ff-icon').value;
+  const recur  = document.getElementById('ff-recur')?.value||'none';
+  const debitaConta = tipo==='invest' ? (document.getElementById('ff-debita')?.checked !== false) : undefined;
+
+  let investId = undefined;
+  if (tipo==='invest') {
+    const link = document.getElementById('ff-invest-link')?.value;
+    if (link==='__new__') {
+      const nome = document.getElementById('ff-invest-new-nome')?.value.trim();
+      if (nome) {
+        const novoAtivo = { id:uid(), nome, categoria:cat, icon, valorAtual:valor, totalAportado:valor, totalRetirado:0, aportes:[{id:uid(),data:date,valor,tipo:'aporte'}] };
+        finInvestimentos.push(novoAtivo);
+        save(SK.finInvest, finInvestimentos);
+        investId = novoAtivo.id;
+      }
+    } else if (link) {
+      investId = link;
+      const ativo = finInvestimentos.find(i=>i.id===link);
+      if (ativo) {
+        ativo.totalAportado += valor;
+        ativo.valorAtual    += valor;
+        ativo.aportes = ativo.aportes||[];
+        ativo.aportes.push({ id:uid(), data:date, valor, tipo:'aporte' });
+        save(SK.finInvest, finInvestimentos);
+      }
+    }
+  }
+
+  const base = { id:_editingFinId||uid(), tipo, titulo, valor, date, categoria:cat, icon, recur, debitaConta, investId, _baseId:_editingFinId||null };
+  if (_editingFinId) finLancamentos = finLancamentos.filter(l=>l.id!==_editingFinId && l._baseId!==_editingFinId);
+
+  const novos = [base];
+  if (recur!=='none') {
+    let cur = new Date(date+'T12:00:00'); const baseId=base.id;
+    for (let i=0; i<36; i++) {
+      if (recur==='monthly') cur.setMonth(cur.getMonth()+1); else cur.setDate(cur.getDate()+7);
+      novos.push({...base,id:uid(),date:fmtDate(cur),_baseId:baseId,_isRecur:true});
+    }
+  }
+  novos.forEach(n=>{ const i=finLancamentos.findIndex(l=>l.id===n.id); if(i>-1)finLancamentos[i]=n; else finLancamentos.push(n); });
+  save(SK.fin, finLancamentos);
+  closeModal(); renderFinanceiro();
+}
+
+function finDelete(id) {
+  const l = finLancamentos.find(x=>x.id===id);
+  if (l?._baseId||(l?.recur&&l.recur!=='none')) {
+    if(!confirm('Excluir só este ou toda a série?')) return;
+    const baseId=l._baseId||l.id;
+    finLancamentos=finLancamentos.filter(x=>x.id!==baseId&&x._baseId!==baseId);
+  } else {
+    finLancamentos=finLancamentos.filter(x=>x.id!==id);
+  }
+  save(SK.fin,finLancamentos); closeModal(); renderFinanceiro();
+}
+
+// FAB de finanças: abre menu de escolha
+function finOpenForm_menu() {
+  document.getElementById('modalContent').innerHTML = `
+    <div class="modal-title">Novo lançamento</div>
+    <div style="display:flex;flex-direction:column;gap:10px;padding-top:4px">
+      <button class="fin-type-btn sel-income" style="padding:14px;font-size:.95rem;text-align:left" onclick="finOpenForm('income')">📥 Entrada — salário, pensão, outros</button>
+      <button class="fin-type-btn sel-expense" style="padding:14px;font-size:.95rem;text-align:left" onclick="finOpenForm('expense')">📤 Gasto — despesas do mês</button>
+      <button class="fin-type-btn sel-invest" style="padding:14px;font-size:.95rem;text-align:left" onclick="finOpenForm('invest')">📈 Investimento — aporte</button>
+      <button class="fin-type-btn" style="padding:14px;font-size:.95rem;text-align:left;background:var(--cream2);color:var(--text-m)" onclick="finTab('cartao',document.querySelector('.fin-tab:nth-child(4)'));closeModal();document.querySelector('.cc-setup')?.click()">💳 Cartão de crédito</button>
+    </div>`;
+  document.getElementById('modalOverlay').classList.add('open');
+}
 
 // ════════════════════════════════════════════════
 //  AVISOS DE EVENTOS
