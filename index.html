@@ -2940,8 +2940,10 @@ function finCalcSaldo(m, a) {
     if (l.tipo === 'expense') expense += l.valor;
     if (l.tipo === 'invest' && l.debitaConta !== false) invest += l.valor;
   });
-  // Pagamentos de fatura que saíram do saldo neste mês
-  const pagFatura = finLancamentos.filter(l => l.tipo === 'pagamento_fatura' && l.date.startsWith(`${a}-${String(m+1).padStart(2,'0')}`)).reduce((s,l)=>s+l.valor,0);
+  // Pagamentos de fatura que saíram do saldo neste mês (respeita debitaConta:false em pagamentos parciais)
+  const pagFatura = finLancamentos
+    .filter(l => l.tipo === 'pagamento_fatura' && l.debitaConta !== false && l.date.startsWith(`${a}-${String(m+1).padStart(2,'0')}`))
+    .reduce((s,l)=>s+l.valor,0);
   const saldo = income - expense - invest - pagFatura;
   return { income, expense, invest, saldo };
 }
@@ -2966,12 +2968,15 @@ function finFechaFatura(cartaoId) {
   const itens = finGetFaturaAberta(cartaoId);
   if (!itens.length) return;
   const total = itens.reduce((s,l)=>s+l.valor,0);
+  if (total <= 0) return; // fatura zerada — não fecha nem registra gasto nenhum
   const fatId = uid();
   const hoje = today();
   // Marcar itens como pertencentes a esta fatura
   itens.forEach(l => { l.faturaId = fatId; });
-  // Registrar fatura fechada
-  finFaturas.push({ id:fatId, cartaoId, total, fechamento:hoje, status:'aberta', itens:itens.map(l=>l.id) });
+  // Registrar a fatura já como paga — o valor é descontado do saldo automaticamente no fechamento
+  finFaturas.push({ id:fatId, cartaoId, total, fechamento:hoje, status:'paga', pagamento:hoje, itens:itens.map(l=>l.id) });
+  // Lança a saída do saldo no momento do fechamento
+  finLancamentos.push({ id:uid(), tipo:'pagamento_fatura', titulo:`Fatura — ${c.nome}`, valor:total, date:hoje, cartaoId, faturaId:fatId });
   save(SK.fin, finLancamentos);
   save(SK.finFaturas, finFaturas);
 }
@@ -3041,10 +3046,18 @@ function finRenderExtrato() {
     }
     if (l.tipo==='pagamento_fatura') {
       const c = finCartoes.find(x=>x.id===l.cartaoId);
-      listHTML += `<div class="fin-item expense">
+      const naoDebitou = l.debitaConta === false;
+      listHTML += `<div class="fin-item ${naoDebitou?'':'expense'}">
         <div class="fin-item-icon">💳</div>
-        <div class="fin-item-body"><div class="fin-item-title">Pagamento fatura — ${c?esc(c.nome):'cartão'}</div><div class="fin-item-meta"><span class="fin-tag">Cartão</span></div></div>
-        <div class="fin-item-value">− ${fmtBRL(l.valor)}</div>
+        <div class="fin-item-body">
+          <div class="fin-item-title">${esc(l.titulo || ('Pagamento fatura — '+(c?c.nome:'cartão')))}</div>
+          <div class="fin-item-meta">
+            <span class="fin-tag">Cartão</span>
+            ${l.parcial?'<span class="fin-tag">Parcial</span>':''}
+            ${naoDebitou?'<span class="fin-tag">Sem débito</span>':''}
+          </div>
+        </div>
+        <div class="fin-item-value">${naoDebitou?'':'− '}${fmtBRL(l.valor)}</div>
       </div>`;
     } else {
       listHTML += finItemHTML(l);
@@ -3153,9 +3166,6 @@ function finRenderCartoes() {
     const itensAbertos = finGetFaturaAberta(c.id);
     const totalAberto  = itensAbertos.reduce((s,l)=>s+l.valor,0);
     const fatAtual     = finGetFaturaAtual(c.id);
-    // Fatura pendente de pagamento (fechada, não paga)
-    const fatPendente  = finFaturas.filter(f=>f.cartaoId===c.id && f.status==='aberta');
-    const totalPendente= fatPendente.reduce((s,f)=>s+f.total,0);
     return `<div class="cc-card" onclick="finAbreCartao('${c.id}')">
       <div class="cc-card-header">
         <div>
@@ -3168,7 +3178,7 @@ function finRenderCartoes() {
       <div class="cc-card-fatura-val">${fmtBRL(totalAberto)}</div>
       <div class="cc-card-footer">
         <div class="cc-card-info">${itensAbertos.length} lançamento${itensAbertos.length!==1?'s':''}</div>
-        ${totalPendente > 0 ? `<span class="cc-card-badge cc-badge-closed">Fatura pendente: ${fmtBRL(totalPendente)}</span>` : `<span class="cc-card-badge cc-badge-open">Em aberto</span>`}
+        <span class="cc-card-badge cc-badge-open">Em aberto</span>
       </div>
     </div>`;
   }).join('');
@@ -3182,8 +3192,7 @@ function finAbreCartao(cartaoId) {
   const itensAbertos = finGetFaturaAberta(cartaoId);
   const totalAberto  = itensAbertos.reduce((s,l)=>s+l.valor,0);
   const fatAtual     = finGetFaturaAtual(cartaoId);
-  const fatPendentes = finFaturas.filter(f=>f.cartaoId===cartaoId && f.status==='aberta');
-  const historico    = finFaturas.filter(f=>f.cartaoId===cartaoId && f.status==='paga');
+  const historico    = finFaturas.filter(f=>f.cartaoId===cartaoId).sort((a,b)=>b.fechamento.localeCompare(a.fechamento));
 
   // Seção fatura aberta
   const itensHTML = itensAbertos.length
@@ -3198,23 +3207,9 @@ function finAbreCartao(cartaoId) {
       </div>`).join('')
     : `<div style="font-size:.8rem;color:var(--text-l);text-align:center;padding:20px">Nenhum gasto nesta fatura ainda</div>`;
 
-  // Faturas pendentes de pagamento
-  const pendentesHTML = fatPendentes.map(f=>{
-    const itensFatura = finLancamentos.filter(l=>f.itens&&f.itens.includes(l.id));
-    return `<div class="fatura-header" style="margin-bottom:10px">
-      <div style="font-size:.7rem;opacity:.7;margin-bottom:6px">Fatura fechada em ${f.fechamento}</div>
-      <div class="fatura-total">${fmtBRL(f.total)}</div>
-      <div class="fatura-meta">${itensFatura.length} lançamentos</div>
-      <div class="fatura-actions">
-        <button class="fatura-btn fatura-btn-pagar" onclick="finPagarFatura('${f.id}')">✓ Pagar fatura</button>
-        <button class="fatura-btn fatura-btn-add" style="flex:.5" onclick="finVerFatura('${f.id}')">Ver detalhes</button>
-      </div>
-    </div>`;
-  }).join('');
-
-  // Histórico de faturas pagas
-  const histHTML = historico.length ? historico.slice(-6).reverse().map(f=>
-    `<div class="fin-item" style="cursor:pointer;opacity:.7" onclick="finVerFatura('${f.id}')">
+  // Histórico de faturas já fechadas e pagas automaticamente
+  const histHTML = historico.length ? historico.slice(0,8).map(f=>
+    `<div class="fin-item" style="cursor:pointer;opacity:.85" onclick="finVerFatura('${f.id}')">
       <div class="fin-item-icon">✅</div>
       <div class="fin-item-body"><div class="fin-item-title">Fatura paga em ${f.pagamento||f.fechamento}</div></div>
       <div class="fin-item-value" style="color:var(--fin-green)">− ${fmtBRL(f.total)}</div>
@@ -3222,31 +3217,71 @@ function finAbreCartao(cartaoId) {
 
   document.getElementById('modalContent').innerHTML = `
     <div class="modal-title">💳 ${esc(c.nome)}</div>
-    ${pendentesHTML}
     <div class="fatura-header" style="margin-bottom:10px">
       <div style="font-size:.7rem;opacity:.7;margin-bottom:4px">Fatura em aberto — ${fatAtual?.label||''}</div>
       <div class="fatura-total">${fmtBRL(totalAberto)}</div>
-      <div class="fatura-meta">${itensAbertos.length} lançamento${itensAbertos.length!==1?'s':''} · fecha dia ${c.fechamento}</div>
+      <div class="fatura-meta">${itensAbertos.length} lançamento${itensAbertos.length!==1?'s':''} · fecha dia ${c.fechamento} · desconta do saldo automaticamente no fechamento</div>
       <div class="fatura-actions">
         <button class="fatura-btn fatura-btn-add" onclick="finAddCartaoGasto('${cartaoId}')">＋ Adicionar gasto</button>
         <button class="fatura-btn fatura-btn-add" style="flex:.5;background:rgba(255,255,255,.1)" onclick="finEditCartao('${cartaoId}')">⚙️</button>
       </div>
     </div>
+    ${totalAberto > 0 ? `
+    <div style="font-size:.78rem;font-weight:600;color:var(--text-m);margin-bottom:6px">💰 Pagar fatura agora (antecipado)</div>
+    <div class="modal-row" style="margin-bottom:4px">
+      <div class="form-group"><input class="form-input" type="number" id="fp-valor" placeholder="Valor a pagar" step="0.01" min="0" max="${totalAberto}" value="${totalAberto.toFixed(2)}"></div>
+      <div class="form-group">
+        <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:.78rem;color:var(--text-m)">
+          <input type="checkbox" id="fp-debita" checked style="width:14px;height:14px"> Sai do saldo
+        </label>
+      </div>
+    </div>
+    <div style="font-size:.65rem;color:var(--text-l);margin-bottom:10px">Pode pagar um valor menor que o total. O restante continua na fatura em aberto.</div>
+    <button class="btn-primary" style="width:100%;margin-bottom:16px" onclick="finPagarAntecipado('${cartaoId}')">✓ Pagar fatura</button>
+    ` : ''}
     <div class="fin-list" style="margin-bottom:16px">${itensHTML}</div>
-    ${histHTML ? `<div style="font-size:.78rem;font-weight:600;color:var(--text-m);margin-bottom:8px">Histórico</div><div class="fin-list">${histHTML}</div>` : ''}
+    ${histHTML ? `<div style="font-size:.78rem;font-weight:600;color:var(--text-m);margin-bottom:8px">Faturas pagas</div><div class="fin-list">${histHTML}</div>` : ''}
     <button class="btn-danger" style="margin-top:16px" onclick="finDeleteCartao('${cartaoId}')">🗑 Remover cartão</button>`;
   document.getElementById('modalOverlay').classList.add('open');
 }
 
-function finPagarFatura(fatId) {
-  const f = finFaturas.find(x=>x.id===fatId); if(!f) return;
-  f.status = 'paga';
-  f.pagamento = today();
-  // Lança saída do saldo
-  finLancamentos.push({ id:uid(), tipo:'pagamento_fatura', titulo:`Pagamento fatura`, valor:f.total, date:today(), cartaoId:f.cartaoId });
+function finPagarAntecipado(cartaoId) {
+  const c = finCartoes.find(x=>x.id===cartaoId); if(!c) return;
+  const itensAbertos = finGetFaturaAberta(cartaoId);
+  const totalAberto = itensAbertos.reduce((s,l)=>s+l.valor,0);
+  if (totalAberto <= 0) return; // nada a pagar — não registra gasto
+
+  const valorInput = parseFloat(document.getElementById('fp-valor').value);
+  if (isNaN(valorInput) || valorInput <= 0) return; // valor zero ou inválido — não registra nada
+  const valor = Math.min(valorInput, totalAberto);
+  const debita = document.getElementById('fp-debita')?.checked !== false;
+
+  const hoje = today();
+  const pagId = uid();
+
+  if (valor >= totalAberto) {
+    // Pagamento total: fecha a fatura por completo, igual ao fechamento automático
+    const fatId = uid();
+    itensAbertos.forEach(l => { l.faturaId = fatId; });
+    finFaturas.push({ id:fatId, cartaoId, total:totalAberto, fechamento:hoje, status:'paga', pagamento:hoje, itens:itensAbertos.map(l=>l.id), antecipado:true, debitouSaldo:debita });
+    if (debita) {
+      finLancamentos.push({ id:pagId, tipo:'pagamento_fatura', titulo:`Fatura — ${c.nome}`, valor, date:hoje, cartaoId, faturaId:fatId });
+    }
+  } else {
+    // Pagamento parcial: registra como pagamento avulso, mas mantém os itens em aberto
+    // (reduz o quanto falta pagar visualmente através do registro do pagamento)
+    if (debita) {
+      finLancamentos.push({ id:pagId, tipo:'pagamento_fatura', titulo:`Pagamento parcial — ${c.nome}`, valor, date:hoje, cartaoId, parcial:true });
+    } else {
+      // Não debita do saldo — apenas um registro informativo de pagamento parcial sem afetar o saldo
+      finLancamentos.push({ id:pagId, tipo:'pagamento_fatura', titulo:`Pagamento parcial — ${c.nome}`, valor, date:hoje, cartaoId, parcial:true, debitaConta:false });
+    }
+  }
+
   save(SK.fin, finLancamentos);
   save(SK.finFaturas, finFaturas);
-  closeModal(); renderFinanceiro();
+  finAbreCartao(cartaoId);
+  renderFinanceiro();
 }
 
 function finVerFatura(fatId) {
@@ -3254,11 +3289,11 @@ function finVerFatura(fatId) {
   const c = finCartoes.find(x=>x.id===f.cartaoId);
   const itens = finLancamentos.filter(l=>f.itens&&f.itens.includes(l.id));
   document.getElementById('modalContent').innerHTML = `
-    <div class="modal-title">${c?esc(c.nome):'Cartão'} — ${f.status==='paga'?'Paga':'Pendente'}</div>
+    <div class="modal-title">${c?esc(c.nome):'Cartão'} — Fatura paga</div>
     <div style="background:var(--cream2);border-radius:var(--radius-sm);padding:12px 14px;margin-bottom:14px">
       <div style="font-size:.7rem;color:var(--text-l)">Total da fatura</div>
       <div style="font-size:1.2rem;font-weight:700;color:var(--brown)">${fmtBRL(f.total)}</div>
-      <div style="font-size:.68rem;color:var(--text-l);margin-top:4px">Fechou em ${f.fechamento}${f.pagamento?' · Paga em '+f.pagamento:''}</div>
+      <div style="font-size:.68rem;color:var(--text-l);margin-top:4px">Fechou e foi descontada do saldo em ${f.pagamento||f.fechamento}</div>
     </div>
     <div class="fin-list">${itens.sort((a,b)=>b.date.localeCompare(a.date)).map(l=>`
       <div class="fin-item expense" style="cursor:default">
@@ -3469,12 +3504,23 @@ function finInvestForm(inv) {
     </div>
   </div>
 
+  <div style="font-size:.78rem;font-weight:600;color:var(--text-m);margin-bottom:6px">➕ Adicionar valor</div>
+  <div class="modal-row" style="margin-bottom:4px">
+    <div class="form-group"><input class="form-input" type="number" id="fi-aporte" placeholder="Valor do aporte" step="0.01" min="0"></div>
+    <div class="form-group">
+      <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:.78rem;color:var(--text-m)">
+        <input type="checkbox" id="fi-aporte-debita" checked style="width:14px;height:14px"> Sai do saldo
+      </label>
+    </div>
+  </div>
+  <button class="btn-primary" style="margin-bottom:20px;width:100%" onclick="finAdicionarAporte('${inv.id}')">Adicionar ao investimento</button>
+
   <div style="font-size:.78rem;font-weight:600;color:var(--text-m);margin-bottom:6px">📊 Atualizar valor atual</div>
   <div class="modal-row" style="margin-bottom:4px">
     <div class="form-group"><input class="form-input" type="number" id="fi-valorAtual" value="${inv.valorAtual}" placeholder="Valor atual" step="0.01"></div>
     <div class="form-group"><button class="btn-primary" style="padding:10px 14px;font-size:.82rem" onclick="finAtualizarValor('${inv.id}')">Atualizar</button></div>
   </div>
-  <div style="font-size:.68rem;color:var(--text-l);margin-bottom:16px">Informe o saldo atual do ativo para calcular rentabilidade</div>
+  <div style="font-size:.68rem;color:var(--text-l);margin-bottom:16px">Informe o saldo atual do ativo — o rendimento é recalculado automaticamente</div>
 
   <div style="font-size:.78rem;font-weight:600;color:var(--text-m);margin-bottom:6px">💸 Registrar retirada</div>
   <div class="modal-row">
@@ -3501,6 +3547,24 @@ function finInvestForm(inv) {
     : `<div style="font-size:.8rem;color:var(--text-l);text-align:center;padding:16px">Nenhuma movimentação ainda</div>`}
   </div>
   <button class="btn-danger" style="margin-top:16px" onclick="finDeleteInvest('${inv.id}')">🗑 Remover ativo</button>`;
+}
+
+function finAdicionarAporte(id) {
+  const inv = finInvestimentos.find(i=>i.id===id); if(!inv) return;
+  const val = parseFloat(document.getElementById('fi-aporte').value);
+  if (!val||val<=0) return;
+  const debita = document.getElementById('fi-aporte-debita')?.checked !== false;
+  inv.totalAportado += val;
+  inv.valorAtual    += val;
+  inv.aportes = inv.aportes||[];
+  inv.aportes.push({ id:uid(), data:today(), valor:val, tipo:'aporte', debitaConta: debita });
+  if (debita) {
+    finLancamentos.push({ id:uid(), tipo:'invest', titulo:`Aporte — ${inv.nome}`, valor:val, date:today(), categoria:inv.categoria, icon:inv.icon||'📈', recur:'none', debitaConta:true, investId:inv.id });
+    save(SK.fin, finLancamentos);
+  }
+  save(SK.finInvest, finInvestimentos);
+  document.getElementById('modalContent').innerHTML = finInvestForm(inv);
+  renderFinanceiro();
 }
 
 function finAtualizarValor(id) {
