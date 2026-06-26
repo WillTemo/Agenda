@@ -551,6 +551,69 @@ body { background:var(--cream); color:var(--text); font-family:'Inter',sans-seri
 .rot-day-btn { background:none; border:1.5px solid var(--beige); border-radius:20px; font-size:.65rem; color:var(--text-l); cursor:pointer; padding:2px 8px; margin-left:auto; flex-shrink:0; white-space:nowrap; }
 .rot-day-btn:hover { border-color:var(--tan); color:var(--brown); }
 
+/* ── CALENDÁRIO GRANDE (estilo EasyJur) ── */
+.bigcal { background:white; border-radius:var(--radius); padding:18px 16px 14px; box-shadow:var(--shadow); margin-bottom:18px; }
+.bigcal-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:14px; }
+.bigcal-month { font-family:'Playfair Display',serif; font-size:1.1rem; font-weight:700; color:var(--brown); }
+.bigcal-today-btn { font-size:.68rem; font-weight:600; color:var(--text-l); background:var(--cream2); border:none; border-radius:20px; padding:4px 10px; cursor:pointer; margin-left:8px; }
+.bigcal-nav { display:flex; gap:6px; }
+.bigcal-navbtn { background:var(--cream); border:none; color:var(--text-m); width:30px; height:30px; border-radius:50%; cursor:pointer; font-size:1rem; display:flex; align-items:center; justify-content:center; }
+.bigcal-grid { display:grid; grid-template-columns:repeat(7,1fr); gap:3px; }
+.bigcal-dow { font-size:.62rem; font-weight:700; color:var(--text-l); text-align:center; padding:4px 0 8px; text-transform:uppercase; letter-spacing:.04em; }
+.bigcal-day { aspect-ratio:1; display:flex; flex-direction:column; align-items:center; justify-content:flex-start; padding-top:6px; font-size:.8rem; cursor:pointer; border-radius:10px; position:relative; transition:background .15s; color:var(--text); gap:3px; }
+.bigcal-day:hover { background:var(--cream); }
+.bigcal-day.other-month { color:var(--beige); cursor:default; }
+.bigcal-day.today .bigcal-daynum { background:var(--brown); color:white; }
+.bigcal-day.selected { background:var(--cream2); }
+.bigcal-daynum { width:22px; height:22px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:600; }
+.bigcal-dots { display:flex; gap:2px; min-height:5px; flex-wrap:wrap; justify-content:center; max-width:26px; }
+.bigcal-dot { width:5px; height:5px; border-radius:50%; flex-shrink:0; }
+.bigcal-day.prova-week { background:rgba(192,200,224,.3); border-radius:6px; }
+.bigcal-legend { display:flex; gap:14px; margin-top:14px; font-size:.66rem; color:var(--text-l); flex-wrap:wrap; }
+.bigcal-legend-item { display:flex; align-items:center; gap:5px; }
+.bigcal-legend-dot { width:7px; height:7px; border-radius:50%; flex-shrink:0; }
+
+/* ── PAINEL DO DIA (modal) ── */
+.daypanel-head { display:flex; align-items:center; justify-content:space-between; margin-bottom:4px; }
+.daypanel-date { font-family:'Playfair Display',serif; font-size:1.15rem; font-weight:700; color:var(--brown); }
+.daypanel-sub { font-size:.75rem; color:var(--text-l); margin-bottom:16px; }
+.daypanel-addbtn { background:var(--cream2); border:none; color:var(--brown); width:32px; height:32px; border-radius:50%; cursor:pointer; font-size:1.1rem; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+
+/* ── RESOLUÇÃO ── */
+.resol-box { background:var(--cream2); border-radius:var(--radius-sm); padding:11px 13px; margin-top:6px; }
+.resol-label { font-size:.68rem; font-weight:700; text-transform:uppercase; letter-spacing:.05em; color:var(--text-l); margin-bottom:4px; }
+.resol-text { font-size:.8rem; color:var(--text); line-height:1.45; white-space:pre-wrap; }
+
+/* ── NOTAS PESSOAIS (diário/bloco de notas) ── */
+.notas-tabs { display:flex; gap:8px; margin-bottom:14px; overflow-x:auto; padding-bottom:2px; }
+.notas-tabs::-webkit-scrollbar { display:none; }
+.notas-tab { flex-shrink:0; padding:7px 14px; border-radius:20px; border:1.5px solid var(--beige); background:white; font-size:.74rem; font-weight:600; color:var(--text-m); cursor:pointer; transition:.15s; white-space:nowrap; }
+.notas-tab.active { background:var(--brown); color:white; border-color:var(--brown); }
+.nota-card { background:white; border-radius:var(--radius-sm); padding:13px 14px; margin-bottom:9px; box-shadow:var(--shadow); cursor:pointer; transition:box-shadow .2s,transform .15s; border-left:4px solid var(--tan); position:relative; }
+.nota-card:hover { box-shadow:var(--shadow-hover); transform:translateY(-1px); }
+.nota-card-head { display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:5px; }
+.nota-card-title { font-size:.86rem; font-weight:600; color:var(--text); line-height:1.3; flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.nota-card-cat { font-size:.62rem; font-weight:700; text-transform:uppercase; letter-spacing:.04em; padding:2px 8px; border-radius:20px; flex-shrink:0; }
+.nota-card-body { font-size:.78rem; color:var(--text-m); line-height:1.45; white-space:pre-wrap; overflow:hidden; display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; }
+.nota-card-body.is-senha { font-family:'Courier New',monospace; letter-spacing:.02em; }
+.nota-card-date { font-size:.65rem; color:var(--text-l); margin-top:7px; }
+.nota-cat-lembrete  { background:var(--cat-saude);    color:#2D6B50; }
+.nota-cat-senha     { background:var(--cat-social);   color:#7B2D40; }
+.nota-cat-dado      { background:var(--cat-estudo);   color:#2D3D7B; }
+.nota-cat-numero    { background:var(--cat-trabalho); color:#5C4F10; }
+.nota-cat-diario    { background:var(--cat-pessoal);  color:#3D2D6B; }
+.nota-cat-outro     { background:var(--cream2);       color:var(--text-m); }
+.nota-stripe-lembrete { border-left-color:#6EB898; }
+.nota-stripe-senha    { border-left-color:#C88090; }
+.nota-stripe-dado     { border-left-color:#8090C8; }
+.nota-stripe-numero   { border-left-color:#B8A84A; }
+.nota-stripe-diario   { border-left-color:#9080C8; }
+.nota-stripe-outro    { border-left-color:var(--beige); }
+.nota-reveal-btn { background:none; border:none; font-size:.85rem; cursor:pointer; flex-shrink:0; padding:2px; }
+.pessoal-section-divider { display:flex; align-items:center; gap:8px; margin:22px 0 12px; }
+.pessoal-section-divider span { font-family:'Playfair Display',serif; font-size:.95rem; font-weight:600; color:var(--brown); white-space:nowrap; }
+.pessoal-section-divider::after { content:''; flex:1; height:1px; background:var(--beige); }
+
 /* ── CONFLITO MODAL ── */
 .conflict-modal { position:fixed; inset:0; background:rgba(30,15,5,.6); z-index:500; display:flex; align-items:flex-end; justify-content:center; opacity:0; pointer-events:none; transition:opacity .25s; }
 .conflict-modal.open { opacity:1; pointer-events:all; }
@@ -621,9 +684,9 @@ body { background:var(--cream); color:var(--text); font-family:'Inter',sans-seri
 
     <!-- ─── VIEW: CALENDÁRIO ─── -->
     <div class="view" id="view-marcos">
-      <div class="mini-cal" id="miniCal"></div>
+      <div class="bigcal" id="bigCal"></div>
       <div class="sec-header">
-        <span class="sec-title">Calendário</span>
+        <span class="sec-title">Próximos eventos</span>
         <span class="sec-link" onclick="addTrayOpen('marco')">+ Adicionar</span>
       </div>
       <div class="marcos-list" id="marcosList"></div>
@@ -822,6 +885,7 @@ const SK = {
   semestres:'est_semestres',
   trabalho:'area_trabalho',
   pessoal:'area_pessoal',
+  notas:'pessoal_notas',
   fin:'fin_lancamentos',        // todos os lançamentos financeiros
   finInvest:'fin_investimentos', // carteira de investimentos
   finCartoes:'fin_cartoes',      // cartões de crédito configurados
@@ -841,6 +905,7 @@ let semestres = load(SK.semestres);   // lista de todos os semestres
 let semestre  = loadObj(SK.semestre); // semestre ativo (objeto)
 let trabalhoItens = load(SK.trabalho);
 let pessoalItens  = load(SK.pessoal);
+let notasItens    = load(SK.notas);
 let finLancamentos   = load(SK.fin);
 let finInvestimentos = load(SK.finInvest);
 let finCartoes       = load(SK.finCartoes);  // [{id, nome, limite, fechamento (dia 1-28), cor}]
@@ -1001,6 +1066,10 @@ let calYear = new Date().getFullYear(), calMonth = new Date().getMonth();
 let currentRamoOpen = {};  // ramoId -> bool
 let currentMateriaId = null;
 let modalMode = null, editingId = null, _pendingMateriaId = null;
+let notasFilter = 'all';
+const NOTA_CATS  = ['lembrete','senha','dado','numero','diario','outro'];
+const NOTA_LABEL = {lembrete:'Lembrete',senha:'Senha',dado:'Dado importante',numero:'Número importante',diario:'Diário',outro:'Outro'};
+const NOTA_ICON  = {lembrete:'🔔',senha:'🔒',dado:'📌',numero:'🔢',diario:'📖',outro:'🗒️'};
 
 // ── CÁLCULO DE MENÇÃO ──
 function calcMencao(notas) {
@@ -1266,6 +1335,7 @@ function renderTodayFull(cid, taskList, td, weekday) {
         const ajusteBtn = !isPast && !isFuture && b._tipo==='rotina'
           ? `<button class="rot-day-btn" onclick="event.stopPropagation();openRotinaOverride('${b._origId||b.id}','${td}')">📅 Só hoje</button>`
           : '';
+        const rotResol = conc ? localStorage.getItem(concKey+'_resol') : null;
         return `<div class="task-card${conc?' done':''}${isForgotten?' forgotten':''}" onclick="openRotinaBlock('${b._origId||b.id}')">
           <div class="task-stripe" ${rStripe}></div>
           <div class="task-check${conc?' checked':''}" onclick="event.stopPropagation();toggleRotinaConc('${concKey}','${cid}','${td}',${weekday})"></div>
@@ -1276,6 +1346,7 @@ function renderTodayFull(cid, taskList, td, weekday) {
               <span class="task-tag cat-${b.cat}">${CAT_LABEL[b.cat]||b.cat}</span>
               ${ajusteBtn}
             </div>
+            ${rotResol?`<div class="resol-box" onclick="event.stopPropagation()"><div class="resol-label">📌 Resolução</div><div class="resol-text">${esc(rotResol)}</div></div>`:''}
           </div>
         </div>`;
       }).join('');
@@ -1294,6 +1365,7 @@ function renderTodayFull(cid, taskList, td, weekday) {
       const isForgotten = isPast && !conc;
       const cor = m.cor||'#C8C0D8';
       const timeLabel = m.time ? (m.timeEnd ? `${m.time}–${m.timeEnd}` : m.time) : '';
+      const evResol = conc ? localStorage.getItem(concKey+'_resol') : null;
       return `<div class="task-card${conc?' done':''}${isForgotten?' forgotten':''}">
         <div class="task-stripe" style="background:${cor}"></div>
         <div class="task-check${conc?' checked':''}" onclick="toggleEvento('${concKey}','${cid}','${td}',${weekday})"></div>
@@ -1304,6 +1376,7 @@ function renderTodayFull(cid, taskList, td, weekday) {
             <span class="task-tag" style="background:${cor}33;color:var(--text-m)">${CAT_LABEL[m.cat]||m.cat}</span>
             ${m.notes?`<span style="font-size:.68rem;color:var(--text-l)">${esc(m.notes)}</span>`:''}
           </div>
+          ${evResol?`<div class="resol-box" onclick="event.stopPropagation()"><div class="resol-label">📌 Resolução</div><div class="resol-text">${esc(evResol)}</div></div>`:''}
         </div>
       </div>`;
     }).join('');
@@ -1334,13 +1407,67 @@ function getAulasHoje(weekday, forDate) {
   return aulas;
 }
 
+// ════════════════════════════════════════════════
+//  RESOLUÇÃO (ao concluir tarefa/rotina/evento)
+// ════════════════════════════════════════════════
+// onConfirm(resolText) é chamado com o texto digitado (pode ser vazio) ou null se cancelado
+let _resolCallback = null;
+function openResolModal(itemTitle, existing, onConfirm) {
+  _resolCallback = onConfirm;
+  document.getElementById('modalContent').innerHTML = `
+    <div class="modal-title">✅ Concluído</div>
+    <p style="font-size:.8rem;color:var(--text-l);margin-bottom:12px;line-height:1.45">
+      "<strong style="color:var(--text-m)">${esc(itemTitle)}</strong>" marcado como concluído. Quer registrar a resolução?
+    </p>
+    <div class="form-group">
+      <label class="form-label">Resolução (opcional)</label>
+      <textarea class="form-textarea resol-modal-text" id="resol-input" placeholder="Como foi, resultado, observações…">${esc(existing||'')}</textarea>
+    </div>
+    <button class="btn-primary" onclick="confirmResol()">Salvar</button>
+    <button class="btn-secondary" onclick="skipResol()">Pular</button>`;
+  document.getElementById('modalOverlay').classList.add('open');
+}
+function confirmResol() {
+  const v = document.getElementById('resol-input').value.trim();
+  closeModal();
+  if(_resolCallback) _resolCallback(v);
+  _resolCallback=null;
+}
+function skipResol() {
+  closeModal();
+  if(_resolCallback) _resolCallback(null);
+  _resolCallback=null;
+}
+
 function toggleRotinaConc(key, cid, td, weekday) {
-  localStorage.setItem(key, localStorage.getItem(key)==='1'?'0':'1');
-  renderTodayFull(cid, tasks.filter(t=>t.date===td&&(activeFilter==='all'||t.cat===activeFilter)), td, weekday);
+  const wasConc = localStorage.getItem(key)==='1';
+  const rerender = () => { if(cid==='dayPanelContent') openDayPanel(td); else renderTodayFull(cid, tasks.filter(t=>t.date===td&&(activeFilter==='all'||t.cat===activeFilter)), td, weekday); };
+  if(!wasConc) {
+    const existing = localStorage.getItem(key+'_resol')||'';
+    openResolModal('Bloco de rotina', existing, (resol)=>{
+      localStorage.setItem(key,'1');
+      if(resol!==null && resol!=='') localStorage.setItem(key+'_resol', resol);
+      rerender();
+    });
+  } else {
+    localStorage.setItem(key,'0');
+    rerender();
+  }
 }
 function toggleEvento(key, cid, td, weekday) {
-  localStorage.setItem(key, localStorage.getItem(key)==='1'?'0':'1');
-  renderTodayFull(cid, tasks.filter(t=>t.date===td&&(activeFilter==='all'||t.cat===activeFilter)), td, weekday);
+  const wasConc = localStorage.getItem(key)==='1';
+  const rerender = () => { if(cid==='dayPanelContent') openDayPanel(td); else renderTodayFull(cid, tasks.filter(t=>t.date===td&&(activeFilter==='all'||t.cat===activeFilter)), td, weekday); };
+  if(!wasConc) {
+    const existing = localStorage.getItem(key+'_resol')||'';
+    openResolModal('Evento', existing, (resol)=>{
+      localStorage.setItem(key,'1');
+      if(resol!==null && resol!=='') localStorage.setItem(key+'_resol', resol);
+      rerender();
+    });
+  } else {
+    localStorage.setItem(key,'0');
+    rerender();
+  }
 }
 
 function filterTasks(cat,btn) {
@@ -1382,6 +1509,7 @@ function taskCardHTML(t, isPast) {
         <span class="task-tag cat-${t.cat}">${CAT_LABEL[t.cat]||t.cat}</span>
         ${t.notes?`<span style="max-width:100px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(t.notes)}</span>`:''}
       </div>
+      ${t.done&&t.resolucao?`<div class="resol-box" onclick="event.stopPropagation()"><div class="resol-label">📌 Resolução</div><div class="resol-text">${esc(t.resolucao)}</div></div>`:''}
     </div>
   </div>`;
 }
@@ -1389,8 +1517,22 @@ function taskCardHTML(t, isPast) {
 function toggleTask(e,id) {
   e.stopPropagation();
   const i=tasks.findIndex(t=>t.id===id);
-  if(i>-1){tasks[i].done=!tasks[i].done; save(SK.tasks,tasks);}
-  if(activeView==='hoje') renderToday(); else if(activeView==='semana') renderWeek();
+  if(i===-1) return;
+  const inDayPanel = modalMode==='daypanel';
+  const panelDate = inDayPanel ? editingId : null;
+  if(!tasks[i].done) {
+    openResolModal(tasks[i].title, tasks[i].resolucao, (resol)=>{
+      tasks[i].done=true;
+      if(resol!==null) tasks[i].resolucao=resol||tasks[i].resolucao;
+      save(SK.tasks,tasks);
+      if(inDayPanel) { openDayPanel(panelDate); }
+      else if(activeView==='hoje') renderToday(); else if(activeView==='semana') renderWeek();
+    });
+  } else {
+    tasks[i].done=false; save(SK.tasks,tasks);
+    if(inDayPanel) { openDayPanel(panelDate); }
+    else if(activeView==='hoje') renderToday(); else if(activeView==='semana') renderWeek();
+  }
 }
 
 // ════════════════════════════════════════════════
@@ -1426,12 +1568,12 @@ function selectWeekDay(ds) { selectedWeekDay=ds; renderWeek(); }
 //  MARCOS VIEW
 // ════════════════════════════════════════════════
 function renderMarcos() {
-  renderMiniCal();
+  renderBigCal();
   const td=today();
   document.getElementById('marcoBadge').textContent=marcos.filter(m=>m.date>=td&&!m._isRecur||m.date>=td).length;
   // mostrar apenas uma instância por série na lista (a próxima futura)
   const seen=new Set();
-  const sorted=[...marcos].sort((a,b)=>a.date.localeCompare(b.date)).filter(m=>{
+  const sorted=[...marcos].filter(m=>m.date>=td).sort((a,b)=>a.date.localeCompare(b.date)).filter(m=>{
     const key=m._baseId||m.id;
     if(seen.has(key)&&m._isRecur) return false;
     seen.add(key); return true;
@@ -1462,14 +1604,13 @@ function renderMarcos() {
   }).join('');
 }
 
-function renderMiniCal() {
+// ── Calendário grande estilo EasyJur: cada dia mostra bolinhas indicando apenas eventos (na cor de cada um) ──
+function renderBigCal() {
   const year=calYear, month=calMonth;
   const firstDay=new Date(year,month,1).getDay();
   const days=new Date(year,month+1,0).getDate();
   const td=today();
-  const marcoMap={};
-  marcos.forEach(m=>{ marcoMap[m.date]=true; });
-  // Coletar todas as datas de prova das matérias (b1DataProva, b2DataProva, e campo legado dataProva)
+
   const provaSet=new Set();
   materias.forEach(m=>{
     if(m.b1DataProva) provaSet.add(m.b1DataProva);
@@ -1477,34 +1618,71 @@ function renderMiniCal() {
     if(m.dataProva)   provaSet.add(m.dataProva);
   });
 
-  let html=`<div class="mini-cal-header">
-    <span class="mini-cal-month">${MONTHS_PT[month]} ${year}</span>
-    <div class="mini-cal-nav">
-      <button class="mini-cal-navbtn" onclick="calPrev()">‹</button>
-      <button class="mini-cal-navbtn" onclick="calNext()">›</button>
+  let html=`<div class="bigcal-header">
+    <span class="bigcal-month">${MONTHS_PT[month]} ${year}<button class="bigcal-today-btn" onclick="calToday()">Hoje</button></span>
+    <div class="bigcal-nav">
+      <button class="bigcal-navbtn" onclick="calPrev()">‹</button>
+      <button class="bigcal-navbtn" onclick="calNext()">›</button>
     </div>
-  </div><div class="cal-grid">${DAYS_PT.map(d=>`<div class="cal-dow">${d[0]}</div>`).join('')}`;
-  for(let i=0;i<firstDay;i++) html+=`<div class="cal-day other-month"></div>`;
+  </div><div class="bigcal-grid">${DAYS_PT.map(d=>`<div class="bigcal-dow">${d[0]}</div>`).join('')}`;
+  for(let i=0;i<firstDay;i++) html+=`<div class="bigcal-day other-month"></div>`;
   for(let d=1;d<=days;d++){
     const ds=`${year}-${String(month+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
-    const isTd=ds===td, hasEv=!!marcoMap[ds], isProva=provaSet.has(ds);
-    let classes='cal-day';
+    const isTd=ds===td, isProva=provaSet.has(ds);
+
+    const eventosDoDia = marcos.filter(m=>m.date===ds);
+    const dotsSet = eventosDoDia.map(m=>m.cor||'#9080C8');
+    if(isProva) dotsSet.push('#8090C8');
+
+    let classes='bigcal-day';
     if(isTd) classes+=' today';
-    if(hasEv) classes+=' has-event';
-    if(isProva&&!isTd) classes+=' prova-dia';
-    html+=`<div class="${classes}" onclick="calDayClick('${ds}')">${d}</div>`;
+    if(isProva) classes+=' prova-week';
+    const dots = dotsSet.slice(0,4).map(c=>`<span class="bigcal-dot" style="background:${c}"></span>`).join('');
+    html+=`<div class="${classes}" onclick="calDayClick('${ds}')">
+      <span class="bigcal-daynum">${d}</span>
+      <span class="bigcal-dots">${dots}</span>
+    </div>`;
   }
   html+=`</div>`;
-  // Legenda
-  const legendas=[];
-  if(provaSet.size) legendas.push(`<span style="display:inline-flex;align-items:center;gap:4px"><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#8090C8"></span>Prova</span>`);
-  legendas.push(`<span style="display:inline-flex;align-items:center;gap:4px"><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--brown-l)"></span>Evento</span>`);
-  html+=`<div style="display:flex;gap:14px;margin-top:10px;font-size:.67rem;color:var(--text-l);flex-wrap:wrap">${legendas.join('')}</div>`;
-  document.getElementById('miniCal').innerHTML=html;
+  // Legenda: lista os eventos do mês com a cor de cada um e o título
+  const seenLegend=new Set();
+  const eventosDoMes = marcos.filter(m=>{
+    const md=parseDate(m.date);
+    return md.getFullYear()===year && md.getMonth()===month;
+  }).sort((a,b)=>a.date.localeCompare(b.date)).filter(m=>{
+    const key=m._baseId||m.id;
+    if(seenLegend.has(key)) return false;
+    seenLegend.add(key); return true;
+  });
+  let legendHtml = eventosDoMes.map(m=>`<span class="bigcal-legend-item"><span class="bigcal-legend-dot" style="background:${m.cor||'#9080C8'}"></span>${esc(m.title)}</span>`).join('');
+  if(provaSet.size) legendHtml += `<span class="bigcal-legend-item"><span class="bigcal-legend-dot" style="background:#8090C8"></span>Prova</span>`;
+  if(!legendHtml) legendHtml = `<span class="bigcal-legend-item" style="color:var(--text-l)">Nenhum evento este mês</span>`;
+  html+=`<div class="bigcal-legend">${legendHtml}</div>`;
+  document.getElementById('bigCal').innerHTML=html;
 }
-function calPrev(){calMonth--;if(calMonth<0){calMonth=11;calYear--;} renderMiniCal();}
-function calNext(){calMonth++;if(calMonth>11){calMonth=0;calYear++;} renderMiniCal();}
-function calDayClick(ds){const m=marcos.find(x=>x.date===ds); if(m) openMarco(m.id);}
+function calToday(){calYear=new Date().getFullYear();calMonth=new Date().getMonth();renderBigCal();}
+
+// Painel resumido do dia: abre modal com tarefas + rotina + eventos do dia clicado
+function calDayClick(ds) {
+  openDayPanel(ds);
+}
+function openDayPanel(ds) {
+  modalMode='daypanel'; editingId=ds;
+  const d=parseDate(ds), weekday=d.getDay();
+  const dt = tasks.filter(t=>t.date===ds);
+  let html = `<div class="daypanel-head">
+    <span class="daypanel-date">${DAYS_FULL[weekday]}, ${d.getDate()} de ${MONTHS_PT[d.getMonth()]}</span>
+    <button class="daypanel-addbtn" onclick="closeModal();openNewTaskForDate('${ds}')" title="Adicionar">＋</button>
+  </div>
+  <div class="daypanel-sub">Resumo do dia — tarefas, rotina e eventos</div>
+  <div id="dayPanelContent"></div>`;
+  document.getElementById('modalContent').innerHTML = html;
+  document.getElementById('modalOverlay').classList.add('open');
+  renderTodayFull('dayPanelContent', dt, ds, weekday);
+}
+
+function calPrev(){calMonth--;if(calMonth<0){calMonth=11;calYear--;} renderBigCal();}
+function calNext(){calMonth++;if(calMonth>11){calMonth=0;calYear++;} renderBigCal();}
 
 // ════════════════════════════════════════════════
 //  ROTINA VIEW
@@ -1546,7 +1724,10 @@ function renderAreas() {
 
   const pp=pessoalItens.length;
   const ppDone=pessoalItens.filter(i=>i.done).length;
-  document.getElementById('areaPessoalSub').textContent=pp?`${ppDone}/${pp} concluídos`:'Adicione itens';
+  const np=notasItens.length;
+  document.getElementById('areaPessoalSub').textContent = pp
+    ? `${ppDone}/${pp} concluídos${np?` · ${np} nota${np>1?'s':''}`:''}`
+    : (np?`${np} nota${np>1?'s':''}`:'Adicione itens');
 
   const { saldo } = finCalcSaldo(new Date().getMonth(), new Date().getFullYear());
   const subEl = document.getElementById('areaFinanceiroSub');
@@ -1865,11 +2046,13 @@ function buildModal(mode,id) {
   if(mode==='edit-trab')    return trabForm(trabalhoItens.find(x=>x.id===id));
   if(mode==='novo-pes')     return pessoalForm(null);
   if(mode==='edit-pes')     return pessoalForm(pessoalItens.find(x=>x.id===id));
+  if(mode==='nova-nota')    return notaForm(null);
+  if(mode==='edit-nota')    return notaForm(notasItens.find(x=>x.id===id));
   return '';
 }
 
 // ── TASK FORM ──
-function taskForm(t) {
+function taskForm(t, suggestedDate) {
   const corAtual = t?.cor || PALETTE[4];
   const TASK_RECUR = [
     {v:'none',    l:'Não repetir'},
@@ -1881,7 +2064,7 @@ function taskForm(t) {
   <div class="form-group"><label class="form-label">Título</label>
   <input class="form-input" id="f-title" value="${t?esc(t.title):''}" placeholder="O que você precisa fazer?"></div>
   <div class="modal-row">
-    <div class="form-group"><label class="form-label">Data</label><input class="form-input" type="date" id="f-date" value="${t?t.date:today()}"></div>
+    <div class="form-group"><label class="form-label">Data</label><input class="form-input" type="date" id="f-date" value="${t?t.date:(suggestedDate||today())}"></div>
     <div class="form-group"><label class="form-label">Horário</label><input class="form-input" type="time" id="f-time" value="${t?t.time:''}"></div>
   </div>
   <div class="form-group"><label class="form-label">🔁 Repetir</label>
@@ -2670,6 +2853,11 @@ function deleteConteudo(id) { conteudos=conteudos.filter(c=>c.id!==id); save(SK.
 // ── DETAIL MODALS ──
 function openTask(id)        { openModal('view-task',id); }
 function openMarco(id)       { openModal('view-marco',id); }
+function openNewTaskForDate(ds) {
+  modalMode='new'; editingId=null;
+  document.getElementById('modalContent').innerHTML = taskForm(null, ds);
+  document.getElementById('modalOverlay').classList.add('open');
+}
 function openRotinaBlock(id) {
   editingId = id;
   const r = rotina.find(x=>x.id===id); if(!r) return;
@@ -2699,13 +2887,31 @@ function taskDetail(t) {
     ${t.time?`<div class="detail-row"><div class="detail-icon">🕐</div><div class="detail-val">${t.time}</div></div>`:''}
     ${t.notes?`<div class="detail-row"><div class="detail-icon">📝</div><div class="detail-val">${esc(t.notes)}</div></div>`:''}
     <div class="detail-row"><div class="detail-icon">✅</div><div class="detail-val">${t.done?'Concluída':'Pendente'}</div></div>
+    ${t.done&&t.resolucao?`<div class="resol-box" style="margin-top:10px"><div class="resol-label">📌 Resolução</div><div class="resol-text">${esc(t.resolucao)}</div></div>`:''}
   </div>
-  <button class="btn-primary" onclick="toggleTask(event,'${t.id}');closeModal()">${t.done?'Marcar como pendente':'Marcar como concluída'}</button>`;
+  <button class="btn-primary" onclick="toggleTaskFromDetail('${t.id}')">${t.done?'Marcar como pendente':'Marcar como concluída'}</button>`;
+}
+function toggleTaskFromDetail(id) {
+  const i=tasks.findIndex(t=>t.id===id); if(i===-1) return;
+  if(!tasks[i].done) {
+    openResolModal(tasks[i].title, tasks[i].resolucao, (resol)=>{
+      tasks[i].done=true;
+      if(resol!==null) tasks[i].resolucao=resol||tasks[i].resolucao;
+      save(SK.tasks,tasks);
+      if(activeView==='hoje') renderToday(); else if(activeView==='semana') renderWeek();
+    });
+  } else {
+    tasks[i].done=false; save(SK.tasks,tasks); closeModal();
+    if(activeView==='hoje') renderToday(); else if(activeView==='semana') renderWeek();
+  }
 }
 function marcoDetail(m) {
   if(!m) return '';
   const diff=diffDays(m.date);
   const dt=diff<0?`${Math.abs(diff)} dias atrás`:diff===0?'Hoje!':diff===1?'Amanhã':`Em ${diff} dias`;
+  const concKey = `ev_${m.date}_${m.id}`;
+  const conc = localStorage.getItem(concKey)==='1';
+  const resol = conc ? localStorage.getItem(concKey+'_resol') : null;
   return `<div class="detail-card">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
       <span class="task-tag cat-${m.cat}">${CAT_ICON[m.cat]} ${CAT_LABEL[m.cat]}</span>
@@ -2714,7 +2920,26 @@ function marcoDetail(m) {
     <div class="detail-title" style="margin-top:10px">${m.icon||'📍'} ${esc(m.title)}</div>
     <div class="detail-row"><div class="detail-icon">📅</div><div class="detail-val">${formatDatePT(m.date)} <span style="color:var(--brown);font-weight:600">(${dt})</span></div></div>
     ${m.notes?`<div class="detail-row"><div class="detail-icon">📍</div><div class="detail-val">${esc(m.notes)}</div></div>`:''}
-  </div>`;
+    <div class="detail-row"><div class="detail-icon">✅</div><div class="detail-val">${conc?'Concluído':'Pendente'}</div></div>
+    ${resol?`<div class="resol-box" style="margin-top:10px"><div class="resol-label">📌 Resolução</div><div class="resol-text">${esc(resol)}</div></div>`:''}
+  </div>
+  <button class="btn-primary" onclick="toggleMarcoFromDetail('${m.id}','${m.date}')">${conc?'Marcar como pendente':'Marcar como concluído'}</button>`;
+}
+function toggleMarcoFromDetail(id, date) {
+  const concKey = `ev_${date}_${id}`;
+  const wasConc = localStorage.getItem(concKey)==='1';
+  if(!wasConc) {
+    const m = marcos.find(x=>x.id===id);
+    const existing = localStorage.getItem(concKey+'_resol')||'';
+    openResolModal(m?.title||'Evento', existing, (resol)=>{
+      localStorage.setItem(concKey,'1');
+      if(resol!==null && resol!=='') localStorage.setItem(concKey+'_resol', resol);
+      renderMarcos(); if(activeView==='hoje') renderToday();
+    });
+  } else {
+    localStorage.setItem(concKey,'0'); closeModal();
+    renderMarcos(); if(activeView==='hoje') renderToday();
+  }
 }
 function rotinaDetail(r) {
   if(!r) return '';
@@ -2807,44 +3032,151 @@ function renderTrabalho() {
 // ════════════════════════════════════════════════
 function renderPessoal() {
   const el=document.getElementById('pessoalContent');
-  const CATS=['Meta','Hábito','Projeto','Leitura','Saúde','Outro'];
-  if(!pessoalItens.length){
-    el.innerHTML=`<div class="empty"><div class="empty-icon">🌿</div><div class="empty-title">Área Pessoal</div><div class="empty-sub">Metas, hábitos, projetos de vida e desenvolvimento pessoal</div></div>
-    <button class="btn-primary" onclick="openModal('novo-pes')" style="margin-top:16px">＋ Adicionar item</button>`;
-    return;
-  }
-  const active=pessoalItens.filter(i=>!i.done);
-  const done=pessoalItens.filter(i=>i.done);
   let html='';
-  if(active.length){
-    html+=`<div class="timeblock-label" style="margin-bottom:8px">🌱 Em curso</div>`;
-    html+=active.map(item=>`<div class="task-card" style="margin-bottom:8px" onclick="openModal('edit-pes','${item.id}')">
-      <div class="task-stripe stripe-pessoal"></div>
-      <div class="task-check${item.done?' checked':''}" onclick="event.stopPropagation();togglePessoal('${item.id}')"></div>
-      <div class="task-body">
-        <div class="task-title">${esc(item.titulo)}</div>
-        <div class="task-meta">
-          <span class="task-tag cat-pessoal">${item.categoria||'Pessoal'}</span>
-          ${item.prazo?`<span style="font-size:.7rem;color:var(--brown)">📅 ${formatDateShort(item.prazo)}</span>`:''}
+
+  // ── SEÇÃO: Metas, hábitos e projetos ──
+  html += `<div class="sec-header" style="margin-bottom:10px">
+    <span class="sec-title">🌱 Metas & Hábitos</span>
+    <span class="sec-link" onclick="openModal('novo-pes')">+ Adicionar</span>
+  </div>`;
+  if(!pessoalItens.length){
+    html += `<div class="empty" style="padding:24px 16px"><div class="empty-icon">🌿</div><div class="empty-sub">Metas, hábitos, projetos de vida…</div></div>`;
+  } else {
+    const active=pessoalItens.filter(i=>!i.done);
+    const done=pessoalItens.filter(i=>i.done);
+    if(active.length){
+      html+=active.map(item=>`<div class="task-card" style="margin-bottom:8px" onclick="openModal('edit-pes','${item.id}')">
+        <div class="task-stripe stripe-pessoal"></div>
+        <div class="task-check${item.done?' checked':''}" onclick="event.stopPropagation();togglePessoal('${item.id}')"></div>
+        <div class="task-body">
+          <div class="task-title">${esc(item.titulo)}</div>
+          <div class="task-meta">
+            <span class="task-tag cat-pessoal">${item.categoria||'Pessoal'}</span>
+            ${item.prazo?`<span style="font-size:.7rem;color:var(--brown)">📅 ${formatDateShort(item.prazo)}</span>`:''}
+          </div>
+          ${item.notas?`<div style="font-size:.72rem;color:var(--text-l);margin-top:4px">${esc(item.notas)}</div>`:''}
         </div>
-        ${item.notas?`<div style="font-size:.72rem;color:var(--text-l);margin-top:4px">${esc(item.notas)}</div>`:''}
-      </div>
-    </div>`).join('');
+      </div>`).join('');
+    }
+    if(done.length){
+      html+=`<div class="timeblock-label" style="margin-bottom:8px;margin-top:${active.length?12:0}px">✅ Concluído</div>`;
+      html+=done.map(item=>`<div class="task-card done" style="margin-bottom:8px" onclick="openModal('edit-pes','${item.id}')">
+        <div class="task-stripe stripe-pessoal"></div>
+        <div class="task-check checked" onclick="event.stopPropagation();togglePessoal('${item.id}')"></div>
+        <div class="task-body">
+          <div class="task-title">${esc(item.titulo)}</div>
+          ${item.resolucao?`<div class="resol-box" onclick="event.stopPropagation()"><div class="resol-label">📌 Resolução</div><div class="resol-text">${esc(item.resolucao)}</div></div>`:''}
+        </div>
+      </div>`).join('');
+    }
+    if(!active.length && !done.length){
+      html += `<div class="empty" style="padding:24px 16px"><div class="empty-icon">🌿</div><div class="empty-sub">Nenhum item ainda</div></div>`;
+    }
   }
-  if(done.length){
-    html+=`<div class="timeblock-label" style="margin-bottom:8px;margin-top:${active.length?12:0}px">✅ Concluído</div>`;
-    html+=done.map(item=>`<div class="task-card done" style="margin-bottom:8px" onclick="openModal('edit-pes','${item.id}')">
-      <div class="task-stripe stripe-pessoal"></div>
-      <div class="task-check checked" onclick="event.stopPropagation();togglePessoal('${item.id}')"></div>
-      <div class="task-body"><div class="task-title">${esc(item.titulo)}</div></div>
-    </div>`).join('');
-  }
+
+  // ── SEÇÃO: Bloco de notas / diário ──
+  html += `<div class="pessoal-section-divider"><span>📖 Bloco de Notas</span></div>`;
+  html += `<div class="sec-header" style="margin-bottom:2px">
+    <span class="sec-link" style="font-size:.78rem;color:var(--text-l)">Lembretes, senhas, dados e anotações do dia a dia</span>
+    <span class="sec-link" onclick="openModal('nova-nota')">+ Nota</span>
+  </div>`;
+  html += `<div id="notasContent"></div>`;
+
   el.innerHTML=html;
+  renderNotas();
 }
 
+// ════════════════════════════════════════════════
+//  NOTAS PESSOAIS (bloco de notas / diário)
+// ════════════════════════════════════════════════
+function renderNotas() {
+  const el=document.getElementById('notasContent');
+  if(!el) return;
+
+  let tabsHtml = `<div class="notas-tabs">
+    <button class="notas-tab${notasFilter==='all'?' active':''}" onclick="filterNotas('all')">Todas</button>
+    ${NOTA_CATS.map(c=>`<button class="notas-tab${notasFilter===c?' active':''}" onclick="filterNotas('${c}')">${NOTA_ICON[c]} ${NOTA_LABEL[c]}</button>`).join('')}
+  </div>`;
+
+  if(!notasItens.length){
+    el.innerHTML = tabsHtml + `<div class="empty" style="padding:24px 16px"><div class="empty-icon">📝</div><div class="empty-title">Nenhuma nota ainda</div><div class="empty-sub">Guarde lembretes, senhas, dados e anotações do dia a dia</div></div>`;
+    return;
+  }
+
+  const filtered = notasItens.filter(n=>notasFilter==='all'||n.categoria===notasFilter);
+  const sorted = [...filtered].sort((a,b)=>(b.atualizadoEm||b.criadoEm||'').localeCompare(a.atualizadoEm||a.criadoEm||''));
+
+  if(!sorted.length){
+    el.innerHTML = tabsHtml + `<div class="empty" style="padding:24px 16px"><div class="empty-icon">📭</div><div class="empty-sub">Nenhuma nota nesta categoria</div></div>`;
+    return;
+  }
+
+  el.innerHTML = tabsHtml + sorted.map(n=>{
+    const cat = n.categoria||'outro';
+    const isSenha = cat==='senha';
+    const dataLabel = n.atualizadoEm ? formatDatePT(n.atualizadoEm.slice(0,10)) : '';
+    const bodyDisplay = isSenha && !n._revealed
+      ? '•'.repeat(Math.min(n.conteudo.length,16))
+      : esc(n.conteudo);
+    return `<div class="nota-card nota-stripe-${cat}" onclick="openModal('edit-nota','${n.id}')">
+      <div class="nota-card-head">
+        <div class="nota-card-title">${esc(n.titulo)}</div>
+        ${isSenha?`<button class="nota-reveal-btn" onclick="event.stopPropagation();toggleSenhaReveal('${n.id}')" title="Mostrar/ocultar">${n._revealed?'🙈':'👁️'}</button>`:''}
+        <span class="nota-card-cat nota-cat-${cat}">${NOTA_LABEL[cat]}</span>
+      </div>
+      <div class="nota-card-body${isSenha?' is-senha':''}">${bodyDisplay}</div>
+      ${dataLabel?`<div class="nota-card-date">Atualizado em ${dataLabel}</div>`:''}
+    </div>`;
+  }).join('');
+}
+
+function filterNotas(cat) { notasFilter=cat; renderNotas(); }
+
+function toggleSenhaReveal(id) {
+  const n = notasItens.find(x=>x.id===id);
+  if(n) { n._revealed = !n._revealed; renderNotas(); }
+}
+
+function notaForm(n) {
+  return `<div class="modal-title">${n?'Editar nota':'Nova nota'}</div>
+  <div class="form-group"><label class="form-label">Título</label>
+  <input class="form-input" id="nf-titulo" value="${n?esc(n.titulo):''}" placeholder="Ex: Senha do Wi-Fi, Aniversário da vó…"></div>
+  <div class="form-group"><label class="form-label">Categoria</label>
+  <div class="cat-picker" id="notaCatPicker">
+    ${NOTA_CATS.map(c=>`<button class="cat-option nota-cat-${c}${(n?n.categoria===c:c==='lembrete')?' selected':''}" data-cat="${c}" onclick="pickNotaCat('${c}')">${NOTA_ICON[c]} ${NOTA_LABEL[c]}</button>`).join('')}
+  </div></div>
+  <div class="form-group"><label class="form-label">Conteúdo</label>
+  <textarea class="form-textarea" id="nf-conteudo" style="min-height:120px" placeholder="Escreva aqui sua nota, lembrete, senha ou dado importante…">${n?esc(n.conteudo||''):''}</textarea></div>
+  <button class="btn-primary" onclick="saveNota()">Salvar</button>
+  ${n?`<button class="btn-danger" onclick="deleteNota('${n.id}')">🗑 Excluir nota</button>`:''}`;
+}
+function pickNotaCat(cat) { document.querySelectorAll('#notaCatPicker .cat-option').forEach(b=>b.classList.toggle('selected',b.dataset.cat===cat)); }
+function saveNota() {
+  const titulo=document.getElementById('nf-titulo').value.trim(); if(!titulo) return;
+  const conteudo=document.getElementById('nf-conteudo').value;
+  const categoria=document.querySelector('#notaCatPicker .cat-option.selected')?.dataset.cat||'lembrete';
+  const now = new Date().toISOString();
+  if(editingId){
+    const i=notasItens.findIndex(x=>x.id===editingId);
+    if(i>-1){ notasItens[i].titulo=titulo; notasItens[i].conteudo=conteudo; notasItens[i].categoria=categoria; notasItens[i].atualizadoEm=now; }
+  } else {
+    notasItens.push({id:uid(),titulo,conteudo,categoria,criadoEm:now,atualizadoEm:now});
+  }
+  save(SK.notas,notasItens); closeModal(); renderNotas();
+}
+function deleteNota(id) { notasItens=notasItens.filter(x=>x.id!==id); save(SK.notas,notasItens); closeModal(); renderNotas(); }
+
 function togglePessoal(id) {
-  const i=pessoalItens.findIndex(x=>x.id===id);
-  if(i>-1){pessoalItens[i].done=!pessoalItens[i].done; save(SK.pessoal,pessoalItens); renderPessoal(); renderAreas();}
+  const i=pessoalItens.findIndex(x=>x.id===id); if(i===-1) return;
+  if(!pessoalItens[i].done) {
+    openResolModal(pessoalItens[i].titulo, pessoalItens[i].resolucao, (resol)=>{
+      pessoalItens[i].done=true;
+      if(resol!==null) pessoalItens[i].resolucao=resol||pessoalItens[i].resolucao;
+      save(SK.pessoal,pessoalItens); renderPessoal(); renderAreas();
+    });
+  } else {
+    pessoalItens[i].done=false; save(SK.pessoal,pessoalItens); renderPessoal(); renderAreas();
+  }
 }
 
 // ── MODAIS DE TRABALHO E PESSOAL ──
